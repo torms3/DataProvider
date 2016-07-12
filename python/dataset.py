@@ -43,6 +43,15 @@ class VolumeDataset(Dataset):
         """
         TODO(kisuk): Documentation.
         """
+        if config is not None:
+            self.build_from_config()
+        else:
+            self.reset()
+
+    def reset(self):
+        """
+        TODO(kisuk): Documentation.
+        """
         self._data  = {}
         self._imgs  = []
         self._lbls  = []
@@ -50,60 +59,82 @@ class VolumeDataset(Dataset):
         self._spec  = {}
         self._range = Box()
 
-        if config is not None:
-            # TODO(kisuk): Parse config to consturct dataset.
-            pass
-
-    def add_image(self, name, data, offset=None):
+    def build_from_config(self, config):
         """
         TODO(kisuk): Documentation.
         """
-        self._data[name] = self._check_data(data, offset)
+        self.reset()
+
+    def add_image(self, name, data, offset=(0,0,0)):
+        """
+        TODO(kisuk): Documentation.
+        """
+        self._data[name] = TensorData(data, offset=offset)
         self._imgs.append(name)
 
-    def add_label(self, name, data, offset=None, mask=None):
+    def add_label(self, name, data, offset=(0,0,0), mask=None):
         """
         TODO(kisuk): Documentation.
         """
-        lbl = self._check_data(data, offset)
+        lbl = TensorData(data, offset=offset)
         self._data[name] = lbl
         self._lbls.append(name)
 
-        # Add mask.
+        # Add a corresponding mask.
         if mask is None:
             # lbl is a TensorData object, which has the shape() method.
             # Don't be confused with numpy array's shape attribute.
             mask = np.ones(lbl.shape(), dtype='float32')
+        else:
+            assert lbl.shape()==mask.shape
 
-        mask_name = name + '_mask'
-        offset = lbl.offset()
-        self._data[mask_name] = self._check_data(mask, offset)
+        mask_name = self._mask_name(name)
+        assert mask_name is not None
+        self._data[mask_name] = TensorData(mask, lbl.offset())
         self._msks.append(mask_name)
 
     def set_spec(self, spec):
         """
         TODO(kisuk): Documentation.
         """
-        for key, val in spec.iteritems():
-            # Replace spec only when key already exists.
-            # Adding a new key-value pair is only possible through add_image
-            # and add_label.
-            if key in self._spec:
-                self._spec[key] = val
+        self._spec = spec
 
         # Update valid range as it could be changed.
-        self._update_range()
+        self._range = None
+
+        for name, dim in self._spec.iteritems():
+            # Update patch size.
+            self._data[name].set_fov(dim[-3:])
+            # Update mask, if any.
+            mask_name = self._mask_name(name)
+            if mask_name is not None:
+                self._data[mask_name].set_fov(dim[-3:])
+
+            # Update valid range.
+            r = self._data[name].range()
+            if self._range is None:
+                self._range = r
+            else:
+                self._range = self._range.intersect(r)
 
     def get_sample(self, pos, spec=None):
-        """
-        TODO(kisuk): Documentation.
+        """Draw a sample centered on pos.
+
+        Args:
+            pos:
+            spec:
+
+        Returns:
+
         """
         data, imgs, lbls, msks = {}, [], [], []
 
         if spec is None:
-            spec = self._spec
+            spec = self._spec    # Use the current spec.
+        else:
+            self.set_spec(spec)  # Dynamically change spec.
 
-        for name in self.spec.keys():
+        for name in self._spec.keys():
             data[name] = self._data[name].get_patch(pos)
             if name in self._imgs: imgs.append(name)
             if name in self._lbls: lbls.append(name)
@@ -135,33 +166,9 @@ class VolumeDataset(Dataset):
         x = np.random.randint(0, s[2])
         return Vec3d(z,y,x) + self._range.min()
 
-    def _check_data(self, data, offset):
-        """
-        TODO(kisuk): Documentation.
-        """
-        if offset is None:
-            offset = (0,0,0)
-
-        if isinstance(data, TensorData):
-            ret = data
+    def _mask_name(self, name):
+        if name in self._lbls:
+            ret = name + '_name'
         else:
-            ret = TensorData(data, offset=offset)
-
+            ret = None
         return ret
-
-    def _update_range(self):
-        """
-        TODO(kisuk): Documentation.
-        """
-        self._range = None
-
-        for name, dim in self._spec.iteritems():
-            # Update patch size.
-            self._data[name].set_fov(dim[-3:])
-            # Update valid range.
-            r = self._data[name].range()
-            if self._range is None:
-                self._range = r
-            else:
-                self._range = self._range.intersect(r)
-

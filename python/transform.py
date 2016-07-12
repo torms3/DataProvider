@@ -43,6 +43,14 @@ def check_tensor(data):
     assert data.ndim==4
     return data
 
+def transform_sample(sample, func, *args, **kwargs):
+    """Apply func to a sample."""
+    ret = {}
+
+    for key, val in sample.iteritems():
+        ret[key] = transform_tensor(val, func, *args, **kwargs)
+
+    return ret
 
 def transform_tensor(data, func, *args, **kwargs):
     """Apply func to each channel of data (4D tensor)."""
@@ -60,7 +68,9 @@ def transform_tensor(data, func, *args, **kwargs):
 
 def crop(img, size, offset=(0,0,0)):
     """
-    TODO(kisuk): Do we need crop?
+    TODO(kisuk):
+        Do we need crop? Yes we do.
+        E.g. transform_sample(sample, 'crop', size, offset)
     """
     img = check_volume(img)
     v1  = Vec3d(offset)
@@ -115,12 +125,12 @@ def standardize(img, mode='2D', dtype='float32'):
 ## Data Augmentations
 ####################################################################
 
-def data_augmentation(data, rft):
-    """Transform data according to a specified rule.
+def flip(data, rule):
+    """Flip data according to a specified rule.
 
     Args:
         data: 3D numpy array to be transformed.
-        rft: Transform rule, specified as a Boolean array.
+        rule: Transform rule, specified as a Boolean array.
              [z reflection,
               y reflection,
               x reflection,
@@ -131,19 +141,19 @@ def data_augmentation(data, rft):
     """
     data = check_tensor(data)
 
-    assert np.size(rft)==4
+    assert np.size(rule)==4
 
     # z reflection
-    if rft[0]:
+    if rule[0]:
         data = data[:,::-1,:,:]
     # y reflection
-    if rft[1]:
+    if rule[1]:
         data = data[:,:,::-1,:]
     # x reflection
-    if rft[2]:
+    if rule[2]:
         data = data[:,:,:,::-1]
     # Transpose in xy
-    if rft[3]:
+    if rule[3]:
         data = data.transpose(0,1,3,2)
 
     return data

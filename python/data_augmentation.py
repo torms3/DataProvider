@@ -14,22 +14,13 @@ class DataAugmentor(object):
     """
 
     def __init__(self):
-        """
-        TODO(kisuk): Documentation.
-        """
         pass
 
-    def prepare_augmentation(self):
+    def prepare(self, spec):
         pass
 
-    def next_sample(self, dataset, spec=None):
-        """
-        TODO(kisuk): Documentation.
-        """
+    def augment(self, sample):
         pass
 
-    def random_sample(self, dataset, spec=None):
-        """
-        TODO(kisuk): Documentation.
-        """
+    def random_sample(self, dataset, spec):
         pass

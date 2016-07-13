@@ -49,9 +49,7 @@ class VolumeDataset(Dataset):
             self.reset()
 
     def reset(self):
-        """
-        TODO(kisuk): Documentation.
-        """
+        """Reset all attributes."""
         self._data  = {}
         self._imgs  = []
         self._lbls  = []
@@ -82,8 +80,6 @@ class VolumeDataset(Dataset):
 
         # Add a corresponding mask.
         if mask is None:
-            # lbl is a TensorData object, which has the shape() method.
-            # Don't be confused with numpy array's shape attribute.
             mask = np.ones(lbl.shape(), dtype='float32')
         else:
             assert lbl.shape()==mask.shape
@@ -98,24 +94,7 @@ class VolumeDataset(Dataset):
         TODO(kisuk): Documentation.
         """
         self._spec = spec
-
-        # Update valid range as it could be changed.
-        self._range = None
-
-        for name, dim in self._spec.iteritems():
-            # Update patch size.
-            self._data[name].set_fov(dim[-3:])
-            # Update mask, if any.
-            mask_name = self._mask_name(name)
-            if mask_name is not None:
-                self._data[mask_name].set_fov(dim[-3:])
-
-            # Update valid range.
-            r = self._data[name].range()
-            if self._range is None:
-                self._range = r
-            else:
-                self._range = self._range.intersect(r)
+        self._update_range()
 
     def get_sample(self, pos, spec=None):
         """Draw a sample centered on pos.
@@ -172,3 +151,22 @@ class VolumeDataset(Dataset):
         else:
             ret = None
         return ret
+
+    def _update_range(self):
+        """Update valid range."""
+        self._range = None
+
+        for name, dim in self._spec.iteritems():
+            # Update patch size.
+            self._data[name].set_fov(dim[-3:])
+            # Update mask, if any.
+            mask_name = self._mask_name(name)
+            if mask_name is not None:
+                self._data[mask_name].set_fov(dim[-3:])
+
+            # Update valid range.
+            r = self._data[name].range()
+            if self._range is None:
+                self._range = r
+            else:
+                self._range = self._range.intersect(r)

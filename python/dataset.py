@@ -7,9 +7,11 @@ Kisuk Lee <kisuklee@mit.edu>, 2016
 """
 
 import numpy as np
-from box import *
-from tensor import *
-from vector import *
+from box import Box
+from config_data import *
+import emio
+from tensor import TensorData
+from vector import Vec3d
 
 class Dataset(object):
     """
@@ -31,44 +33,55 @@ class VolumeDataset(Dataset):
     Dataset for volumetric data.
 
     Attributes:
-        _data: Data dictionary {key: tensor_data}.
-        _imgs: Image key list.
-        _lbls: Label key list.
-        _msks: Mask  key list.
+        _data:
+        _imgs: Image dict. {key: [preprocessing1,...]}
+        _lbls: Label dict. {key: [preprocessing1,...]}
+        _msks:
         _spec:
         _range:
     """
 
-    def __init__(self, config=None):
-        """
-        TODO(kisuk): Documentation.
-        """
-        if config is not None:
-            self.build_from_config()
+    def __init__(self, config=None, dataset_id=None):
+        """Build dataset from config, if any."""
+        if config_path is not None:
+            self.build_from_config(config, dataset_id)
         else:
             self.reset()
 
     def reset(self):
         """Reset all attributes."""
         self._data  = {}
-        self._imgs  = []
-        self._lbls  = []
-        self._msks  = []
         self._spec  = {}
         self._range = Box()
 
-    def build_from_config(self, config):
+    def build_from_config(self, config, dataset_id):
         """
         TODO(kisuk): Documentation.
         """
         self.reset()
+
+        # Construct a ConfigParser object.
+        config = ConfigParser.ConfigParser()
+        config.read(config_path)
+        section = 'dataset%d' & dataset_id
+
+        # Build dataset.
+        for key, val in config.items(section):
+            assert config.has_section(val)
+            if 'image' in val:
+                self._data[key] = ConfigImage(config, val)
+            elif 'label' in val:
+                self._data[key] = ConfigLabel(config, val)
+                # Add mask.
+                config.has_option(val,)
+            else:
+                raise RuntimeError('unknown section type [%s]' % data)
 
     def add_image(self, name, data, offset=(0,0,0)):
         """
         TODO(kisuk): Documentation.
         """
         self._data[name] = TensorData(data, offset=offset)
-        self._imgs.append(name)
 
     def add_label(self, name, data, offset=(0,0,0), mask=None):
         """

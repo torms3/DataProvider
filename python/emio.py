@@ -16,6 +16,9 @@ def imread(fname):
 
     Args:
         fname: Name of the file to read (hdf5 or tiff).
+
+    Returns:
+        data: Numpy 3D or 4D array.
     """
     if '.hdf5' in fname or '.h5' in fname:
         f = h5py.File(fname)
@@ -45,3 +48,22 @@ def imsave(data, fname):
         tifffile.imsave(fname, data)
     else:
         raise RuntimeError('only hdf5 and tiff formats are supported')
+
+
+def read_from_files(fnames):
+        """
+        Read a list of images.
+
+        Args:
+            fnames: List of string, file names.
+
+        Returns:
+            ret: List.
+        """
+        ret = list()
+
+        for f in fnames:
+            data = imread(f)
+            ret.append(data)
+
+        return ret

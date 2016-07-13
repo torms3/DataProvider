@@ -206,7 +206,7 @@ def binary_class(img, dtype='float32'):
     """
     img = check_volume(img)
     img = binarize(img, dtype=dtype)
-    return multiclass_expansion(img, dtype=dtype)
+    return multiclass_expansion(img, N=2, dtype=dtype)
 
 
 def affinitize(img, dtype='float32'):

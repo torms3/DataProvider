@@ -79,8 +79,11 @@ class VolumeDataProvider(DataProvider):
         # (0)
         dataset = self._get_random_dataset()
 
-        # (1)
-        # sample = DataAugmentor.random_sample(dataset, self._net_spec)
+        # (1) Increment spec size by 1 if affinity.
+        # spec = self._net_spec + 1
+
+        # (2)
+        # sample = DataAugmentor.random_sample(dataset, spec)
 
         # (5)
         # sample = transform(sample)

@@ -41,10 +41,11 @@ class VolumeDataset(Dataset):
         _range:
     """
 
-    def __init__(self, config=None, dataset_id=None):
+    def __init__(self, config=None, section=None, net_spec=None):
         """Build dataset from config, if any."""
-        if config_path is not None:
-            self.build_from_config(config, dataset_id)
+        if config is not None:
+            assert section is not None
+            self.build_from_config(config, section)
         else:
             self.reset()
 
@@ -54,22 +55,17 @@ class VolumeDataset(Dataset):
         self._spec  = {}
         self._range = Box()
 
-    def build_from_config(self, config, dataset_id):
+    def build_from_config(self, config, section):
         """
         TODO(kisuk): Documentation.
         """
         self.reset()
 
-        # Construct a ConfigParser object.
-        config = ConfigParser.ConfigParser()
-        config.read(config_path)
-        section = 'dataset%d' & dataset_id
-
-        # Build dataset.
+        # Build Dataset.
         for key, val in config.items(section):
             assert config.has_section(val)
             if 'image' in val:
-                self._data[key] = ConfigImage(config, val)
+                self._data[key] = ConfigData(config, val)
             elif 'label' in val:
                 self._data[key] = ConfigLabel(config, val)
                 # Add mask.

@@ -1,17 +1,18 @@
 # sample config file
 [image1]
-fnames = path/of/image1.tif_or_h5
-         path/of/image2.tif_or_h5
+files = path/of/image1.tif_or_h5
+        path/of/image2.tif_or_h5
 offset = 0,0,0
+fov = 5,109,109
 preprocess = {'type':'standardize','mode':'2D'}
+             {'type':'mirror_border','fov':(5,109,109)}
+transform =
 
 [label1]
-fnames = path/of/label1.tif_or_h5
+files = path/of/label1.tif_or_h5
+offset = 0,0,0
 transform = affinitize
-
-[mask1]
-fmasks = path/of/mask1.tif/h5
-transform = repeat
+masks = path/of/mask1.tif_or_h5
 
 [dataset1]
 input1 = image1
@@ -24,5 +25,3 @@ border_mode = mirror
 augment = {'type': 'warp', 'mode': 0.5}
           {'type': 'jitter'}
           {'type': 'flip'}
-crop_size = None
-

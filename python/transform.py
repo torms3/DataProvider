@@ -7,41 +7,8 @@ Kisuk Lee <kisuklee@mit.edu>, 2016
 """
 
 import numpy as np
+from util import *
 from vector import Vec3d, minimum, maximum
-
-def check_volume(data):
-    """Ensure that data is numpy 3D array."""
-    assert isinstance(data, np.ndarray)
-
-    if data.ndim == 2:
-        data = data[np.newaxis,...]
-    elif data.ndim == 3:
-        pass
-    elif data.ndim == 4:
-        assert data.shape[0]==1
-        data = np.reshape(data, data.shape[-3:])
-    else:
-        raise RuntimeError('data must be a numpy 3D array')
-
-    assert data.ndim==3
-    return data
-
-
-def check_tensor(data):
-    """Ensure that data is numpy 4D array."""
-    assert isinstance(data, np.ndarray)
-
-    if data.ndim == 2:
-        data = data[np.newaxis,np.newaxis,...]
-    elif data.ndim == 3:
-        data = data[np.newaxis,...]
-    elif data.ndim == 4:
-        pass
-    else:
-        raise RuntimeError('data must be a numpy 4D array')
-
-    assert data.ndim==4
-    return data
 
 def transform_sample(sample, func, *args, **kwargs):
     """Apply func to a sample."""
@@ -66,17 +33,18 @@ def transform_tensor(data, func, *args, **kwargs):
     return np.concatenate(arrs, axis=0)
 
 
-def crop(img, size, offset=(0,0,0)):
+def crop(img, offset=(0,0,0), size=None):
     """
-    TODO(kisuk):
-        Do we need crop? Yes we do.
-        E.g. transform_sample(sample, 'crop', size, offset)
+    TODO(kisuk): Documentation.
     """
     img = check_volume(img)
-    v1  = Vec3d(offset)
-    v2  = v1 + Vec3d(size)
     ret = np.zeros(size, dtype=img.dtype)
-    ret[:] = img[v1[0]:v2[0],v1[1]:v2[1],v1[2]:v2[2]]
+    v1  = Vec3d(offset)
+    if size is None:
+        ret[:] = img[v1[0]:,v1[1]:,v1[2]:]
+    else:
+        v2 = v1 + Vec3d(size)
+        ret[:] = img[v1[0]:v2[0],v1[1]:v2[1],v1[2]:v2[2]]
     return ret
 
 ####################################################################

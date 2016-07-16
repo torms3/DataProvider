@@ -6,6 +6,8 @@ ConfigData classes.
 Kisuk Lee <kisuklee@mit.edu>, 2016
 """
 
+import numpy as np
+
 import emio
 from tensor import TensorData
 
@@ -14,56 +16,81 @@ class ConfigData(TensorData):
     ConfigData.
     """
 
-    def __init__(self, config, section, option='fnames'):
+    def __init__(self, config, section):
         """Build data from config."""
+        assert config.has_section(section)
 
-        # Read data from files
-        fnames = config.get(section, option).split(',')
-        arr_list = emio.read_from_files(fnames)
-        data = np.concatenate(arr_list, axis=0)
+        # Either read data from specified files, or generate data with
+        # specified shape and filler.
+        if config.has_option(section, 'files'):
+            fnames = config.get(section, 'files').split('\n')
+            arr_list = emio.read_from_files(fnames)
+            data = np.concatenate(arr_list, axis=0)
+        elif config.has_option(section, 'shape'):
+            shape = tuple(eval(config.get(section, 'shape')))
+            if config.has_option(section, 'filler'):
+                filler = eval(config.get(section, 'filler'))
+            else:
+                filler = {'type':'zero'}
+            data = fill_data(shape, filler=filler)
+        else:
+            raise RuntimeError('invalid data section [%s]' % section)
+
+        # FoV (optional)
+        if config.has_option(section, 'fov'):
+            fov = config.get(section, 'fov')
+            fov = tuple(eval(fov))
+        else:
+            fov = (0,0,0)
 
         # Offset (optional)
         if config.has_option(section, 'offset'):
-            offset = config.get(section, 'offset').split(',')
-            offset = tuple(int(x) for x in offset)
+            offset = config.get(section, 'offset')
+            offset = tuple(eval(offset))
         else:
             offset = (0,0,0)
 
         # Initialize TensorData
-        super(ConfigData, self).__init__(data, offset=offset)
+        super(ConfigData, self).__init__(data, fov=fov, offset=offset)
 
-        # Global preprocessing
+        # Preprocessing
+        self._preprocessing(config, section)
 
-        # Local transformation
+        # Transformation
+        self._transformation(config, section)
 
+    def _preprocessing(self, config, section):
+        """
+        TODO(kisuk): Documentation.
+        """
+        # A list of global preprocessing (data)
+        if config.has_option(section, 'preprocess'):
+            preprocess = config.get(section, 'preprocess').split('\n')
+            preprocess = [eval(x) for x in preprocess]
+        else:
+            preprocess = list()
 
-class ConfigImage(ConfigData):
-    """
-    ConfigImage.
-    """
+        # Check the validity of each preprocessing
+        for pp in preprocess:
+            assert isinstance(pp, dict)
+            assert 'type' in pp
 
-    def __init__(self, config, section):
-        """Build image from config."""
+        # TODO(kisuk): Perform preprocessing.
 
-        # Initialize ConfigData
-        super(ConfigImage, self).__init__(config, section)
+    def _transformation(self):
+        """
+        TODO(kisuk): Documentation.
+        """
+        # A list of local transformation (sample)
+        if config.has_option(section, 'transform'):
+            transform = config.get(section, 'transform').split('\n')
+            transform = [eval(x) for x in transform]
+        else:
+            transform = list()
 
-        # Global preprocessing
+        # Check the validity of each transformation
+        for t in transform:
+            assert isinstance(t, dict)
+            assert 'type' in t
 
-        # Local transformation
-
-
-class ConfigLabel(ConfigData):
-    """
-    ConfigLabel.
-    """
-
-    def __init__(self, config, section):
-        """Build label from config."""
-
-        # Initialize ConfigData
-        super(ConfigImage, self).__init__(config, section)
-
-        # Global preprocessing
-
-        # Local transformation
+        self.transform = transform

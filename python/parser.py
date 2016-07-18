@@ -8,6 +8,49 @@ Kisuk Lee <kisuklee@mit.edu>, 2016
 
 import ConfigParser
 
+class Parser(object):
+    """
+    Parser (working title) class.
+    """
+
+    def __init__(self, dspec_path, net_spec, params):
+        """
+        TODO(kisuk): Documentation.
+        """
+        # Construct a ConfigParser object.
+        config = ConfigParser.ConfigParser()
+        config.read(dspec_path)
+        self._config = config
+
+        # Net specification
+        self.net_spec = net_spec
+
+        # TODO(kisuk): Preprocess params.
+
+    def parse_dataset(self, dataset_id):
+        """
+        TODO(kisuk): Documentation.
+
+        Args:
+            dataset_id:
+
+        Returns:
+            dataset:
+        """
+        config = ConfigParser.ConfigParser()
+
+        dataset = 'dataset%d' % dataset_id
+        if self._config.has_section(dataset):
+            config.add_section(dataset)
+            for name, data in self._config.items(dataset):
+                config.set(dataset, name, data)
+        else:
+            err_msg = 'dataset section [%s] does not exist.' % dataset
+            raise RuntimeError(err_msg)
+
+
+
+
 def parse_data_spec(dspec_path, net_spec, drange, params):
     """
     Parse data spec and construct a ConfigParser object.
@@ -24,8 +67,8 @@ def parse_data_spec(dspec_path, net_spec, drange, params):
 
     def instantiate_dataset(config, dataset_id):
         """
-        Instantiate dataset template, if exists, with dataset_id. If dataset
-        already exists (template specialization), then do not instantiate.
+        Instantiate dataset template, if exists, with dataset_id.
+        If dataset already exists, then do not instantiate.
 
         Returns:
             dataset: Section name for dataset.
@@ -41,13 +84,14 @@ def parse_data_spec(dspec_path, net_spec, drange, params):
                         data = data % dataset_id
                     config.set(dataset, name, data)
             else:
-                raise RuntimeError('unknown dataset section [%s]' % dataset)
+                err = 'dataset section [%s] does not exist.' % dataset
+                raise RuntimeError(err)
 
         # Instantiate each data section.
         for name, data in config.items(dataset):
             instantiate_data(config, data)
 
-        return section
+        return dataset
 
     def instantiate_data(config, data):
         """

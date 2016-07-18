@@ -67,7 +67,7 @@ class VolumeDataset(Dataset):
             if 'image' in val:
                 self._data[key] = ConfigData(config, val)
             elif 'label' in val:
-                self._data[key] = ConfigLabel(config, val)
+                self._data[key] = ConfigData(config, val)
                 # Add mask.
                 config.has_option(val,)
             else:

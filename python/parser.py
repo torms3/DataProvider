@@ -39,14 +39,54 @@ class Parser(object):
         """
         config = ConfigParser.ConfigParser()
 
+        # dataset section
         dataset = 'dataset%d' % dataset_id
         if self._config.has_section(dataset):
             config.add_section(dataset)
             for name, data in self._config.items(dataset):
                 config.set(dataset, name, data)
+                self.parse_data(config, name, data)
         else:
             err_msg = 'dataset section [%s] does not exist.' % dataset
             raise RuntimeError(err_msg)
+
+        # Treat special case of affinity.
+        # Increase FoV by 1, and then append crop to the transformation list.
+        if self._has_affinity(config):
+            self._treat_affinity(config)
+
+        # Add border mirroring.
+        if self.params['border_mode'] is 'mirror':
+            self._treat_border(config)
+
+        return config
+
+    def parse_data(self, config, name, data):
+        """
+        TODO(kisuk): Documentation.
+        """
+        if self._config.has_section(data):
+            config.add_section(data)
+            for option, value in self._config.items(data):
+                config.set(data, option, value)
+        else:
+            err_msg = 'data section [%s] does not exist.' % data
+            raise RuntimeError(err_msg)
+
+        # FoV
+        fov = self.net_spec[name][-3:]
+        config.set(data, 'fov', fov)
+
+        # Add mask if data is label.
+        if 'label' in data:
+            data_id  = int(data.split('label')[-1])
+            self._add_mask(config, data_id)
+
+    def _add_mask(self, config, data_id):
+        """
+        TODO(kisuk): Documentation.
+        """
+
 
 
 

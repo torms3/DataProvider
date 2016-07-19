@@ -39,14 +39,14 @@ class ConfigData(TensorData):
         # FoV (optional)
         if config.has_option(section, 'fov'):
             fov = config.get(section, 'fov')
-            fov = tuple(eval(fov))
+            fov = tuple(eval(str(fov)))
         else:
             fov = (0,0,0)
 
         # Offset (optional)
         if config.has_option(section, 'offset'):
             offset = config.get(section, 'offset')
-            offset = tuple(eval(offset))
+            offset = tuple(eval(str(offset)))
         else:
             offset = (0,0,0)
 

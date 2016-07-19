@@ -7,7 +7,7 @@ Kisuk Lee <kisuklee@mit.edu>, 2016
 """
 
 import numpy as np
-from util import *
+from utils import *
 from vector import Vec3d, minimum, maximum
 
 def transform_sample(sample, func, *args, **kwargs):
@@ -130,7 +130,19 @@ def flip(data, rule):
 ## Label Transformations
 ####################################################################
 
-def binarize(img, dtype='float32'):
+"""
+List of label transformation.
+
+Whenever adding a new label transformation, the function name should be
+appended to this list.
+"""
+label_transform = ['binarize',
+                   'multiclass_expansion',
+                   'binary_class',
+                   'affinitize']
+
+
+def binarize(img, dtype='float32', is_mask=False):
     """Binarize image.
 
     Normally used to turn a ground truth segmentation into a ground truth
@@ -149,36 +161,34 @@ def binarize(img, dtype='float32'):
     return ret
 
 
-def multiclass_expansion(lbl, N=None, dtype='float32'):
+def multiclass_expansion(img, N, dtype='float32', is_mask=False):
     """
     TODO(kisuk): Semantic segmentation.
     """
-    lbl = check_volume(lbl)
-    unique_lbls = np.unique(lbl)
+    img = check_volume(img)
+    ret = np.zeros((N,) + img.shape, dtype=dtype)
 
-    # If N is not given, infer from the maximum ID in lbl.
-    if N == None:
-        N = np.max(unique_lbls) + 1
-
-    ret = np.zeros((N,) + lbl.shape, dtype=dtype)
-
-    for l in unique_lbls:
-        ret[l,...] = (img == l)
+    if is_mask:
+        ret[:] = np.tile(img, (N,1,1,1))
+    else:
+        for l in range(N):
+            ret[l,...] = (img == l)
 
     return ret
 
 
-def binary_class(img, dtype='float32'):
+def binary_class(img, dtype='float32', is_mask=False):
     """
     TODO(kisuk): Documentation.
     """
     img = check_volume(img)
     img = binarize(img, dtype=dtype)
-    return multiclass_expansion(img, N=2, dtype=dtype)
+    return multiclass_expansion(img, N=2, dtype=dtype, is_mask=is_mask)
 
 
-def affinitize(img, dtype='float32'):
-    """Transform segmentation to 3D affinity graph.
+def affinitize(img, dtype='float32', is_mask=False):
+    """
+    Transform segmentation to 3D affinity graph.
 
     Args:
         img: 3D indexed image, with each index corresponding to each segment.
@@ -186,6 +196,9 @@ def affinitize(img, dtype='float32'):
     Returns:
         ret: 3D affinity graph (4D tensor), 3 channels for z, y, x direction.
     """
+    if is_mask:
+        return affinitize_mask(img, dtype=dtype)
+
     img = check_volume(img)
     ret = np.zeros((3,) + img.shape, dtype=dtype)
 
@@ -199,8 +212,9 @@ def affinitize(img, dtype='float32'):
 ## Mask Transformations
 ####################################################################
 
-def affinity_mask(msk, dtype='float32'):
-    """Transform binary mask to affinity mask.
+def affinitize_mask(msk, dtype='float32'):
+    """
+    Transform binary mask to affinity mask.
 
     Args:
         msk: 3D binary mask.

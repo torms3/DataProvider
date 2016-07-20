@@ -8,6 +8,8 @@ Kisuk Lee <kisuklee@mit.edu>, 2015-2016
 
 import numpy as np
 import parser
+from dataset import *
+from transform import *
 
 class DataProvider(object):
     """
@@ -45,17 +47,17 @@ class VolumeDataProvider(DataProvider):
             drange:
             dprior:
         """
-        self._datasets = []
-        self._net_spec = net_spec
-
-        # TODO(kisuk): Process sampling weight.
-
         # Build Datasets.
         p = parser.Parser(dspec_path, net_spec, params)
+        self._datasets = []
         for dataset_id in drange:
+            print 'constructing dataset %d...' % dataset_id
             config = p.parse_dataset(dataset_id)
             dataset = VolumeDataset(config)
             self._datasets.append(dataset)
+
+        # TODO(kisuk): Process sampling weight.
+        self._sampling_weights = [1.0/len(drange)] * len(drange)  # Temp
 
         # TODO(kisuk): Setup data augmentation.
 
@@ -64,33 +66,23 @@ class VolumeDataProvider(DataProvider):
         return self.random_sample()
 
     def random_sample(self):
-
         # Sampling procedure:
         #   (0) Pick one dataset randomly.
         #   (1) Draw random parameters for data augmentation.
         #   (2) Compute new patch size required for data augmentation.
         #   (3) Set new patch size and draw a random sample.
         #   (4) Apply data augmentaion.
-        #   (5) Transform label & mask (boundary, affinity, semantic, etc.).
-        #   (6) Crop the final sample.
+        #   (5) Apply sample transformation.
 
-        # (0)
+        # (0) Pick one dataset randomly.
         dataset = self._get_random_dataset()
 
-        # (1) Increment spec size by 1 if affinity.
-        # spec = self._net_spec + 1
+        # (3) Draw a random sample.
+        # sample, transform = DataAugmentor.random_sample(dataset, spec)
+        sample, transform = dataset.random_sample()
 
-        # (2)
-        # sample = DataAugmentor.random_sample(dataset, spec)
-
-        # (5)
-        # sample = transform(sample)
-
-        # (6)
-        # TODO(kisuk): Final crop.
-
-
-        pass
+        # (5) Apply sample transformation.
+        return self._transform(sample, transform)
 
     ####################################################################
     ## Private Helper Methods
@@ -103,23 +95,26 @@ class VolumeDataProvider(DataProvider):
         Returns:
             Randomly chosen dataset.
         """
-
         # Take a single experiment with a multinomial distribution, whose
         # probabilities indicate how likely each sample be selected.
         # Output is an one-hot vector.
         sq = np.random.multinomial(1, self._sampling_weights, size=1)
         sq = np.squeeze(sq)
 
-        # Get the index of non-zero element
+        # Get the index of non-zero element.
         idx = np.nonzero(sq)[0]
 
         return self._datasets[idx]
 
-
-
-        pass
-
-    def _transform_label(self, sample):
+    def _transform(self, sample, transform):
         """
         TODO(kisuk): Documentation.
         """
+        ret = {}
+        for name, data in sample.iteritems():
+            for tf in transform[name]:
+                func = tf['type']
+                del tf['type']
+                data = transform_tensor(data, func, **tf)
+            ret[name] = data
+        return ret

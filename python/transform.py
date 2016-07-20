@@ -10,13 +10,6 @@ import numpy as np
 from utils import *
 from vector import Vec3d, minimum, maximum
 
-def transform_sample(sample, func, *args, **kwargs):
-    """Apply func to a sample."""
-    ret = {}
-    for key, val in sample.iteritems():
-        ret[key] = transform_tensor(val, func, *args, **kwargs)
-    return ret
-
 def transform_tensor(data, func, *args, **kwargs):
     """Apply func to each channel of data (4D tensor)."""
     data = check_tensor(data)
@@ -26,7 +19,7 @@ def transform_tensor(data, func, *args, **kwargs):
 
     for c in xrange(data.shape[0]):
         vol = f(data[c,...], *args, **kwargs)
-        arrs.append(vol[np.newaxis,...])
+        arrs.append(check_tensor(vol))
 
     return np.concatenate(arrs, axis=0)
 
@@ -36,13 +29,12 @@ def crop(img, offset=(0,0,0), size=None):
     TODO(kisuk): Documentation.
     """
     img = check_volume(img)
+    if size is None:
+        size = tuple(Vec3d(img.shape) - Vec3d(offset))
     ret = np.zeros(size, dtype=img.dtype)
     v1  = Vec3d(offset)
-    if size is None:
-        ret[:] = img[v1[0]:,v1[1]:,v1[2]:]
-    else:
-        v2 = v1 + Vec3d(size)
-        ret[:] = img[v1[0]:v2[0],v1[1]:v2[1],v1[2]:v2[2]]
+    v2  = v1 + Vec3d(size)
+    ret[:] = img[v1[0]:v2[0],v1[1]:v2[1],v1[2]:v2[2]]
     return ret
 
 ####################################################################
@@ -201,8 +193,8 @@ def affinitize(img, dtype='float32', is_mask=False):
     ret = np.zeros((3,) + img.shape, dtype=dtype)
 
     ret[2,1:,:,:] = (img[1:,:,:]==img[:-1,:,:]) & (img[1:,:,:]>0)  # z affinity
-    ret[1::,1:,:] = (img[:,1:,:]==img[:,:-1,:]) & (img[:,1:,:]>0)  # y affinity
-    ret[0::,:,1:] = (img[:,:,1:]==img[:,:,:-1]) & (img[:,:,1:]>0)  # x affinity
+    ret[1,:,1:,:] = (img[:,1:,:]==img[:,:-1,:]) & (img[:,1:,:]>0)  # y affinity
+    ret[0,:,:,1:] = (img[:,:,1:]==img[:,:,:-1]) & (img[:,:,1:]>0)  # x affinity
 
     return ret
 
@@ -220,7 +212,7 @@ def affinitize_mask(msk, dtype='float32'):
     Returns:
         ret: 3D affinity mask (4D tensor), 3 channels for z, y, x direction.
     """
-    img = check_volume(img)
+    msk = check_volume(msk)
     ret = np.zeros((3,) + msk.shape, dtype=dtype)
 
     ret[2,1:,:,:] = (msk[1:,:,:]>0) | (msk[:-1,:,:]>0)

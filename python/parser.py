@@ -226,29 +226,3 @@ class Parser(object):
                 # Update offset.
                 off = Vec3d(off) - Vec3d(fov)/2
                 config.set(data, 'offset', tuple(off))
-
-
-if __name__ == "__main__":
-
-    # Data spec path
-    dspec_path = 'zfish.spec'
-
-    # Net specification
-    net_spec = {}
-    net_spec['input'] = (13,178,178)
-    net_spec['label'] = (5,70,70)
-
-    # Parameters
-    params = {}
-    params['border_mode'] = 'mirror'
-    params['augment'] = [{'type':'warp', 'mode': 0.5},
-                         {'type':'jitter'},
-                         {'type':'flip'}]
-
-    # Test Parser.
-    p = Parser(dspec_path, net_spec, params)
-    idx = 1
-    config = p.parse_dataset(idx)
-    f = open('zfish_dataset%d.spec' % idx, 'w')
-    config.write(f)
-    f.close()

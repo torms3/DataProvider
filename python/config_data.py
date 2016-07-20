@@ -9,6 +9,7 @@ Kisuk Lee <kisuklee@mit.edu>, 2016
 import numpy as np
 import emio
 from tensor import TensorData
+from transform import *
 from utils import *
 
 class ConfigData(TensorData):
@@ -86,11 +87,11 @@ class ConfigData(TensorData):
         for pp in preprocess:
             func = pp['type']
             del pp['type']
-            data = transform_tensor(data, func, **pp):
+            data = transform_tensor(data, func, **pp)
 
         return data, fov, offset
 
-    def _transformation(self):
+    def _transformation(self, config, section):
         """
         TODO(kisuk): Documentation.
         """

@@ -67,8 +67,8 @@ class TensorData(object):
         Extract a patch of size _fov centered on pos.
         """
         assert self._rg.contains(pos)  # check validity
-        pos -= self._offset  # local coordinate system
-        box  = centered_box(pos, self._fov)
+        loc  = pos - self._offset  # local coordinate system
+        box  = centered_box(loc, self._fov)
         vmin = box.min()
         vmax = box.max()
         return np.copy(self._data[:,vmin[0]:vmax[0],

@@ -34,22 +34,22 @@ class VolumeDataset(Dataset):
 
     Attributes:
         _data:
+        _spec:
         _range:
     """
 
     def __init__(self, config):
-        """Build dataset from config."""
+        """Initialize VolumeDataset."""
         self.build_from_config(config)
 
     def reset(self):
         """Reset all attributes."""
         self._data  = {}
-        self._range = Box()
+        self._spec  = None
+        self._range = None
 
     def build_from_config(self, config):
-        """
-        TODO(kisuk): Documentation.
-        """
+        """Build dataset from config."""
         self.reset()
 
         # First pass for images and labels.
@@ -68,10 +68,14 @@ class VolumeDataset(Dataset):
                     config.set(data, 'shape', shape)
                 self._data[name] = ConfigData(config, data)
 
+        # Set spec.
+        spec = {}
+        for name, data in self._data.iteritems():
+            spec[name] = tuple(data.fov())
+        self.set_spec(spec)
+
     def set_spec(self, spec):
-        """
-        TODO(kisuk): Documentation.
-        """
+        """Set spec and update valid range."""
         self._spec = spec
         self._update_range()
 
@@ -83,25 +87,19 @@ class VolumeDataset(Dataset):
             spec:
 
         Returns:
-
+            data:
+            transform:
         """
-        data, imgs, lbls, msks = {}, [], [], []
-
-        if spec is None:
-            spec = self._spec    # Use the current spec.
-        else:
+        if spec is not None:
             self.set_spec(spec)  # Dynamically change spec.
 
+        data = {}
+        transform = {}
         for name in self._spec.keys():
             data[name] = self._data[name].get_patch(pos)
-            if name in self._imgs: imgs.append(name)
-            if name in self._lbls: lbls.append(name)
-            if name in self._msks: msks.append(name)
+            transform[name] = self._data[name].transform
 
-        assert (len(imgs)+len(lbls)+len(msks))==len(data)
-        # TODO(kisuk): Which one is better? Multiple returns or a dictionary?
-        # return data, imgs, lbls, msks
-        return {'data':data, 'imgs':imgs, 'lbls':lbls, 'msks':msks}
+        return data, transform
 
     def next_sample(self, spec=None):
         """Fetch next sample in a sample sequence."""
@@ -124,25 +122,12 @@ class VolumeDataset(Dataset):
         x = np.random.randint(0, s[2])
         return Vec3d(z,y,x) + self._range.min()
 
-    def _mask_name(self, name):
-        if name in self._lbls:
-            ret = name + '_name'
-        else:
-            ret = None
-        return ret
-
     def _update_range(self):
         """Update valid range."""
         self._range = None
-
         for name, dim in self._spec.iteritems():
             # Update patch size.
             self._data[name].set_fov(dim[-3:])
-            # Update mask, if any.
-            mask_name = self._mask_name(name)
-            if mask_name is not None:
-                self._data[mask_name].set_fov(dim[-3:])
-
             # Update valid range.
             r = self._data[name].range()
             if self._range is None:

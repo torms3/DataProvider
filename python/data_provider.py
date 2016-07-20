@@ -9,6 +9,7 @@ Kisuk Lee <kisuklee@mit.edu>, 2015-2016
 import numpy as np
 import parser
 from dataset import *
+from data_augmentation import DataAugmentor
 from transform import *
 
 class DataProvider(object):
@@ -59,29 +60,22 @@ class VolumeDataProvider(DataProvider):
         # TODO(kisuk): Process sampling weight.
         self._sampling_weights = [1.0/len(drange)] * len(drange)  # Temp
 
-        # TODO(kisuk): Setup data augmentation.
+        # Setup data augmentation.
+        self._data_aug = DataAugmentor(params['augment'])
 
     def next_sample(self):
         """Fetch next sample in a sample sequence."""
         return self.random_sample()
 
     def random_sample(self):
-        # Sampling procedure:
-        #   (0) Pick one dataset randomly.
-        #   (1) Draw random parameters for data augmentation.
-        #   (2) Compute new patch size required for data augmentation.
-        #   (3) Set new patch size and draw a random sample.
-        #   (4) Apply data augmentaion.
-        #   (5) Apply sample transformation.
-
-        # (0) Pick one dataset randomly.
+        # Pick one dataset randomly.
         dataset = self._get_random_dataset()
 
-        # (3) Draw a random sample.
-        # sample, transform = DataAugmentor.random_sample(dataset, spec)
+        # Draw a random sample and apply data augmenation.
+        # sample, transform = self._data_aug.random_sample(dataset, self.net_spec)
         sample, transform = dataset.random_sample()
 
-        # (5) Apply sample transformation.
+        # Apply transformation.
         return self._transform(sample, transform)
 
     ####################################################################

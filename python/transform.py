@@ -10,6 +10,13 @@ import numpy as np
 from utils import *
 from vector import Vec3d, minimum, maximum
 
+def transform_sample(sample, func, *args, **kwargs):
+    """Apply func to a sample."""
+    ret = {}
+    for key, val in sample.iteritems():
+        ret[key] = transform_tensor(val, func, *args, **kwargs)
+    return ret
+
 def transform_tensor(data, func, *args, **kwargs):
     """Apply func to each channel of data (4D tensor)."""
     data = check_tensor(data)

@@ -17,14 +17,11 @@ class DataProvider(object):
     DataProvider interface.
     """
 
-    def __init__(self):
-        pass
-
     def next_sample(self):
-        pass
+        raise NotImplementedError
 
     def random_sample(self):
-        pass
+        raise NotImplementedError
 
 
 class VolumeDataProvider(DataProvider):
@@ -68,14 +65,12 @@ class VolumeDataProvider(DataProvider):
         return self.random_sample()
 
     def random_sample(self):
+        """Fetch random sample."""
         # Pick one dataset randomly.
         dataset = self._get_random_dataset()
-
         # Draw a random sample and apply data augmenation.
-        # sample, transform = self._data_aug.random_sample(dataset, self.net_spec)
-        sample, transform = dataset.random_sample()
-
-        # Apply transformation.
+        sample, transform = self._data_aug.random_sample(dataset)
+        # Return transformed sample.
         return self._transform(sample, transform)
 
     ####################################################################
@@ -89,6 +84,10 @@ class VolumeDataProvider(DataProvider):
         Returns:
             Randomly chosen dataset.
         """
+        # Trivial case
+        if len(self._datasets)==1:
+            return self._datasets[0]
+
         # Take a single experiment with a multinomial distribution, whose
         # probabilities indicate how likely each sample be selected.
         # Output is an one-hot vector.

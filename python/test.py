@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+import h5py
+from data_provider import *
+
 if __name__ == "__main__":
 
     # Data spec path
@@ -15,12 +18,16 @@ if __name__ == "__main__":
     params['augment'] = [{'type':'flip'}]
 
     # VolumeDataProvider
-    from data_provider import *
-    dp = VolumeDataProvider(dspec_path, net_spec, params, [1,3])
-    sample = dp.random_sample()
+    dp = VolumeDataProvider(dspec_path, net_spec, params, [0])
 
-    import h5py
-    f = h5py.File('sample.h5')
-    for name, data in sample.iteritems():
-        f.create_dataset('/' + name, data=data)
-    f.close()
+    samples = []
+    for x in range(16):
+        print 'Iteration %d...' % (x+1)
+        sample = dp.random_sample()
+        samples.append(sample)
+        # Save as file.
+        print 'Save as file...'
+        f = h5py.File('sample%d.h5' % (x+1))
+        for name, data in sample.iteritems():
+            f.create_dataset('/' + name, data=data)
+        f.close()

@@ -48,22 +48,3 @@ def imsave(data, fname):
         tifffile.imsave(fname, data)
     else:
         raise RuntimeError('only hdf5 and tiff formats are supported')
-
-
-def read_from_files(fnames):
-        """
-        Read a list of images.
-
-        Args:
-            fnames: List of string, file names.
-
-        Returns:
-            ret: List.
-        """
-        ret = list()
-
-        for f in fnames:
-            data = imread(f)
-            ret.append(data)
-
-        return ret

@@ -6,6 +6,7 @@ Dataset classes.
 Kisuk Lee <kisuklee@mit.edu>, 2016
 """
 
+import copy
 import numpy as np
 from box import Box
 from config_data import *
@@ -18,14 +19,11 @@ class Dataset(object):
     Dataset interface.
     """
 
-    def __init__(self):
-        pass
-
     def next_sample(self):
-        pass
+        raise NotImplementedError
 
     def random_sample(self):
-        pass
+        raise NotImplementedError
 
 
 class VolumeDataset(Dataset):
@@ -74,6 +72,9 @@ class VolumeDataset(Dataset):
             spec[name] = tuple(data.fov())
         self.set_spec(spec)
 
+    def get_spec(self):
+        return copy.deepcopy(self._spec)
+
     def set_spec(self, spec):
         """Set spec and update valid range."""
         self._spec = spec
@@ -90,14 +91,20 @@ class VolumeDataset(Dataset):
             data:
             transform:
         """
+        # Dynamically change spec.
         if spec is not None:
-            self.set_spec(spec)  # Dynamically change spec.
+            original_spec = self._spec
+            self.set_spec(spec)
 
         data = {}
         transform = {}
         for name in self._spec.keys():
             data[name] = self._data[name].get_patch(pos)
-            transform[name] = self._data[name].transform
+            transform[name] = self._data[name].get_transform()
+
+        # Return to original spec.
+        if spec is not None:
+            self.set_spec(original_spec)
 
         return data, transform
 

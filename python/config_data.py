@@ -6,6 +6,7 @@ ConfigData classes.
 Kisuk Lee <kisuklee@mit.edu>, 2016
 """
 
+import copy
 import numpy as np
 import emio
 from tensor import TensorData
@@ -27,6 +28,9 @@ class ConfigData(TensorData):
 
         # Transformation
         self._transformation(config, section)
+
+    def get_transform(self):
+        return copy.deepcopy(self._transform)
 
     ####################################################################
     ## Private Helper Methods
@@ -107,4 +111,4 @@ class ConfigData(TensorData):
             assert isinstance(t, dict)
             assert 'type' in t
 
-        self.transform = transform
+        self._transform = transform

@@ -14,7 +14,7 @@ class DataAugmentor(object):
     Data augmentation.
 
     Attributes:
-        _aug_list:
+        _aug_list: List of data augmentation. Will be executed sequentially.
     """
 
     def __init__(self, spec):
@@ -32,15 +32,11 @@ class DataAugmentor(object):
             aug_list.append(aug)
         self._aug_list = aug_list
 
-    def next_sample(self, dataset, spec):
-        spec = self._prepare(spec)
-        sample, transform = dataset.next_sample(spec=spec)
-        for aug in self._aug_list:
-            sample = aug.augment(sample)
-        return sample, transform
+    def next_sample(self, dataset):
+        raise NotImplementedError
 
-    def random_sample(self, dataset, spec):
-        spec = self._prepare(spec)
+    def random_sample(self, dataset):
+        spec = self._prepare(dataset.get_spec())
         sample, transform = dataset.random_sample(spec=spec)
         for aug in self._aug_list:
             sample = aug.augment(sample)
@@ -58,23 +54,17 @@ class DataAugment(object):
     DataAugment interface.
     """
 
-    def __init__(self):
-        pass
-
     def prepare(self, spec):
-        pass
+        raise NotImplementedError
 
     def augment(self, sample):
-        pass
+        raise NotImplementedError
 
 
 class FlipAugment(DataAugment):
     """
     Random flip.
     """
-
-    def __init__(self):
-        pass
 
     def prepare(self, spec):
         return dict(spec)
@@ -94,12 +84,3 @@ class WarpAugment(DataAugment):
 
     def augment(self, sample):
         pass
-
-
-if __name__ == "__main__":
-
-    params = {}
-    params['augment'] = [{'type':'flip'},
-                         {'type':'warp'}]
-
-    d = DataAugmentor(params['augment'])

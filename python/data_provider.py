@@ -7,7 +7,7 @@ Kisuk Lee <kisuklee@mit.edu>, 2015-2016
 """
 
 import numpy as np
-import ConfigParser
+import parser
 
 class DataProvider(object):
     """
@@ -48,41 +48,16 @@ class VolumeDataProvider(DataProvider):
         self._datasets = []
         self._net_spec = net_spec
 
-        # TODO(kisuk): Preprocessing params.
-
         # TODO(kisuk): Process sampling weight.
 
-        # Construct a ConfigParser
-        config = ConfigParser.ConfigParser()
-        config.read(data_spec)
-
         # Build Datasets.
+        p = parser.Parser(dspec_path, net_spec, params)
         for dataset_id in drange:
-            # Build section name.
-            section = 'dataset%d' % dataset_id
-            # Add FoV.
-            self._add_fov(config, section, net_spec)
-            # Add border mirroring.
-            if params['border_mode'] is 'mirror':
-                self._add_mirror_border(config, section, net_spec)
-                # TODO(kisuk): Check config if 'border_mirror' was added.
-            # Construct a Dataset
-            dataset = VolumeDataset(config, section, net_spec)
+            config = p.parse_dataset(dataset_id)
+            dataset = VolumeDataset(config)
             self._datasets.append(dataset)
 
         # TODO(kisuk): Setup data augmentation.
-
-    def _add_mirror_border(self, config, section, net_spec):
-        """Add preprocessing 'mirror_border' to each images."""
-        # For each layer's name and dimension:
-        for name, dim in net_spec.iteritems():
-            key = config.get(section, name)
-            if 'image' in key:  # Apply border mirroring only to images.
-                # Border mirroring is appended to the preprocessing list.
-                pp = config.get(key, 'preprocess')
-                pp += '\n'
-                pp += "{'type':'mirror_border','fov':%s}" % str(dim[-3:])
-                config.set(key, 'preprocess', pp)
 
     def next_sample(self):
         """Fetch next sample in a sample sequence."""

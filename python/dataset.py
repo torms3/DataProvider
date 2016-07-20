@@ -34,69 +34,39 @@ class VolumeDataset(Dataset):
 
     Attributes:
         _data:
-        _imgs: Image dict. {key: [preprocessing1,...]}
-        _lbls: Label dict. {key: [preprocessing1,...]}
-        _msks:
-        _spec:
         _range:
     """
 
-    def __init__(self, config=None, section=None, net_spec=None):
-        """Build dataset from config, if any."""
-        if config is not None:
-            assert section is not None
-            self.build_from_config(config, section)
-        else:
-            self.reset()
+    def __init__(self, config):
+        """Build dataset from config."""
+        self.build_from_config(config)
 
     def reset(self):
         """Reset all attributes."""
         self._data  = {}
-        self._spec  = {}
         self._range = Box()
 
-    def build_from_config(self, config, section):
+    def build_from_config(self, config):
         """
         TODO(kisuk): Documentation.
         """
         self.reset()
 
-        # Build Dataset.
-        for key, val in config.items(section):
-            assert config.has_section(val)
-            if 'image' in val:
-                self._data[key] = ConfigData(config, val)
-            elif 'label' in val:
-                self._data[key] = ConfigData(config, val)
-                # Add mask.
-                config.has_option(val,)
-            else:
-                raise RuntimeError('unknown section type [%s]' % data)
+        # First pass for images and labels.
+        for name, data in config.items('dataset'):
+            assert config.has_section(data)
+            if '_mask' in data:
+                continue
+            self._data[name] = ConfigData(config, data)
 
-    def add_image(self, name, data, offset=(0,0,0)):
-        """
-        TODO(kisuk): Documentation.
-        """
-        self._data[name] = TensorData(data, offset=offset)
-
-    def add_label(self, name, data, offset=(0,0,0), mask=None):
-        """
-        TODO(kisuk): Documentation.
-        """
-        lbl = TensorData(data, offset=offset)
-        self._data[name] = lbl
-        self._lbls.append(name)
-
-        # Add a corresponding mask.
-        if mask is None:
-            mask = np.ones(lbl.shape(), dtype='float32')
-        else:
-            assert lbl.shape()==mask.shape
-
-        mask_name = self._mask_name(name)
-        assert mask_name is not None
-        self._data[mask_name] = TensorData(mask, lbl.offset())
-        self._msks.append(mask_name)
+        # Second pass for masks.
+        for name, data in config.items('dataset'):
+            if '_mask' in data:
+                if config.has_option(data, 'shape'):
+                    label = data.strip('_mask')
+                    shape = self._data[label].shape()
+                    config.set(data, 'shape', shape)
+                self._data[name] = ConfigData(config, data)
 
     def set_spec(self, spec):
         """

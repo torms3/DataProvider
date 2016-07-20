@@ -8,26 +8,29 @@ Kisuk Lee <kisuklee@mit.edu>, 2016
 
 import ConfigParser
 from transform import label_transform
+from vector import Vec3d
 
 class Parser(object):
     """
-    Parser (working title) class.
+    Parser class.
     """
 
     def __init__(self, dspec_path, net_spec, params):
-        """
-        TODO(kisuk): Documentation.
+        """Initialize a Parser object.
+
+        Args:
+            dspec_path: Data spec path.
+            net_spec: Net spec, a dictionary containing layer-data name pairs.
+            params: Parameter dictionary.
         """
         # Construct a ConfigParser object.
         config = ConfigParser.ConfigParser()
         config.read(dspec_path)
-        self._config = config
 
-        # Net specification
+        # Set attributes.
+        self._config  = config
         self.net_spec = net_spec
-
-        # TODO(kisuk): Preprocess params.
-        self.params = params
+        self.params   = params
 
     def parse_dataset(self, dataset_id):
         """
@@ -37,11 +40,10 @@ class Parser(object):
             dataset_id:
 
         Returns:
-            dataset:
+            dataset: ConfigParser object containing dataset info.
         """
         config = ConfigParser.ConfigParser()
 
-        # dataset section
         section = 'dataset'
         if self._config.has_section(section):
             config.add_section(section)
@@ -61,6 +63,12 @@ class Parser(object):
     def parse_data(self, config, name, data, idx):
         """
         TODO(kisuk): Documentation.
+
+        Args:
+            config:
+            name:
+            data:
+            idx:
         """
         if self._config.has_section(data):
             config.add_section(data)
@@ -80,29 +88,50 @@ class Parser(object):
         fov = self.net_spec[name][-3:]
         config.set(data, 'fov', fov)
 
+        # Offset
+        if not config.has_option(data, 'offset'):
+            config.set(data, 'offset', (0,0,0))
+
         # Add mask if data is label.
         if 'label' in data:
             self._add_mask(config, name, data, idx)
 
+    ####################################################################
+    ## Private Helper Methods
+    ####################################################################
+
     def _add_mask(self, config, name, data, idx):
-        """
-        TODO(kisuk): Documentation.
+        """Add mask for label.
+
+        Each label is supposed to have corresponding mask, an equal-sized
+        volume with postive real values. During training, cost and gradient
+        volumes are element-wise multiplied by mask.
+
+        Args:
+            config: ConfigParser object containing dataset info.
+            name: Layer name for label.
+            data: Section name for label data.
+            idx: Dataset ID.
         """
         assert config.has_section(data)
 
-        # Add mask.
+        # Mask name is assumed to be label name with '_mask' postfix.
         name = name + '_mask'
         mask = data + '_mask'
         config.set('dataset', name, mask)
+
+        # Add mask data.
         config.add_section(mask)
         for option, value in config.items(data):
             if option == 'file':
                 continue
             elif option == 'mask':
+                # Use [mask] option of label, if exists, to instantiate
+                # [file] option of mask.
                 assert self._config.has_option('files', value)
-                flist = self._config.get('files', value).split('\n')
+                flist  = self._config.get('files', value).split('\n')
                 option = 'file'
-                value = flist[idx]
+                value  = flist[idx]
             elif option == 'transform':
                 tf = [eval(x) for x in value.split('\n')]
                 tf = self._treat_mask_transform(tf)
@@ -110,12 +139,24 @@ class Parser(object):
             config.set(mask, option, value)
 
         # Add default mask filler.
+        # If mask is not built from file, build it from [shape] and [filler]
+        # options. [shape] option should be added later dynamically.
         if not config.has_option(mask, 'file'):
             config.set(mask, 'shape', '(z,y,x)')  # Place holder
             config.set(mask, 'filler', "{'type':'one'}")
 
     def _treat_mask_transform(self, tf):
-        """Replace label transformation with mask transformation."""
+        """
+        Replace label transformation with mask transformation by adding
+        [is_mask=True] optional argument.
+
+        Args:
+            tf: List of transformation.
+
+        Returns:
+            ret: List of transformation, with label transformations substituted
+                 by corresponding mask transformations.
+        """
         ret = []
         for t in tf:
             if t['type'] in label_transform:
@@ -167,9 +208,14 @@ class Parser(object):
         """
         if self.params['border_mode'] is 'mirror':
             for _, data in config.items('dataset'):
+                # Apply only to images.
+                if not 'image' in data:
+                    continue
                 assert config.has_section(data)
                 assert config.has_option(data, 'fov')
+                assert config.has_option(data, 'offset')
                 fov = config.get(data, 'fov')
+                off = config.get(data, 'offset')
                 # Append border mirroring to the preprocessing list.
                 if config.has_option(data, 'preprocess'):
                     pp = config.get(data, 'Preprocess') + '\n'
@@ -177,9 +223,15 @@ class Parser(object):
                     pp = ''
                 pp += "{'type':'mirror_border','fov':(%d,%d,%d)}" % fov
                 config.set(data, 'preprocess', pp)
+                # Update offset.
+                off = Vec3d(off) - Vec3d(fov)/2
+                config.set(data, 'offset', tuple(off))
 
 
 if __name__ == "__main__":
+
+    # Data spec path
+    dspec_path = 'zfish.spec'
 
     # Net specification
     net_spec = {}
@@ -192,9 +244,6 @@ if __name__ == "__main__":
     params['augment'] = [{'type':'warp', 'mode': 0.5},
                          {'type':'jitter'},
                          {'type':'flip'}]
-
-    # Data spec path
-    dspec_path = 'zfish.spec'
 
     # Test Parser.
     p = Parser(dspec_path, net_spec, params)

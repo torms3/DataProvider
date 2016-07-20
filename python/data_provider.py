@@ -34,7 +34,7 @@ class VolumeDataProvider(DataProvider):
         _net_spec:
     """
 
-    def __init__(self, dspec_path, net_spec, params, drange, dprior=None):
+    def __init__(self, dspec_path, net_spec, params):
         """
         Initialize DataProvider.
 
@@ -42,9 +42,11 @@ class VolumeDataProvider(DataProvider):
             dspec_path: Path to the dataset specification file.
             net_spec: Net specification.
             params:
-            drange:
-            dprior:
         """
+        # Params.
+        drange = params['drange']
+        dprior = params.get('dprior', None)
+
         # Build Datasets.
         p = parser.Parser(dspec_path, net_spec, params)
         self._datasets = []

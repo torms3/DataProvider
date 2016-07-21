@@ -1,5 +1,6 @@
 [files]
-dir = ../dataset/zfish
+# dir = ../dataset/zfish
+dir = /usr/people/kisuk/Data_local/datasets/zfish
 img = %(dir)s/r1.daan.img.h5
       %(dir)s/r1.kyle.img.h5
       %(dir)s/r1.merlin.1.img.h5
@@ -26,3 +27,9 @@ transform = {'type':'affinitize'}
 [dataset]
 input = image
 label = label
+
+[general]
+border  = 'mirror'
+augment = {'type':'flip'}
+train   = 1-6
+test    = 7

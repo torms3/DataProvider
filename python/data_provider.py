@@ -34,7 +34,7 @@ class VolumeDataProvider(DataProvider):
         _net_spec:
     """
 
-    def __init__(self, dspec_path, net_spec, params):
+    def __init__(self, dspec_path, net_spec, params, auto_mask=True):
         """
         Initialize DataProvider.
 
@@ -48,7 +48,7 @@ class VolumeDataProvider(DataProvider):
         dprior = params.get('dprior', None)
 
         # Build Datasets.
-        p = parser.Parser(dspec_path, net_spec, params)
+        p = parser.Parser(dspec_path, net_spec, params, auto_mask=auto_mask)
         self._datasets = []
         for dataset_id in drange:
             print 'constructing dataset %d...' % dataset_id
@@ -75,7 +75,8 @@ class VolumeDataProvider(DataProvider):
         # Return transformed sample.
         sample = self._transform(sample, transform)
         # TODO(kisuk): Rebalancing
-        return self._rebalancing(sample)
+        return sample
+        # return self._rebalancing(sample)
 
     ####################################################################
     ## Private Helper Methods

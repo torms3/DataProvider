@@ -7,8 +7,9 @@ Kisuk Lee <kisuklee@mit.edu>, 2016
 """
 
 import caffe
+from collections import OrderedDict
 import numpy as np
-from DataProvider.python.data_provider import VolumeDataProvider
+from python.data_provider import VolumeDataProvider
 
 class VolumeDataLayer(caffe.Layer):
     """
@@ -24,17 +25,19 @@ class VolumeDataLayer(caffe.Layer):
 
         # Data & net specs.
         dspec_path = layer_params['dspec_path']
-        net_spec = layer_params['net_spec']
+        net_spec   = layer_params['net_spec']
 
         # Parameters for constructing data provider.
         params = dict()
-        params['border']  = layer_params.get('border_mode', 'None')
+        params['border']  = layer_params.get('border', None)
         params['augment'] = layer_params.get('augment', [])
         params['drange']  = layer_params['drange']
         params['dprior']  = layer_params.get('dprior', None)
 
         # Construct a VolumeDataProvider object.
-        self.data_provider = VolumeDataProvider(dspec_path, net_spec, params)
+        auto_mask = layer_params.get('auto_mask', True)
+        self.data_provider = VolumeDataProvider(dspec_path, net_spec, params,
+            auto_mask=auto_mask)
 
         # Infer ntop fomr net spec.
         ntop = len(net_spec)

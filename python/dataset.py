@@ -7,6 +7,7 @@ Kisuk Lee <kisuklee@mit.edu>, 2016
 """
 
 import copy
+from collections import OrderedDict
 import numpy as np
 from box import Box
 from config_data import *
@@ -42,7 +43,7 @@ class VolumeDataset(Dataset):
 
     def reset(self):
         """Reset all attributes."""
-        self._data  = {}
+        self._data  = dict()
         self._spec  = None
         self._range = None
 

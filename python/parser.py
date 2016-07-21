@@ -15,7 +15,7 @@ class Parser(object):
     Parser class.
     """
 
-    def __init__(self, dspec_path, net_spec, params):
+    def __init__(self, dspec_path, net_spec, params, auto_mask=True):
         """Initialize a Parser object.
 
         Args:
@@ -28,9 +28,10 @@ class Parser(object):
         config.read(dspec_path)
 
         # Set attributes.
-        self._config  = config
-        self.net_spec = net_spec
-        self.params   = params
+        self._config   = config
+        self.net_spec  = net_spec
+        self.params    = params
+        self.auto_mask = auto_mask
 
     def parse_dataset(self, dataset_id):
         """
@@ -93,7 +94,7 @@ class Parser(object):
             config.set(data, 'offset', (0,0,0))
 
         # Add mask if data is label.
-        if 'label' in data:
+        if self.auto_mask and 'label' in data:
             self._add_mask(config, name, data, idx)
 
     ####################################################################
@@ -226,3 +227,17 @@ class Parser(object):
                 # Update offset.
                 off = Vec3d(off) - Vec3d(fov)/2
                 config.set(data, 'offset', tuple(off))
+
+
+if __name__ == "__main__":
+
+    dspec_path = 'zfish.spec'
+    net_spec = dict(input=(18,208,208), label=(10,100,100))
+    params = dict(border='mirror', augment=[{'type':'flip'}], drange=0)
+
+    # Parser
+    p = Parser(dspec_path, net_spec, params, auto_mask=False)
+    config = p.parse_dataset(0)
+    f = open('zfish_dataset0.spec', 'w')
+    config.write(f)
+    f.close()

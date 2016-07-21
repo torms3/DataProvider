@@ -54,6 +54,7 @@ def fill_data(shape, filler={'type':'zero'}, dtype='float32'):
                 {'type':'constant', 'value':%f}
                 {'type':'gaussian', 'loc':%f, 'scale':%f}
                 {'type':'uniform', 'low':%f, 'high':%f}
+                {'type':'randi', 'low':%d, 'high':%d}
 
     Returs:
         data: Numpy array of shape, filled with specified values.
@@ -61,26 +62,30 @@ def fill_data(shape, filler={'type':'zero'}, dtype='float32'):
     data = np.zeros(shape, dtype=dtype)
 
     assert 'type' in filler
-    if filler['type'] is 'zero':
+    if filler['type'] == 'zero':
         # Fill zeros.
         pass
-    elif filler['type'] is 'one':
+    elif filler['type'] == 'one':
         # Fill ones.
         data = np.ones(shape, dtype=dtype)
-    elif filler['type'] is 'constant':
+    elif filler['type'] == 'constant':
         # Fill constant value.
         assert 'value' in filler
         data[:] = filler['value']
-    elif filler['type'] is 'gaussian':
+    elif filler['type'] == 'gaussian':
         # Fill random numbers from Gaussian(loc, scale).
-        loc = filler['mean'] if 'mean' in filler else 0.0
-        scale = filler['std'] if 'std' in filler else 1.0
+        loc = filler.get('mean', 0.0)
+        scale = filler.get('std', 1.0)
         data[:] = np.random.normal(loc=loc, scale=scale, size=shape)
-    elif filler['type'] is 'uniform':
+    elif filler['type'] == 'uniform':
         # Fill random numbers from Uniform(low, high).
-        low = filler['low'] if 'low' in filler else 0.0
-        high = filler['high'] if 'high' in filler else 1.0
+        low = filler.get('low', 0.0)
+        high = filler.get('high', 1.0)
         data[:] = np.random.uniform(low=low, high=high, size=shape)
+    elif filler['type'] == 'randint':
+        low = filler.get('low', 0)
+        high = filler.get('high', None)
+        data[:] = np.random.randint(low=low, high=high, size=shape)
     else:
         raise RuntimeError('invalid filler type [%s]' % filler['type'])
 

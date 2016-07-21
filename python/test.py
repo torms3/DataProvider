@@ -14,7 +14,7 @@ if __name__ == "__main__":
 
     # Parameters
     params = {}
-    params['border_mode'] = 'mirror'
+    params['border']  = 'mirror'
     params['augment'] = [{'type':'flip'}]
 
     # VolumeDataProvider

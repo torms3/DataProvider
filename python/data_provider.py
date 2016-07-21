@@ -73,7 +73,9 @@ class VolumeDataProvider(DataProvider):
         # Draw a random sample and apply data augmenation.
         sample, transform = self._data_aug.random_sample(dataset)
         # Return transformed sample.
-        return self._transform(sample, transform)
+        sample = self._transform(sample, transform)
+        # TODO(kisuk): Rebalancing
+        return self._rebalancing(sample)
 
     ####################################################################
     ## Private Helper Methods

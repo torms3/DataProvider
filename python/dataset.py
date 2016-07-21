@@ -106,7 +106,10 @@ class VolumeDataset(Dataset):
         if spec is not None:
             self.set_spec(original_spec)
 
-        return data, transform
+        # Ordered by key
+        sample = OrderedDict(sorted(data.items(), key=lambda x: x[0]))
+
+        return sample, transform
 
     def next_sample(self, spec=None):
         """Fetch next sample in a sample sequence."""

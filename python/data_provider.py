@@ -78,7 +78,8 @@ class VolumeDataProvider(DataProvider):
         # Return transformed sample.
         sample = self._transform(sample, transform)
         # Rebalancing
-        return self._rebalancing(sample)
+        return sample
+        # return self._rebalancing(sample)
 
     ####################################################################
     ## Private Helper Methods
@@ -119,5 +120,5 @@ class VolumeDataProvider(DataProvider):
             ret[name] = data
         return ret
 
-    def _rebalancing(self, sample):
-        # TODO(kisuk):
+    # def _rebalancing(self, sample):
+    #     # TODO(kisuk):

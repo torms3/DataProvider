@@ -36,9 +36,9 @@ def crop(img, offset=(0,0,0), size=None):
     TODO(kisuk): Documentation.
     """
     img = check_volume(img)
-    ret = np.zeros_like(img)
     if size is None:
         size = tuple(Vec3d(img.shape) - Vec3d(offset))
+    ret = np.zeros(size, dtype=img.dtype)
     v1  = Vec3d(offset)
     v2  = v1 + Vec3d(size)
     ret[:] = img[v1[0]:v2[0],v1[1]:v2[1],v1[2]:v2[2]]

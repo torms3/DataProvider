@@ -43,11 +43,12 @@ class VolumeDataProvider(DataProvider):
             net_spec: Net specification.
             params:
         """
-        # Params.
+        # Params
         drange = params['drange']
         dprior = params.get('dprior', None)
 
         # Build Datasets.
+        print '[VolumeDataProvider]'
         p = parser.Parser(dspec_path, net_spec, params, auto_mask=auto_mask)
         self._datasets = []
         for dataset_id in drange:
@@ -56,14 +57,16 @@ class VolumeDataProvider(DataProvider):
             dataset = VolumeDataset(config)
             self._datasets.append(dataset)
 
-        # TODO(kisuk): Process sampling weight.
-        self._sampling_weights = [1.0/len(drange)] * len(drange)  # Temp
+        # Sampling weight
+        # TODO(kisuk): Temporary
+        self._sampling_weights = [1.0/len(drange)] * len(drange)
 
         # Setup data augmentation.
         self._data_aug = DataAugmentor(params['augment'])
 
     def next_sample(self):
         """Fetch next sample in a sample sequence."""
+        # TODO(kisuk): Temporary
         return self.random_sample()
 
     def random_sample(self):
@@ -74,9 +77,8 @@ class VolumeDataProvider(DataProvider):
         sample, transform = self._data_aug.random_sample(dataset)
         # Return transformed sample.
         sample = self._transform(sample, transform)
-        # TODO(kisuk): Rebalancing
-        return sample
-        # return self._rebalancing(sample)
+        # Rebalancing
+        return self._rebalancing(sample)
 
     ####################################################################
     ## Private Helper Methods
@@ -94,7 +96,7 @@ class VolumeDataProvider(DataProvider):
             return self._datasets[0]
 
         # Take a single experiment with a multinomial distribution, whose
-        # probabilities indicate how likely each sample be selected.
+        # probabilities indicate how likely each dataset be selected.
         # Output is an one-hot vector.
         sq = np.random.multinomial(1, self._sampling_weights, size=1)
         sq = np.squeeze(sq)
@@ -116,3 +118,6 @@ class VolumeDataProvider(DataProvider):
                 data = transform_tensor(data, func, **tf)
             ret[name] = data
         return ret
+
+    def _rebalancing(self, sample):
+        # TODO(kisuk):

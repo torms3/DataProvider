@@ -107,7 +107,7 @@ class VolumeDataset(Dataset):
         if spec is not None:
             self.set_spec(original_spec)
 
-        # Ordered by key
+        # Order by key
         sample = OrderedDict(sorted(data.items(), key=lambda x: x[0]))
 
         return sample, transform

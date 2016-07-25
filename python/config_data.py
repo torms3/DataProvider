@@ -23,7 +23,7 @@ class ConfigData(TensorData):
         # Preprocessing
         data, fov, offset = self._prepare_data(config, section)
 
-        # Initialize TensorData
+        # Initialize TensorData.
         super(ConfigData, self).__init__(data, fov=fov, offset=offset)
 
         # Transformation

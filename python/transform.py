@@ -36,9 +36,9 @@ def crop(img, offset=(0,0,0), size=None):
     TODO(kisuk): Documentation.
     """
     img = check_volume(img)
+    ret = np.zeros_like(img)
     if size is None:
         size = tuple(Vec3d(img.shape) - Vec3d(offset))
-    ret = np.zeros(size, dtype=img.dtype)
     v1  = Vec3d(offset)
     v2  = v1 + Vec3d(size)
     ret[:] = img[v1[0]:v2[0],v1[1]:v2[1],v1[2]:v2[2]]
@@ -117,7 +117,7 @@ def flip(data, rule):
     # x reflection
     if rule[2]:
         data = data[:,:,:,::-1]
-    # Transpose in xy
+    # Transpose in xy.
     if rule[3]:
         data = data.transpose(0,1,3,2)
 
@@ -126,9 +126,7 @@ def flip(data, rule):
 ####################################################################
 ## Label Transformations
 ####################################################################
-
-"""
-List of label transformation.
+"""List of label transformation.
 
 Whenever adding a new label transformation, the function name should be
 appended to this list.
@@ -222,9 +220,9 @@ def affinitize_mask(msk, dtype='float32'):
     msk = check_volume(msk)
     ret = np.zeros((3,) + msk.shape, dtype=dtype)
 
-    ret[2,1:,:,:] = (msk[1:,:,:]>0) | (msk[:-1,:,:]>0)
-    ret[1,:,1:,:] = (msk[:,1:,:]>0) | (msk[:,:-1,:]>0)
-    ret[0,:,:,1:] = (msk[:,:,1:]>0) | (msk[:,:,:-1]>0)
+    ret[2,1:,:,:] = (msk[1:,:,:]>0) | (msk[:-1,:,:]>0)  # z affinity
+    ret[1,:,1:,:] = (msk[:,1:,:]>0) | (msk[:,:-1,:]>0)  # y affinity
+    ret[0,:,:,1:] = (msk[:,:,1:]>0) | (msk[:,:,:-1]>0)  # x affinity
 
     return ret
 
@@ -232,7 +230,20 @@ def affinitize_mask(msk, dtype='float32'):
 ## Rebalancing
 ####################################################################
 
-# TODO(kisuk): Implement gradient rebalancing.
+def rebalance_class(img, dtype='float32'):
+    img = check_volume(img)
+    ret = np.zeros(img.shape, dtype=dtype)
+
+    num_lbls = list()
+    unique_lbl = np.unique(img)
+    for lbl in unique_lbl:
+        num_lbl = np.count_nonzero(img==lbl)
+        num_lbls.append(num_lbl)
+
+    weights = 1.0/np.asarray(num_lbls)
+    weights = weights/np.sum(weights)
+
+    return ret
 
 ########################################################################
 ## Unit Testing

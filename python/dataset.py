@@ -33,6 +33,7 @@ class VolumeDataset(Dataset):
 
     Attributes:
         _data:
+        _label:
         _spec:
         _range:
     """
@@ -44,6 +45,7 @@ class VolumeDataset(Dataset):
     def reset(self):
         """Reset all attributes."""
         self._data  = dict()
+        self._label = list()
         self._spec  = None
         self._range = None
 
@@ -56,7 +58,11 @@ class VolumeDataset(Dataset):
             assert config.has_section(data)
             if '_mask' in data:
                 continue
-            self._data[name] = ConfigData(config, data)
+            if 'label' in data:
+                self._data[name] = ConfigLabel(config, data)
+                self._label.append(name)
+            else:
+                self._data[name] = ConfigData(config, data)
 
         # Second pass for masks.
         for name, data in config.items('dataset'):
@@ -81,6 +87,10 @@ class VolumeDataset(Dataset):
         self._spec = spec
         self._update_range()
 
+    def num_sample(self):
+        s = self._range.size()
+        return s[0]*s[1]*s[2]
+
     def get_sample(self, pos, spec=None):
         """Draw a sample centered on pos.
 
@@ -97,10 +107,12 @@ class VolumeDataset(Dataset):
             original_spec = self._spec
             self.set_spec(spec)
 
-        data = {}
-        transform = {}
+        data = dict()
         for name in self._spec.keys():
             data[name] = self._data[name].get_patch(pos)
+
+        transform = dict()
+        for name in self._label:
             transform[name] = self._data[name].get_transform()
 
         # Return to original spec.

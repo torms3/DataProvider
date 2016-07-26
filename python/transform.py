@@ -10,25 +10,54 @@ import numpy as np
 from utils import *
 from vector import Vec3d, minimum, maximum
 
-def transform_sample(sample, func, *args, **kwargs):
-    """Apply func to a sample."""
-    ret = {}
-    for key, val in sample.iteritems():
-        ret[key] = transform_tensor(val, func, *args, **kwargs)
-    return ret
-
-def transform_tensor(data, func, *args, **kwargs):
+def transform_tensor(func, data, *args, **kwargs):
     """Apply func to each channel of data (4D tensor)."""
     data = check_tensor(data)
     arrs = list()
-
     f = globals()[func]
-
     for c in xrange(data.shape[0]):
         vol = f(data[c,...], *args, **kwargs)
         arrs.append(check_tensor(vol))
-
     return np.concatenate(arrs, axis=0)
+
+
+class SampleFunction(object):
+    """
+    TODO(kisuk): Documentation.
+    """
+
+    def __getattr__(self, name):
+        def transform_fn(sample, *args, **kwargs):
+            return self._transform_sample(name, sample, *args, **kwargs)
+        return transform_fn
+
+    def _transform_sample(self, func, sample, *args, **kwargs):
+        """Apply func to a sample."""
+        ret = {}
+        for key, data in sample.iteritems():
+            ret[key] = transform_tensor(func, data, *args, **kwargs)
+        return ret
+
+
+class TensorFunction(object):
+    """
+    TODO(kisuk): Documentation.
+    """
+
+    def __getattr__(self, func):
+        def transform_fn(data, *args, **kwargs):
+            return transform_tensor(func, data, *args, **kwargs)
+        return transform_fn
+
+    def evaluate(self, data, spec):
+        d = dict(spec)
+        func = d['type']
+        del d['type']
+        return transform_tensor(func, data, **d)
+
+
+sample_func = SampleFunction()
+tensor_func = TensorFunction()
 
 
 def crop(img, offset=(0,0,0), size=None):
@@ -126,18 +155,8 @@ def flip(data, rule):
 ####################################################################
 ## Label Transformations
 ####################################################################
-"""List of label transformation.
 
-Whenever adding a new label transformation, the function name should be
-appended to this list.
-"""
-label_transform = ['binarize',
-                   'multiclass_expansion',
-                   'binary_class',
-                   'affinitize']
-
-
-def binarize(img, dtype='float32', is_mask=False):
+def binarize(img, dtype='float32'):
     """Binarize image.
 
     Normally used to turn a ground truth segmentation into a ground truth
@@ -156,29 +175,24 @@ def binarize(img, dtype='float32', is_mask=False):
     return ret
 
 
-def multiclass_expansion(img, N, dtype='float32', is_mask=False):
+def multiclass_expansion(img, N, dtype='float32'):
     """
     TODO(kisuk): Semantic segmentation.
     """
     img = check_volume(img)
     ret = np.zeros((N,) + img.shape, dtype=dtype)
-
-    if is_mask:
-        ret[:] = np.tile(img, (N,1,1,1))
-    else:
-        for l in range(N):
-            ret[l,...] = (img == l)
-
+    for l in range(N):
+        ret[l,...] = (img == l)
     return ret
 
 
-def binary_class(img, dtype='float32', is_mask=False):
+def binary_class(img, dtype='float32'):
     """
     TODO(kisuk): Documentation.
     """
     img = check_volume(img)
     img = binarize(img, dtype=dtype)
-    return multiclass_expansion(img, N=2, dtype=dtype, is_mask=is_mask)
+    return multiclass_expansion(img, N=2, dtype=dtype)
 
 
 def affinitize(img, dtype='float32', is_mask=False):
@@ -231,6 +245,9 @@ def affinitize_mask(msk, dtype='float32'):
 ####################################################################
 
 def rebalance_class(img, dtype='float32'):
+    """
+    TODO(kisuk): Documentation.
+    """
     img = check_volume(img)
     ret = np.zeros(img.shape, dtype=dtype)
 
@@ -242,6 +259,9 @@ def rebalance_class(img, dtype='float32'):
 
     weights = 1.0/np.asarray(num_lbls)
     weights = weights/np.sum(weights)
+
+    for idx, lbl in enumerate(unique_lbl):
+        ret[img==lbl] = weights[idx]
 
     return ret
 

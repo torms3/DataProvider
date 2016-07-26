@@ -71,7 +71,7 @@ class FlipAugment(DataAugment):
 
     def augment(self, sample):
         rule = np.random.rand(4) > 0.5
-        return transform_sample(sample, 'flip', rule=rule)
+        return sample_func.flip(sample, rule=rule)
 
 
 class WarpAugment(DataAugment):

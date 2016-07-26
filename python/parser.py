@@ -7,7 +7,6 @@ Kisuk Lee <kisuklee@mit.edu>, 2016
 """
 
 import ConfigParser
-from transform import label_transform
 from vector import Vec3d
 
 class Parser(object):
@@ -133,10 +132,6 @@ class Parser(object):
                 flist  = self._config.get('files', value).split('\n')
                 option = 'file'
                 value  = flist[idx]
-            elif option == 'transform':
-                tf = [eval(x) for x in value.split('\n')]
-                tf = self._treat_mask_transform(tf)
-                value = '\n'.join([str(x) for x in tf])
             config.set(mask, option, value)
 
         # Add default mask filler.
@@ -145,25 +140,6 @@ class Parser(object):
         if not config.has_option(mask, 'file'):
             config.set(mask, 'shape', '(z,y,x)')  # Place holder
             config.set(mask, 'filler', "{'type':'one'}")
-
-    def _treat_mask_transform(self, tf):
-        """
-        Replace label transformation with mask transformation by adding
-        [is_mask=True] optional argument.
-
-        Args:
-            tf: List of transformation.
-
-        Returns:
-            ret: List of transformation, with label transformations substituted
-                 by corresponding mask transformations.
-        """
-        ret = []
-        for t in tf:
-            if t['type'] in label_transform:
-                t['is_mask'] = True
-            ret.append(t)
-        return ret
 
     def _is_affinity(self, config, data):
         """Check if data is affinity."""
@@ -188,20 +164,14 @@ class Parser(object):
         """
         TODO(kisuk): Documentation.
         """
-        for _, data in config.items('dataset'):
-            assert config.has_section(data)
-            assert config.has_option(data, 'fov')
-            # Increment FoV by 1.
-            fov = config.get(data, 'fov')
-            fov = tuple(x+1 for x in fov)
-            config.set(data, 'fov', fov)
-            # Append crop to the transformation list.
-            if config.has_option(data, 'transform'):
-                tf = config.get(data, 'transform') + '\n'
-            else:
-                tf = ''
-            tf += "{'type':'crop','offset':(1,1,1)}"
-            config.set(data, 'transform', tf)
+        if self._has_affinity(config):
+            for _, data in config.items('dataset'):
+                assert config.has_section(data)
+                assert config.has_option(data, 'fov')
+                # Increment FoV by 1.
+                fov = config.get(data, 'fov')
+                fov = tuple(x+1 for x in fov)
+                config.set(data, 'fov', fov)
 
     def _treat_border(self, config):
         """
@@ -236,7 +206,7 @@ if __name__ == "__main__":
     params = dict(border='mirror', augment=[{'type':'flip'}], drange=0)
 
     # Parser
-    p = Parser(dspec_path, net_spec, params, auto_mask=False)
+    p = Parser(dspec_path, net_spec, params, auto_mask=True)
     config = p.parse_dataset(0)
     f = open('zfish_dataset0.spec', 'w')
     config.write(f)

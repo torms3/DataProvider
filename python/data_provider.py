@@ -11,6 +11,7 @@ import parser
 from dataset import *
 from data_augmentation import DataAugmentor
 from transform import *
+from label_transform import *
 
 class DataProvider(object):
     """
@@ -58,11 +59,23 @@ class VolumeDataProvider(DataProvider):
             self._datasets.append(dataset)
 
         # Sampling weight
-        # TODO(kisuk): Temporary
-        self._sampling_weights = [1.0/len(drange)] * len(drange)
+        self.set_sampling_weights(dprior)
 
         # Setup data augmentation.
         self._data_aug = DataAugmentor(params['augment'])
+
+    def set_sampling_weights(self, dprior=None):
+        """
+        TODO(kisuk): Documentation.
+        """
+        if dprior is None:
+            dprior = [x.num_sample() for x in self._datasets]
+        # Normalize.
+        dprior = np.asarray(dprior, dtype='float32')
+        dprior = dprior/np.sum(dprior)
+        # Set sampling weights.
+        # print 'Sampling weights: {}'.format(['%0.3f' % x for x in dprior])
+        self._sampling_weights = dprior
 
     def next_sample(self):
         """Fetch next sample in a sample sequence."""
@@ -76,10 +89,8 @@ class VolumeDataProvider(DataProvider):
         # Draw a random sample and apply data augmenation.
         sample, transform = self._data_aug.random_sample(dataset)
         # Return transformed sample.
-        sample = self._transform(sample, transform)
-        # Rebalancing
-        return sample
-        # return self._rebalancing(sample)
+        return self._transform(sample, transform)
+
 
     ####################################################################
     ## Private Helper Methods
@@ -111,14 +122,6 @@ class VolumeDataProvider(DataProvider):
         """
         TODO(kisuk): Documentation.
         """
-        ret = {}
-        for name, data in sample.iteritems():
-            for tf in transform[name]:
-                func = tf['type']
-                del tf['type']
-                data = transform_tensor(data, func, **tf)
-            ret[name] = data
-        return ret
-
-    # def _rebalancing(self, sample):
-    #     # TODO(kisuk):
+        for key, spec in transform.iteritems():
+            label_func.evaluate(sample, key, spec)
+        return sample

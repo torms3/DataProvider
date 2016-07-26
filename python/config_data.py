@@ -26,12 +26,6 @@ class ConfigData(TensorData):
         # Initialize TensorData.
         super(ConfigData, self).__init__(data, fov=fov, offset=offset)
 
-        # Transformation
-        self._transformation(config, section)
-
-    def get_transform(self):
-        return copy.deepcopy(self._transform)
-
     ####################################################################
     ## Private Helper Methods
     ####################################################################
@@ -89,11 +83,30 @@ class ConfigData(TensorData):
         # Perform preprocessing.
         data = check_tensor(data)
         for pp in preprocess:
-            func = pp['type']
-            del pp['type']
-            data = transform_tensor(data, func, **pp)
+            data = tensor_func.evaluate(data, pp)
 
         return data, fov, offset
+
+
+class ConfigLabel(ConfigData):
+    """
+    ConfigLabel class.
+    """
+
+    def __init__(self, config, section):
+        """Build data from config."""
+        # Initialize ConfigData.
+        super(ConfigLabel, self).__init__(config, section)
+
+        # Transformation
+        self._transformation(config, section)
+
+    def get_transform(self):
+        return copy.deepcopy(self._transform)
+
+    ####################################################################
+    ## Private Helper Methods
+    ####################################################################
 
     def _transformation(self, config, section):
         """
@@ -101,14 +114,13 @@ class ConfigData(TensorData):
         """
         # List of local transformation.
         if config.has_option(section, 'transform'):
-            transform = config.get(section, 'transform').split('\n')
-            transform = [eval(x) for x in transform]
+            transform = eval(config.get(section, 'transform'))
         else:
-            transform = list()
+            transform = None
 
         # Check the validity of each transformation.
-        for t in transform:
-            assert isinstance(t, dict)
-            assert 'type' in t
+        if transform is not None:
+            assert isinstance(transform, dict)
+            assert 'type' in transform
 
         self._transform = transform

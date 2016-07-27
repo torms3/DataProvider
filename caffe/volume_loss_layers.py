@@ -44,7 +44,7 @@ class SigmoidCrossEntropyLossLayer(caffe.Layer):
         # Unbalanced cost
         top[1].data[...] = np.sum(self.cost)
         # Classification error
-        top[2].data[...] = np.sum(self.cerr)/np.count_nonzero(mask > 0)
+        top[2].data[...] = np.sum(self.cerr)
 
     def backward(self, top, propagate_down, bottom):
         if propagate_down[1] or propagate_down[2]:

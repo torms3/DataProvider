@@ -84,7 +84,8 @@ class VolumeDataset(Dataset):
 
     def set_spec(self, spec):
         """Set spec and update valid range."""
-        self._spec = spec
+        # Order by key
+        self._spec = OrderedDict(sorted(spec.items(), key=lambda x: x[0]))
         self._update_range()
 
     def num_sample(self):
@@ -99,7 +100,7 @@ class VolumeDataset(Dataset):
             spec:
 
         Returns:
-            data:
+            sample:
             transform:
         """
         # Dynamically change spec.
@@ -107,9 +108,11 @@ class VolumeDataset(Dataset):
             original_spec = self._spec
             self.set_spec(spec)
 
-        data = dict()
+        # sample is guaranteed to be ordered by key, because self._spec
+        # is already ordered in set_spec().
+        sample = dict()
         for name in self._spec.keys():
-            data[name] = self._data[name].get_patch(pos)
+            sample[name] = self._data[name].get_patch(pos)
 
         transform = dict()
         for name in self._label:
@@ -118,9 +121,6 @@ class VolumeDataset(Dataset):
         # Return to original spec.
         if spec is not None:
             self.set_spec(original_spec)
-
-        # Order by key
-        sample = OrderedDict(sorted(data.items(), key=lambda x: x[0]))
 
         return sample, transform
 

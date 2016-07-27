@@ -195,7 +195,7 @@ def binary_class(img, dtype='float32'):
     return multiclass_expansion(img, N=2, dtype=dtype)
 
 
-def affinitize(img, dtype='float32', is_mask=False):
+def affinitize(img, dtype='float32'):
     """
     Transform segmentation to 3D affinity graph.
 
@@ -205,9 +205,6 @@ def affinitize(img, dtype='float32', is_mask=False):
     Returns:
         ret: 3D affinity graph (4D tensor), 3 channels for z, y, x direction.
     """
-    if is_mask:
-        return affinitize_mask(img, dtype=dtype)
-
     img = check_volume(img)
     ret = np.zeros((3,) + img.shape, dtype=dtype)
 

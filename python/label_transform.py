@@ -42,7 +42,7 @@ def affinitize(sample, key):
     affs = transform.affinitize(sample[key])
     msks = transform.affinitize_mask(sample[key+'_mask'])
     # Rebalancing
-    wmsk =transform.tensor_func.rebalance_class(affs)
+    wmsk = transform.tensor_func.rebalance_class(affs)
     # Update sample.
     sample[key] = affs
     sample[key+'_mask'] = msks*wmsk

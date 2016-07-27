@@ -28,11 +28,11 @@ class SigmoidCrossEntropyLossLayer(caffe.Layer):
         top[2].reshape(1)  # Classification error
 
     def forward(self, bottom, top):
+        sigmoid = lambda x: 1.0/(1.0+np.exp(-x))
         prob  = sigmoid(bottom[0].data)
         label = bottom[1].data
         mask  = bottom[2].data
         # Gradient
-        sigmoid = lambda x: 1.0/(1.0+np.exp(-x))
         self.diff[...] = mask*(prob - label)
         # Cross entropy
         XE = lambda x, y: -y*np.log(x) - (1-y)*np.log(1-x)

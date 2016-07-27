@@ -38,7 +38,7 @@ class SigmoidCrossEntropyLossLayer(caffe.Layer):
         XE = lambda x, y: -y*np.log(x) - (1-y)*np.log(1-x)
         self.cost[...] = XE(prob, label)
         # Classification error
-        self.cerr[...] = (mask > 0)*((prop > self.thresh) != (label > thresh))
+        self.cerr[...] = (mask > 0)*((prob > self.thresh) != (label > thresh))
         # Rebalanced cost
         top[0].data[...] = np.sum(mask*self.cost)
         # Unbalanced cost

@@ -28,8 +28,9 @@ class SigmoidCrossEntropyLossLayer(caffe.Layer):
         top[2].reshape(1)  # Classification error
 
     def forward(self, bottom, top):
-        sigmoid = lambda x: 1.0/(1.0+np.exp(-x))
-        prob  = sigmoid(bottom[0].data)
+        # Replaced with numerically-stable sigmoid function
+        # sigmoid = lambda x: 1.0/(1.0+np.exp(-x))
+        prob  = self.sigmoid(bottom[0].data)
         label = bottom[1].data
         mask  = bottom[2].data
         # Gradient
@@ -52,3 +53,13 @@ class SigmoidCrossEntropyLossLayer(caffe.Layer):
         if propagate_down[0]:
             bottom[0].diff[...] = self.diff
 
+    def sigmoid(self, x):
+        """Numerically-stable sigmoid function."""
+        ret = np.zeros_like(x)
+        idx = x >= 0
+        z = np.exp(-x[idx])
+        ret[idx] = 1 / (1 + z)
+        idx = x < 0
+        z = np.exp(x[idx])
+        ret[idx] = z / (1 + z)
+        return ret

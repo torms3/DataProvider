@@ -254,15 +254,20 @@ def rebalance_class(img, dtype='float32'):
     for lbl in unique_lbl:
         num_lbl = np.count_nonzero(img==lbl)
         num_lbls.append(num_lbl)
+    assert(len(num_lbls)>0)
 
-    weights = 1.0/np.asarray(num_lbls)
-    weights = weights/np.sum(weights)
-
-    if len(weights)==1:
-	weights[0] = 0.5
-
-    for idx, lbl in enumerate(unique_lbl):
-        ret[img==lbl] = weights[idx]
+    if len(num_lbls)==1:
+        # TODO(kisuk):
+        #   This is to make rebalancing exactly the same as in ZNNv1 and v4,
+        #   but not sure about how reasonable this value (0.5) is, and about
+        #   if this can also be applied to multiclass case (e.g. semantic
+        #   segmentation).
+        ret[:] = 0.5
+    else:
+        weights = 1.0/np.asarray(num_lbls)
+        weights = weights/np.sum(weights)
+        for idx, lbl in enumerate(unique_lbl):
+            ret[img==lbl] = weights[idx]
 
     return ret
 

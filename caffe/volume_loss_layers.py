@@ -34,7 +34,7 @@ class SigmoidCrossEntropyLossLayer(caffe.Layer):
         # Gradient
         self.diff[...] = mask*(prob - label)
         # Cross entropy
-        self.cost[...] = self.cross_entropy(prob, label)
+        self.cost[...] = self.cross_entropy(bottom[0].data, label)
         # Classification error
         self.cerr[...] = (mask>0)*((prob>self.thresh) != (label>self.thresh))
         # Rebalanced cost
@@ -68,5 +68,5 @@ class SigmoidCrossEntropyLossLayer(caffe.Layer):
             y: Prediction
             t: Target (ground truth)
         """
-        return -x*(y - (x>=0)) + np.log(1 + np.exp(x - 2*x*(x>=0)))
+        return -y*(t - (y>=0)) + np.log(1 + np.exp(y - 2*y*(y>=0)))
 

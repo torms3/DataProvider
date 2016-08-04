@@ -6,6 +6,7 @@ Functions for data transformation.
 Kisuk Lee <kisuklee@mit.edu>, 2016
 """
 
+from collections import OrderedDict
 import numpy as np
 from utils import *
 from vector import Vec3d, minimum, maximum
@@ -33,7 +34,7 @@ class SampleFunction(object):
 
     def _transform_sample(self, func, sample, *args, **kwargs):
         """Apply func to a sample."""
-        ret = {}
+        ret = OrderedDict()
         for key, data in sample.iteritems():
             ret[key] = transform_tensor(func, data, *args, **kwargs)
         return ret
@@ -256,6 +257,9 @@ def rebalance_class(img, dtype='float32'):
 
     weights = 1.0/np.asarray(num_lbls)
     weights = weights/np.sum(weights)
+
+    if len(weights)==1:
+	weights[0] = 0.5
 
     for idx, lbl in enumerate(unique_lbl):
         ret[img==lbl] = weights[idx]

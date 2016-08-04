@@ -108,9 +108,7 @@ class VolumeDataset(Dataset):
             original_spec = self._spec
             self.set_spec(spec)
 
-        # sample is guaranteed to be ordered by key, because self._spec
-        # is already ordered in set_spec().
-        sample = dict()
+        sample = OrderedDict()
         for name in self._spec.keys():
             sample[name] = self._data[name].get_patch(pos)
 

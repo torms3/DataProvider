@@ -5,7 +5,7 @@ from data_provider import *
 if __name__ == "__main__":
 
     # Data spec path
-    dspec_path = 'zfish.spec'
+    dspec_path = 'piriform.spec'
 
     # Net specification
     net_spec = {}
@@ -21,11 +21,14 @@ if __name__ == "__main__":
     # VolumeDataProvider
     dp = VolumeDataProvider(dspec_path, net_spec, params)
 
-    sample = dp.random_sample()
+    for _ in range(100):
+        sample = dp.random_sample()
+        for name, _ in sample.iteritems():
+    	    print name
 
     # Save as file.
-    # print 'Save as file...'
-    # f = h5py.File('sample.h5')
-    # for name, data in sample.iteritems():
-    #     f.create_dataset('/' + name, data=data)
-    # f.close()
+    #print 'Save as file...'
+    #f = h5py.File('sample.h5')
+    #for name, data in sample.iteritems():
+    #    f.create_dataset('/' + name, data=data)
+    #f.close()

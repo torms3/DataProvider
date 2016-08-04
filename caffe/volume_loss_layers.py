@@ -28,16 +28,13 @@ class SigmoidCrossEntropyLossLayer(caffe.Layer):
         top[2].reshape(1)  # Classification error
 
     def forward(self, bottom, top):
-        # Replaced with numerically-stable sigmoid function
-        # sigmoid = lambda x: 1.0/(1.0+np.exp(-x))
         prob  = self.sigmoid(bottom[0].data)
         label = bottom[1].data
         mask  = bottom[2].data
         # Gradient
         self.diff[...] = mask*(prob - label)
         # Cross entropy
-        XE = lambda x, y: -y*np.log(x) - (1-y)*np.log(1-x)
-        self.cost[...] = XE(prob, label)
+        self.cost[...] = self.cross_entropy(prob, label)
         # Classification error
         self.cerr[...] = (mask>0)*((prob>self.thresh) != (label>self.thresh))
         # Rebalanced cost
@@ -63,3 +60,13 @@ class SigmoidCrossEntropyLossLayer(caffe.Layer):
         z = np.exp(x[idx])
         ret[idx] = z / (1 + z)
         return ret
+
+    def cross_entropy(self, y, t):
+        """Numerically-stable binomial cross-entropy.
+
+        Args:
+            y: Prediction
+            t: Target (ground truth)
+        """
+        return -x*(y - (x>=0)) + np.log(1 + np.exp(x - 2*x*(x>=0)))
+

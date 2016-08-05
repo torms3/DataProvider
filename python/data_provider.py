@@ -114,7 +114,7 @@ class VolumeDataProvider(DataProvider):
         sq = np.squeeze(sq)
 
         # Get the index of non-zero element.
-        idx = np.nonzero(sq)[0]
+        idx = np.nonzero(sq)[0][0]
 
         return self._datasets[idx]
 

@@ -92,7 +92,7 @@ class VolumeDataset(Dataset):
         s = self._range.size()
         return s[0]*s[1]*s[2]
 
-    def get_sample(self, pos, spec=None):
+    def get_sample(self, pos):
         """Draw a sample centered on pos.
 
         Args:
@@ -103,11 +103,6 @@ class VolumeDataset(Dataset):
             sample:
             transform:
         """
-        # Dynamically change spec.
-        if spec is not None:
-            original_spec = self._spec
-            self.set_spec(spec)
-
         sample = OrderedDict()
         for name in self._spec.keys():
             sample[name] = self._data[name].get_patch(pos)
@@ -115,10 +110,6 @@ class VolumeDataset(Dataset):
         transform = dict()
         for name in self._label:
             transform[name] = self._data[name].get_transform()
-
-        # Return to original spec.
-        if spec is not None:
-            self.set_spec(original_spec)
 
         return sample, transform
 
@@ -128,8 +119,19 @@ class VolumeDataset(Dataset):
 
     def random_sample(self, spec=None):
         """Fetch sample randomly"""
+        # Dynamically change spec.
+        if spec is not None:
+            original_spec = self._spec
+            self.set_spec(spec)
+
         pos = self._random_location()
-        return self.get_sample(pos, spec)
+        sample = self.get_sample(pos, spec)
+
+        # Return to original spec.
+        if spec is not None:
+            self.set_spec(original_spec)
+
+        return sample
 
     ####################################################################
     ## Private Helper Methods

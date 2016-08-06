@@ -33,7 +33,7 @@ class MisalignAugment(data_augmentation.DataAugment):
         # Randomly draw x/y translation independently.
         for k, v in self.spec.iteritems():
             z, y, x = v[-3:]
-            assert z>0
+            assert z > 0
             # Trivial 2D case
             if z == 1:
                 ret[k] = v[:-3] + (z, y, x)
@@ -58,7 +58,7 @@ class MisalignAugment(data_augmentation.DataAugment):
 
             # Dimension
             z, y, x = v.shape[-3:]
-            assert z >= 1
+            assert z > 0
 
             # Trivial 2D case
             if z == 1:

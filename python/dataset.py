@@ -97,7 +97,6 @@ class VolumeDataset(Dataset):
 
         Args:
             pos:
-            spec:
 
         Returns:
             sample:
@@ -125,13 +124,14 @@ class VolumeDataset(Dataset):
             self.set_spec(spec)
 
         pos = self._random_location()
-        sample = self.get_sample(pos)
+        ret = self.get_sample(pos)
 
         # Return to original spec.
         if spec is not None:
             self.set_spec(original_spec)
 
-        return sample
+        # ret is a 2-tuple (sample, transform).
+        return ret
 
     ####################################################################
     ## Private Helper Methods

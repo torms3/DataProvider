@@ -5,7 +5,7 @@ from data_provider import *
 if __name__ == "__main__":
 
     # Data spec path
-    dspec_path = 'piriform.spec'
+    dspec_path = 'test_spec/piriform.spec'
 
     # Net specification
     net_spec = {}

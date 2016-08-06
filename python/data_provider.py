@@ -6,6 +6,7 @@ DaraProvider classes.
 Kisuk Lee <kisuklee@mit.edu>, 2015-2016
 """
 
+from collections import OrderedDict
 import numpy as np
 import parser
 from dataset import *
@@ -30,9 +31,10 @@ class VolumeDataProvider(DataProvider):
     DataProvider for volumetric data.
 
     Attributes:
-        _datasets:
-        _sampling_weights:
-        _net_spec:
+        _datasets: List of datasets.
+        _sampling_weights: Probability of each dataset being chosen at each
+                            iteration.
+        _net_spec: Dictionary mapping layers' name to their input dimension.
     """
 
     def __init__(self, dspec_path, net_spec, params, auto_mask=True):
@@ -42,7 +44,9 @@ class VolumeDataProvider(DataProvider):
         Args:
             dspec_path: Path to the dataset specification file.
             net_spec: Net specification.
-            params:
+            params: Various options.
+            auto_mask: Whether to automatically generate mask from corresponding
+                        label.
         """
         # Params
         drange = params['drange']
@@ -89,7 +93,9 @@ class VolumeDataProvider(DataProvider):
         # Draw a random sample and apply data augmenation.
         sample, transform = self._data_aug.random_sample(dataset)
         # Return transformed sample.
-        return self._transform(sample, transform)
+        sample = self._transform(sample, transform)
+        # Ensure that sample is ordered by key.
+        return OrderedDict(sorted(sample.items(), key=lambda x: x[0]))
 
 
     ####################################################################

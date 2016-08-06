@@ -32,16 +32,16 @@ class TensorData(object):
         """
         Initialize a TensorData object.
         """
-        # Set immutable attributes
+        # Set immutable attributes.
         self._data   = self._check_data(data)
         self._dim    = Vec3d(self._data.shape[1:])
         self._offset = Vec3d(offset)
 
-        # Set bounding box
+        # Set bounding box.
         self._bb = Box((0,0,0), self._dim)
         self._bb.translate(self._offset)
 
-        # Set fov (patch size)
+        # Set fov (patch size).
         self.set_fov(fov)
 
     def set_fov(self, fov):
@@ -53,21 +53,23 @@ class TensorData(object):
         if fov == (0,0,0):
             fov = Vec3d(self._dim)
 
-        # FoV should be nonnegative, and smaller than data dimension
+        # FoV should be nonnegative, and smaller than data dimension.
         assert fov==minimum(maximum(fov,(0,0,0)), self._dim)
 
-        # Set FoV
+        # Set FoV.
         self._fov = fov
 
-        # Update range
+        # Update range.
         self._set_range()
 
     def get_patch(self, pos):
         """
         Extract a patch of size _fov centered on pos.
         """
-        assert self._rg.contains(pos)  # check validity
-        loc  = pos - self._offset  # local coordinate system
+        # Check validity.
+        assert self._rg.contains(pos)
+        # Local coordinate system
+        loc  = pos - self._offset
         box  = centered_box(loc, self._fov)
         vmin = box.min()
         vmax = box.max()
@@ -86,7 +88,7 @@ class TensorData(object):
         """Return data shape (c,z,y,x)."""
         return self._data.shape
 
-    def dimension(self):
+    def dim(self):
         """Return channel shape (z,y,x)."""
         return Vec3d(self._dim)
 
@@ -107,11 +109,11 @@ class TensorData(object):
     ####################################################################
 
     def _check_data(self, data):
-        # data should be either numpy 3D or 4D array
+        # Data should be either numpy 3D or 4D array.
         assert isinstance(data, np.ndarray)
         assert data.ndim==3 or data.ndim==4
 
-        # Add channel dimension if data is 3D array
+        # Add channel dimension if data is 3D array.
         if data.ndim == 3:
             data = data[np.newaxis,...]
 
@@ -119,8 +121,8 @@ class TensorData(object):
 
     def _set_range(self):
         """Set a valid range for extracting patches."""
-        top  = self._fov/2                # top margin
-        btm  = self._fov - top - (1,1,1)  # bottom margin
+        top  = self._fov/2                # Top margin
+        btm  = self._fov - top - (1,1,1)  # Bottom margin
         vmin = self._offset + top
         vmax = self._offset + self._dim - btm
 
@@ -155,10 +157,10 @@ class WritableTensorData(TensorData):
         assert self._rg.contains(pos)
         patch = self._check_data(patch)
         dim = patch.shape[1:]
-        assert dim == self._fov
+        assert dim==self._fov
         box = centered_box(pos, dim)
 
-        # local coordinate
+        # Local coordinate
         box.translate(-self._offset)
         vmin = box.min()
         vmax = box.max()

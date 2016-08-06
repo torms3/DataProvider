@@ -8,7 +8,7 @@ Kisuk Lee <kisuklee@mit.edu>, 2016
 """
 
 import data_augmentation
-from utils import *
+from utils import check_tensor
 
 class MisalignAugment(data_augmentation.DataAugment):
     """

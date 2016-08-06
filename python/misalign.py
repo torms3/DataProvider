@@ -69,7 +69,7 @@ class MisalignAugment(data_augmentation.DataAugment):
                 pivot = np.random.randint(1, z - 1)
 
                 # Random direction of translation.
-                # Always bottom box is translated.
+                # Always lower box is translated.
                 x_sign = np.random.choice(['+','-'])
                 y_sign = np.random.choice(['+','-'])
                 x_t = int(eval(x_sign + str(self.x_t)))

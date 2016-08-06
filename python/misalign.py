@@ -8,6 +8,7 @@ Kisuk Lee <kisuklee@mit.edu>, 2016
 """
 
 import data_augmentation
+import numpy as np
 from utils import check_tensor
 
 class MisalignAugment(data_augmentation.DataAugment):
@@ -26,12 +27,8 @@ class MisalignAugment(data_augmentation.DataAugment):
 
         # Random translation.
         # Always lower box is translated.
-        x_sign = np.random.choice(['+','-'])
-        y_sign = np.random.choice(['+','-'])
-        x_t = str(round(self.MAX_TRANS*np.random.rand(1)))
-        y_t = str(round(self.MAX_TRANS*np.random.rand(1)))
-        self.x_t = int(eval(x_sign + x_t)))
-        self.y_t = int(eval(y_sign + y_t)))
+        self.x_t = int(round(self.MAX_TRANS*np.random.rand(1)))
+        self.y_t = int(round(self.MAX_TRANS*np.random.rand(1)))
 
         # Randomly draw x/y translation independently.
         ret, pvt, zs = dict(), dict(), list()
@@ -44,14 +41,20 @@ class MisalignAugment(data_augmentation.DataAugment):
             pvt[k] = z
             zs.append(z)
 
+        # Random direction of translation.
+        x_sign = np.random.choice(['+','-'])
+        y_sign = np.random.choice(['+','-'])
+        self.x_t = int(eval(x_sign + str(self.x_t)))
+        self.y_t = int(eval(y_sign + str(self.y_t)))
+
         zmin = min(zs)
 
         # Trivial 2D case
         if zmin == 1:
-            self.augment = False
+            self.do_augment = False
             ret = dict(spec)
         else:
-            self.augment = True
+            self.do_augment = True
             # Introduce misalignment at pivot.
             pivot = np.random.randint(1, zmin - 1)
             for k, v in pvt.iteritems():
@@ -66,7 +69,7 @@ class MisalignAugment(data_augmentation.DataAugment):
 
         ret = dict()
 
-        if self.augment:
+        if self.do_augment:
             for k, v in sample.iteritems():
                 # Ensure data is 4D tensor.
                 data = check_tensor(v)

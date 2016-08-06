@@ -15,20 +15,16 @@ if __name__ == "__main__":
     # Parameters
     params = {}
     params['border']  = 'mirror'
-    params['augment'] = [{'type':'flip'}]
-    params['drange'] = list(range(7))
+    params['augment'] = [{'type':'misalign'}]
+    params['drange']  = [1]
 
     # VolumeDataProvider
     dp = VolumeDataProvider(dspec_path, net_spec, params)
-
-    for _ in range(100):
-        sample = dp.random_sample()
-        for name, _ in sample.iteritems():
-    	    print name
+    sample = dp.random_sample()
 
     # Save as file.
-    #print 'Save as file...'
-    #f = h5py.File('sample.h5')
-    #for name, data in sample.iteritems():
-    #    f.create_dataset('/' + name, data=data)
-    #f.close()
+    print 'Save as file...'
+    f = h5py.File('sample.h5')
+    for name, data in sample.iteritems():
+        f.create_dataset('/' + name, data=data)
+    f.close()

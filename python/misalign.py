@@ -45,7 +45,7 @@ class MisalignAugment(data_augmentation.DataAugment):
         return ret
 
     def augment(self, sample):
-        """Apply misalignment data augmentation and then crop to self.spec."""
+        """Apply misalignment data augmentation."""
 
         ret = dict()
 

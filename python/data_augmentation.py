@@ -10,13 +10,11 @@ from collections import OrderedDict
 import numpy as np
 from transform import *
 
-from misalign import MisalignAugment
-
 """
 Data augmentaion pool.
 
-Whenever adding new data augmentation outside this module, it should be
-properly imported here and its type name should be appended to this list.
+Whenever adding new data augmentation outside this module, its type name should
+be appended to this list.
 """
 aug_pool = ['flip','warp','misalign']
 
@@ -78,6 +76,10 @@ class DataAugment(object):
     def augment(self, sample):
         raise NotImplementedError
 
+"""
+Whenever adding new data augmentation outside this module, it should be properly
+imported below.
+"""
 
 class FlipAugment(DataAugment):
     """
@@ -102,3 +104,6 @@ class WarpAugment(DataAugment):
 
     def augment(self, sample):
         pass
+
+
+from misalign import MisalignAugment

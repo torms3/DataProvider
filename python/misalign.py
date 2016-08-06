@@ -7,9 +7,10 @@ Karan Kathpalia <karank@cs.princeton.edu>
 Kisuk Lee <kisuklee@mit.edu>, 2016
 """
 
+import data_augmentation
 from utils import *
 
-class MisalignAugment(DataAugment):
+class MisalignAugment(data_augmentation.DataAugment):
     """
     Misalignment.
     """
@@ -59,24 +60,26 @@ class MisalignAugment(DataAugment):
             z, y, x = v.shape[-3:]
             assert z >= 1
 
-            # Trivial case
+            # Trivial 2D case
             if z == 1:
                 assert new_data.shape==data.shape
                 new_data[:] = data
             else:
                 # Introduce misalignment at pivot.
-                pivot = np.random.randint(z - 1)
+                pivot = np.random.randint(1, z - 1)
 
                 # Random direction of translation.
                 # Always bottom box is translated.
-                x_t = int(np.random.rand(1) > 0.5) * self.x_t
-                y_t = int(np.random.rand(1) > 0.5) * self.y_t
+                x_sign = np.random.choice(['+','-'])
+                y_sign = np.random.choice(['+','-'])
+                x_t = int(eval(x_sign + str(self.x_t)))
+                y_t = int(eval(y_sign + str(self.y_t)))
 
                 # Copy upper box.
                 xmin = max(x_t, 0)
                 ymin = max(y_t, 0)
                 xmax = min(x_t, 0) + x
-                ymax = min(x_t, 0) + y
+                ymax = min(y_t, 0) + y
                 new_data[:,0:pivot,...] = data[:,0:pivot,ymin:ymax,xmin:xmax]
 
                 # Copy lower box.
@@ -84,7 +87,7 @@ class MisalignAugment(DataAugment):
                 ymin = max(-y_t, 0)
                 xmax = min(-x_t, 0) + x
                 ymax = min(-y_t, 0) + y
-                new_data[:,pivot:,...] = data[:,0:pivot,ymin:ymax,xmin:xmax]
+                new_data[:,pivot:,...] = data[:,pivot:,ymin:ymax,xmin:xmax]
 
             ret[k] = new_data
 

@@ -27,9 +27,3 @@ transform = {'type':'affinitize'}
 [dataset]
 input = image
 label = label
-
-[general]
-border  = 'mirror'
-augment = {'type':'flip'}
-train   = 1-6
-test    = 7

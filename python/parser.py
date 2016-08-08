@@ -47,7 +47,9 @@ class Parser(object):
         section = 'dataset'
         if self._config.has_section(section):
             config.add_section(section)
-            for name, data in self._config.items(section):
+            # for name, data in self._config.items(section):
+            for name in self.net_spec.keys():
+                data = self._config.get(section, name)
                 config.set(section, name, data)
                 self.parse_data(config, name, data, dataset_id)
         else:
@@ -201,12 +203,14 @@ class Parser(object):
 
 if __name__ == "__main__":
 
-    dspec_path = 'zfish.spec'
-    net_spec = dict(input=(18,208,208), label=(10,100,100))
-    params = dict(border='mirror', augment=[{'type':'flip'}], drange=0)
+    dspec_path = 'test_spec/zfish.spec'
+    # net_spec = dict(input=(18,208,208), label=(10,100,100))
+    net_spec = dict(input=(18,208,208))
+    # params = dict(border='mirror', augment=[{'type':'flip'}], drange=0)
+    params = dict(border='mirror', drange=0)
 
     # Parser
-    p = Parser(dspec_path, net_spec, params, auto_mask=True)
+    p = Parser(dspec_path, net_spec, params)
     config = p.parse_dataset(0)
     f = open('zfish_dataset0.spec', 'w')
     config.write(f)

@@ -149,7 +149,7 @@ class WritableTensorData(TensorData):
             TensorData.__init__(self,data_or_dim, fov, offset)
         else:
             dim  = Vec3d(data_or_dim)
-            data = np.zeros(dim)
+            data = np.zeros(dim, dtype='float32')
             TensorData.__init__(self,data, fov, offset)
 
     def set_patch(self, pos, patch):

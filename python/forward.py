@@ -8,6 +8,7 @@ Kisuk Lee <kisuklee@mit.edu>, 2016
 
 import numpy as np
 
+from box import Box, centered_box
 from tensor import WritableTensor
 from vector import *
 
@@ -32,8 +33,9 @@ class ForwardScanner(object):
         """
         ret = None
         if self.counter < len(self.locs):
-            loc = self.locs[self.counter]
-            ret, _ = self.dataset.get_sample(loc)
+            assert self.current is None
+            self.current = self.locs[self.counter]
+            ret, _ = self.dataset.get_sample(self.current)
             self.counter += 1
         return ret
 
@@ -41,8 +43,9 @@ class ForwardScanner(object):
         """
         TODO(kisuk): Documentation
         """
+        assert self.current is not None
         # TODO(kisuk): Write to outputs.
-        pass
+        self.current = None
 
     ####################################################################
     ## Private Methods
@@ -63,7 +66,23 @@ class ForwardScanner(object):
 
         # TODO(kisuk): Validity check?
 
+        # Order is important!
+        self._setup_stride()
         self._setup_coords()
+        self._prepare_outputs()
+
+    def _setup_stride(self):
+        """
+        TODO(kisuk): Documentation.
+        """
+        stride = None
+        for k, v in self.scan_spec.iteritems():
+            box = centered_box(Vec3d(0,0,0), v[-3:])
+            if stride is None:
+                stride = box
+            else:
+                stride = stride.intersect(box)
+        self.default_stride = stride
 
     def _setup_coords(self):
         """
@@ -104,8 +123,7 @@ class ForwardScanner(object):
 
         # Non-overlapping stride.
         if stride == 0:
-            # TODO(kisuk)
-            pass
+            stride = int(self.default_stride[dim])
 
         # Automatic full spanning.
         if grid == 0:
@@ -126,13 +144,35 @@ class ForwardScanner(object):
         self.coords[dim] = sorted(coord)
 
     def _prepare_outputs(self):
-        pass
+        """
+        TODO(kisuk): Documentation.
+        """
+        self.outputs = dict()
 
-    def _add_output(self):
-        pass
+        rmin = self.locs[0]
+        rmax = self.locs[-1]
 
-    def _min_coord(self):
-        pass
+        for k, v in self.scan_spec.iteritems():
+            a = centered_box(rmin, v[-3:])
+            b = centered_box(rmax, v[-3:])
+            self.outputs[k] = WritableTensorData(v, fov=a+b)
 
-    def _max_coord(self):
-        pass
+
+if __name__ == "__main__":
+
+    import data_provider
+
+    # Data spec path
+    dspec_path = 'test_spec/piriform.spec'
+
+    # Net specification
+    net_spec = {}
+    net_spec['input'] = (18,208,208)
+
+    # Parameters
+    params = {}
+    params['border']  = 'mirror'
+    params['drange']  = [1]
+
+    # VolumeDataProvider
+    dp = VolumeDataProvider(dspec_path, net_spec, params)

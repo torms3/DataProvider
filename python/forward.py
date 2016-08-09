@@ -17,13 +17,13 @@ class ForwardScanner(object):
     ForwardScanner.
     """
 
-    def __init__(self, dataset, params, scan_spec):
+    def __init__(self, dataset, scan_spec, params=None):
         """
         Initialize ForwardScanner.
         """
         self.dataset   = dataset
-        self.params    = params
         self.scan_spec = scan_spec
+        self.params    = params if params is not None else dict()
 
         self._setup()
 
@@ -34,8 +34,11 @@ class ForwardScanner(object):
         ret = None
         if self.counter < len(self.locs):
             assert self.current is None
-            self.current = self.locs[self.counter]
-            ret, _ = self.dataset.get_sample(self.current)
+            idx = self.counter
+            loc = self.locs[idx]
+            print '({}/{}) loc: {}'.format(idx, len(self.locs), loc)
+            ret, _ = self.dataset.get_sample(loc)
+            self.current = loc
             self.counter += 1
         return ret
 

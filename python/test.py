@@ -1,24 +1,24 @@
 #!/usr/bin/env python
 import h5py
-from data_provider import *
+
+from data_provider import VolumeDataProvider
+from vector import Vec3d
 
 if __name__ == "__main__":
 
-    # Data spec path
+    # Data spec path.
     dspec_path = 'test_spec/piriform.spec'
 
-    # Net specification
-    net_spec = {}
-    net_spec['input'] = (18,208,208)
-    net_spec['label'] = (10,100,100)
+    # Net specification.
+    fov   = Vec3d(9,109,109)
+    outsz = Vec3d(10,100,100)
+    insz  = outsz + fov - Vec3d(1,1,1)
+    net_spec = dict(input=tuple(insz), label=tuple(outsz))
 
-    # Parameters
-    params = {}
-    params['border']  = 'mirror'
-    params['augment'] = [{'type':'misalign'}]
-    params['drange']  = [1]
+    # Parameters.
+    params = dict(border='mirror', augment=[{'type':'flip'}], drange=[0])
 
-    # VolumeDataProvider
+    # Create VolumeDataProvider.
     dp = VolumeDataProvider(dspec_path, net_spec, params)
     sample = dp.random_sample()
 

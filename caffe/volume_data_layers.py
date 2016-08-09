@@ -39,7 +39,7 @@ class VolumeDataLayer(caffe.Layer):
         self.data_provider = VolumeDataProvider(dspec_path, net_spec, params,
             auto_mask=auto_mask)
 
-        # Infer ntop fomr net spec.
+        # Infer ntop from net spec.
         ntop = len(net_spec)
         if len(top) != ntop:
             raise Exception('Need to define %d tops.' % ntop)

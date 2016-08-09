@@ -31,7 +31,7 @@ class VolumeDataProvider(DataProvider):
     DataProvider for volumetric data.
 
     Attributes:
-        _datasets: List of datasets.
+        datasets: List of datasets.
         _sampling_weights: Probability of each dataset being chosen at each
                             iteration.
         _net_spec: Dictionary mapping layers' name to their input dimension.
@@ -55,12 +55,12 @@ class VolumeDataProvider(DataProvider):
         # Build Datasets.
         print '[VolumeDataProvider]'
         p = parser.Parser(dspec_path, net_spec, params, auto_mask=auto_mask)
-        self._datasets = []
+        self.datasets = []
         for dataset_id in drange:
             print 'constructing dataset %d...' % dataset_id
             config = p.parse_dataset(dataset_id)
             dataset = VolumeDataset(config)
-            self._datasets.append(dataset)
+            self.datasets.append(dataset)
 
         # Sampling weight
         self.set_sampling_weights(dprior)
@@ -73,7 +73,7 @@ class VolumeDataProvider(DataProvider):
         TODO(kisuk): Documentation.
         """
         if dprior is None:
-            dprior = [x.num_sample() for x in self._datasets]
+            dprior = [x.num_sample() for x in self.datasets]
         # Normalize.
         dprior = np.asarray(dprior, dtype='float32')
         dprior = dprior/np.sum(dprior)
@@ -110,8 +110,8 @@ class VolumeDataProvider(DataProvider):
             Randomly chosen dataset.
         """
         # Trivial case
-        if len(self._datasets)==1:
-            return self._datasets[0]
+        if len(self.datasets)==1:
+            return self.datasets[0]
 
         # Take a single experiment with a multinomial distribution, whose
         # probabilities indicate how likely each dataset be selected.
@@ -122,7 +122,7 @@ class VolumeDataProvider(DataProvider):
         # Get the index of non-zero element.
         idx = np.nonzero(sq)[0][0]
 
-        return self._datasets[idx]
+        return self.datasets[idx]
 
     def _transform(self, sample, transform):
         """

@@ -158,10 +158,12 @@ class ForwardScanner(object):
         rmax = self.locs[-1]
 
         for k, v in self.scan_spec.iteritems():
-            a = centered_box(rmin, v[-3:])
-            b = centered_box(rmax, v[-3:])
+            fov = v[-3:]
+            a = centered_box(rmin, fov)
+            b = centered_box(rmax, fov)
             c = a.merge(b)
-            self.outputs[k] = WTD(v, fov=c.size(), offset=c.min())
+            shape = v[:-3] + tuple(c.size())
+            self.outputs[k] = WTD(shape, fov=fov, offset=c.min())
 
 
 if __name__ == "__main__":

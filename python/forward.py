@@ -24,6 +24,15 @@ class ForwardScanner(object):
         self.dataset   = dataset
         self.scan_spec = scan_spec
         self.params    = params if params is not None else dict()
+        self.coords    = None
+        self.locs      = None
+        self.counter   = None
+        self.current   = None
+        self.offset    = None
+        self.stride    = None
+        self.grid      = None
+        self.vmin      = None
+        self.vmax      = None
 
         self._setup()
 

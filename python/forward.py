@@ -85,7 +85,7 @@ class ForwardScanner(object):
                 stride = box
             else:
                 stride = stride.intersect(box)
-        self.default_stride = stride
+        self.default_stride = stride.size()
 
     def _setup_coords(self):
         """

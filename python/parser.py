@@ -49,9 +49,10 @@ class Parser(object):
             config.add_section(section)
             # for name, data in self._config.items(section):
             for name in self.net_spec.keys():
-                data = self._config.get(section, name)
-                config.set(section, name, data)
-                self.parse_data(config, name, data, dataset_id)
+                if self._config.has_option(section, name):
+                    data = self._config.get(section, name)
+                    config.set(section, name, data)
+                    self.parse_data(config, name, data, dataset_id)
         else:
             raise RuntimeError('dataset section does not exist.')
 

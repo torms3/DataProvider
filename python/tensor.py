@@ -76,9 +76,7 @@ class TensorData(object):
         return np.copy(self._data[:,vmin[0]:vmax[0],
                                     vmin[1]:vmax[1],
                                     vmin[2]:vmax[2]])
-
-
-
+                                    
     ####################################################################
     ## Public methods for accessing attributes
     ####################################################################

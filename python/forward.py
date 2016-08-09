@@ -9,7 +9,7 @@ Kisuk Lee <kisuklee@mit.edu>, 2016
 import numpy as np
 
 from box import Box, centered_box
-from tensor import WritableTensor
+from tensor import WritableTensorData
 from vector import *
 
 class ForwardScanner(object):

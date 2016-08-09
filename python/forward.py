@@ -24,15 +24,6 @@ class ForwardScanner(object):
         self.dataset   = dataset
         self.scan_spec = scan_spec
         self.params    = params if params is not None else dict()
-        self.coords    = None
-        self.locs      = None
-        self.counter   = None
-        self.current   = None
-        self.offset    = None
-        self.stride    = None
-        self.grid      = None
-        self.vmin      = None
-        self.vmax      = None
 
         self._setup()
 
@@ -56,7 +47,9 @@ class ForwardScanner(object):
         TODO(kisuk): Documentation
         """
         assert self.current is not None
-        # TODO(kisuk): Write to outputs.
+        # Write to outputs.
+        for k, v in sample.iteritems():
+            self.outputs[k].set_patch(self.current, v)
         self.current = None
 
     ####################################################################

@@ -106,6 +106,7 @@ class ForwardScanner(object):
                     locs.append(Vec3d(z,y,x))
         self.locs = locs
         self.counter = 0
+        self.current = None
 
     def _setup_coord(self, dim):
         """

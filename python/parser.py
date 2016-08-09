@@ -180,7 +180,7 @@ class Parser(object):
         """
         TODO(kisuk): Documentation.
         """
-        if self.params['border'] is 'mirror':
+        if self.get('border', None) is 'mirror':
             for _, data in config.items('dataset'):
                 # Apply only to images.
                 if not 'image' in data:

@@ -76,7 +76,7 @@ class TensorData(object):
         return np.copy(self._data[:,vmin[0]:vmax[0],
                                     vmin[1]:vmax[1],
                                     vmin[2]:vmax[2]])
-                                    
+
     ####################################################################
     ## Public methods for accessing attributes
     ####################################################################
@@ -139,16 +139,15 @@ class WritableTensorData(TensorData):
     Writable tensor data.
     """
 
-    def __init__(self, data_or_dim, fov=(0,0,0), offset=(0,0,0)):
+    def __init__(self, data_or_shape, fov=(0,0,0), offset=(0,0,0)):
         """
         Initialize a writable tensor data, or create a new tensor of zeros.
         """
-        if isinstance(data_or_dim, np.ndarray):
-            TensorData.__init__(self,data_or_dim, fov, offset)
+        if isinstance(data_or_shape, np.ndarray):
+            TensorData.__init__(self, data_or_shape, fov, offset)
         else:
-            dim  = Vec3d(data_or_dim)
-            data = np.zeros(dim, dtype='float32')
-            TensorData.__init__(self,data, fov, offset)
+            data = np.zeros(data_or_shape, dtype='float32')
+            TensorData.__init__(self, data, fov, offset)
 
     def set_patch(self, pos, patch):
         """

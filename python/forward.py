@@ -9,7 +9,7 @@ Kisuk Lee <kisuklee@mit.edu>, 2016
 import numpy as np
 
 from box import Box, centered_box
-from tensor import WritableTensorData
+from tensor import WritableTensorData as WTD
 from vector import *
 
 class ForwardScanner(object):
@@ -91,6 +91,8 @@ class ForwardScanner(object):
         """
         TODO(kisuk): Documentation.
         """
+        self.coords = [None]*3
+
         self._setup_coord(0)  # z-dimension
         self._setup_coord(1)  # y-dimension
         self._setup_coord(2)  # x-dimension
@@ -158,7 +160,8 @@ class ForwardScanner(object):
         for k, v in self.scan_spec.iteritems():
             a = centered_box(rmin, v[-3:])
             b = centered_box(rmax, v[-3:])
-            self.outputs[k] = WritableTensorData(v, fov=a+b)
+            c = a.merge(b)
+            self.outputs[k] = WTD(v, fov=c.size(), offset=c.min())
 
 
 if __name__ == "__main__":

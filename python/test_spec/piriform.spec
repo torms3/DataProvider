@@ -1,6 +1,7 @@
 [files]
 # TODO: Instantiate dir
-dir = /path/to/dataset
+#dir = /path/to/dataset
+dir = /usr/people/kisuk/Data_local/datasets/piriform
 img = %(dir)s/stack1-image.h5
       %(dir)s/stack2-image.h5
       %(dir)s/stack3-image.h5

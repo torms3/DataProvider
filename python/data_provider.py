@@ -66,7 +66,8 @@ class VolumeDataProvider(DataProvider):
         self.set_sampling_weights(dprior)
 
         # Setup data augmentation.
-        self._data_aug = DataAugmentor(params['augment'])
+        aug_spec = params.get('augment', [])
+        self._data_aug = DataAugmentor(aug_spec)
 
     def set_sampling_weights(self, dprior=None):
         """

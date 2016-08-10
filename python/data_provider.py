@@ -128,12 +128,15 @@ class VolumeDataProvider(DataProvider):
         """
         TODO(kisuk): Documentation.
         """
+        affinitized = False
         for key, spec in transform.iteritems():
+            if spec['type'] == 'affinitize':
+                affinitized = True
             label_func.evaluate(sample, key, spec)
 
         # Crop by 1 if affinitized.
-        if 'affinitize' in transform.values():
+        if affinitized:
             for key, data in sample.iteritems():
-                sample[key] = transform.tensor_func.crop(data, (1,1,1))
+                sample[key] = tensor_func.crop(data, (1,1,1))
 
         return sample

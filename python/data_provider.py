@@ -80,7 +80,7 @@ class VolumeDataProvider(DataProvider):
         dprior = dprior/np.sum(dprior)
         # Set sampling weights.
         # print 'Sampling weights: {}'.format(['%0.3f' % x for x in dprior])
-        self._sampling_weights = dprior         
+        self._sampling_weights = dprior
 
     def next_sample(self):
         """Fetch next sample in a sample sequence."""
@@ -130,4 +130,10 @@ class VolumeDataProvider(DataProvider):
         """
         for key, spec in transform.iteritems():
             label_func.evaluate(sample, key, spec)
+
+        # Crop by 1 if affinitized.
+        if 'affinitize' in transform.values():
+            for key, data in sample.iteritems():
+                sample[key] = transform.tensor_func.crop(data, (1,1,1))
+
         return sample

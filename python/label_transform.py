@@ -45,10 +45,7 @@ def affinitize(sample, key):
     wmsk = transform.tensor_func.rebalance_class(affs)
     # Update sample.
     sample[key] = affs
-    sample[key+'_mask'] = msks*wmsk
-    # Crop by 1.
-    for key, data in sample.iteritems():
-        sample[key] = transform.tensor_func.crop(data, (1,1,1))
+    sample[key+'_mask'] = msks*wmsk    
 
 
 def multiclass_expansion(sample, key, N):

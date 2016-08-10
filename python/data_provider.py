@@ -80,7 +80,7 @@ class VolumeDataProvider(DataProvider):
         dprior = dprior/np.sum(dprior)
         # Set sampling weights.
         # print 'Sampling weights: {}'.format(['%0.3f' % x for x in dprior])
-        self._sampling_weights = dprior
+        self._sampling_weights = dprior         
 
     def next_sample(self):
         """Fetch next sample in a sample sequence."""

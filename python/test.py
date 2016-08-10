@@ -23,11 +23,19 @@ if __name__ == "__main__":
 
     # Create VolumeDataProvider.
     dp = VolumeDataProvider(dspec_path, net_spec, params)
-    sample = dp.random_sample()
 
-    # Save as file.
+    # Dump a single randome sample.
+    sample = dp.random_sample()
     print 'Save as file...'
     f = h5py.File('sample.h5')
     for name, data in sample.iteritems():
         f.create_dataset('/' + name, data=data)
+    f.close()
+
+    # Dump the whole dataset.
+    print 'Save as file...'
+    dataset = dp.datasets[0]._data  # Illegal access. Don't try this at home.
+    f = h5py.File('dataset.h5')
+    for name, data in dataset.iteritems():
+        f.create_dataset('/' + name, data=data.get_data())
     f.close()

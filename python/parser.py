@@ -7,6 +7,7 @@ Kisuk Lee <kisuklee@mit.edu>, 2016
 """
 
 import ConfigParser
+
 from vector import Vec3d
 
 class Parser(object):
@@ -58,7 +59,7 @@ class Parser(object):
 
         # Treat special case of affinity.
         self._treat_affinity(config)
-        # Treat border mirroring.
+        # Treat border.
         self._treat_border(config)
 
         return config
@@ -180,35 +181,48 @@ class Parser(object):
         """
         TODO(kisuk): Documentation.
         """
-        if self.params.get('border', None) is 'mirror':
+        border_func = self.params.get('border', None)
+        if border_func is not None and border_func['type'] is 'mirror_border':
             for _, data in config.items('dataset'):
                 # Apply only to images.
                 if not 'image' in data:
                     continue
                 assert config.has_section(data)
-                assert config.has_option(data, 'fov')
                 assert config.has_option(data, 'offset')
-                fov = config.get(data, 'fov')
-                off = config.get(data, 'offset')
+                offset = config.get(data, 'offset')
                 # Append border mirroring to the preprocessing list.
                 if config.has_option(data, 'preprocess'):
                     pp = config.get(data, 'Preprocess') + '\n'
                 else:
                     pp = ''
-                pp += "{'type':'mirror_border','fov':(%d,%d,%d)}" % fov
+                pp += str(border_func)
                 config.set(data, 'preprocess', pp)
                 # Update offset.
-                off = Vec3d(off) - Vec3d(fov)/2
-                config.set(data, 'offset', tuple(off))
+                fov = border_func['fov']
+                offset = Vec3d(offset) - Vec3d(fov)/2
+                config.set(data, 'offset', tuple(offset))
 
 
 if __name__ == "__main__":
 
+    # Data spec path.
     dspec_path = 'test_spec/zfish.spec'
-    # net_spec = dict(input=(18,208,208), label=(10,100,100))
-    net_spec = dict(input=(18,208,208))
-    # params = dict(border='mirror', augment=[{'type':'flip'}], drange=0)
-    params = dict(border='mirror', drange=0)
+
+    # FoV of the net.
+    fov = (9,109,109)
+
+    # For training.
+    net_spec = dict(input=(18,208,208), label=(10,100,100))
+    params = dict()
+    params['border']  = dict(type='mirror_border', fov=fov)
+    params['augment'] = [dict(type='flip')]
+    params['drange']  = [0]
+
+    # For inference.
+    # net_spec = dict(input=(18,208,208))
+    # params = dict()
+    # params['border']  = dict(type='mirror_border', fov=fov)
+    # params['drange']  = [0]
 
     # Parser
     p = Parser(dspec_path, net_spec, params)

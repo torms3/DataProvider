@@ -16,14 +16,15 @@ class MisalignAugment(data_augmentation.DataAugment):
     Misalignment.
     """
 
+    def __init__(self, max_trans=20.0):
+        """Initialize MisalignAugment."""
+        self.MAX_TRANS = max_trans
+
     def prepare(self, spec):
         """
         TODO(kisuk): Documentation.
         """
         self.spec = spec
-
-        # TODO(kisuk): Temporary magic number. Does this need be a parameter?
-        self.MAX_TRANS = 20.0
 
         # Random translation.
         # Always lower box is translated.

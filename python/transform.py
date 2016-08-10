@@ -24,7 +24,7 @@ def transform_tensor(func, data, *args, **kwargs):
 
 class SampleFunction(object):
     """
-    TODO(kisuk): Documentation.
+    Apply 3D volume function to every volume in a data sample.
     """
 
     def __getattr__(self, name):
@@ -42,7 +42,7 @@ class SampleFunction(object):
 
 class TensorFunction(object):
     """
-    TODO(kisuk): Documentation.
+    Apply 3D volume function to each channel of 4D tensor.
     """
 
     def __getattr__(self, func):
@@ -51,6 +51,7 @@ class TensorFunction(object):
         return transform_fn
 
     def evaluate(self, data, spec):
+        """Evaluate tensor function specified by spec on data."""
         d = dict(spec)
         func = d['type']
         del d['type']

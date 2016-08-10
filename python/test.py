@@ -16,7 +16,10 @@ if __name__ == "__main__":
     net_spec = dict(input=tuple(insz), label=tuple(outsz))
 
     # Parameters.
-    params = dict(border='mirror', augment=[{'type':'flip'}], drange=[0])
+    params = dict()
+    params['border']  = dict(type='mirror_border', fov=fov)
+    params['augment'] = [dict(type='flip')]
+    params['drange']  = [0]
 
     # Create VolumeDataProvider.
     dp = VolumeDataProvider(dspec_path, net_spec, params)

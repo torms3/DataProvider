@@ -1,6 +1,5 @@
 [files]
-# dir = ../dataset/zfish
-dir = /usr/people/kisuk/Data_local/datasets/zfish
+dir = ../dataset/zfish
 img = %(dir)s/r1.daan.img.h5
       %(dir)s/r1.kyle.img.h5
       %(dir)s/r1.merlin.1.img.h5

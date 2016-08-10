@@ -9,7 +9,7 @@ Kisuk Lee <kisuklee@mit.edu>, 2015-2016
 from collections import OrderedDict
 import numpy as np
 import parser
-from dataset import *
+from dataset import VolumeDataset
 from data_augmentation import DataAugmentor
 from transform import *
 from label_transform import *
@@ -43,30 +43,30 @@ class VolumeDataProvider(DataProvider):
 
         Args:
             dspec_path: Path to the dataset specification file.
-            net_spec: Net specification.
-            params: Various options.
-            auto_mask: Whether to automatically generate mask from corresponding
-                        label.
+            net_spec:   Net specification.
+            params:     Various options.
+            auto_mask:  Whether to automatically generate mask from
+                        corresponding label.
         """
-        # Params
-        drange = params['drange']
-        dprior = params.get('dprior', None)
+        # Params.
+        drange = params['drange']            # Required.
+        dprior = params.get('dprior', None)  # Optional.
 
         # Build Datasets.
         print '[VolumeDataProvider]'
         p = parser.Parser(dspec_path, net_spec, params, auto_mask=auto_mask)
-        self.datasets = []
+        self.datasets = list()
         for dataset_id in drange:
             print 'constructing dataset %d...' % dataset_id
-            config = p.parse_dataset(dataset_id)
+            config  = p.parse_dataset(dataset_id)
             dataset = VolumeDataset(config)
             self.datasets.append(dataset)
 
-        # Sampling weight
+        # Sampling weight.
         self.set_sampling_weights(dprior)
 
         # Setup data augmentation.
-        aug_spec = params.get('augment', [])
+        aug_spec = params.get('augment', [])  # Default is an empty list.
         self._data_aug = DataAugmentor(aug_spec)
 
     def set_sampling_weights(self, dprior=None):
@@ -84,8 +84,7 @@ class VolumeDataProvider(DataProvider):
 
     def next_sample(self):
         """Fetch next sample in a sample sequence."""
-        # TODO(kisuk): Temporary
-        return self.random_sample()
+        return self.random_sample()  # TODO(kisuk): Temporary.
 
     def random_sample(self):
         """Fetch random sample."""
@@ -93,7 +92,7 @@ class VolumeDataProvider(DataProvider):
         dataset = self._get_random_dataset()
         # Draw a random sample and apply data augmenation.
         sample, transform = self._data_aug.random_sample(dataset)
-        # Return transformed sample.
+        # Transform sample.
         sample = self._transform(sample, transform)
         # Ensure that sample is ordered by key.
         return OrderedDict(sorted(sample.items(), key=lambda x: x[0]))
@@ -105,7 +104,7 @@ class VolumeDataProvider(DataProvider):
 
     def _get_random_dataset(self):
         """
-        Pick one dataset randomly, according to the given sampling weights:
+        Pick one dataset randomly, according to the given sampling weights.
 
         Returns:
             Randomly chosen dataset.

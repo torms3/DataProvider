@@ -182,25 +182,26 @@ class Parser(object):
         TODO(kisuk): Documentation.
         """
         border_func = self.params.get('border', None)
-        if border_func is not None and border_func['type'] is 'mirror_border':
-            for _, data in config.items('dataset'):
-                # Apply only to images.
-                if not 'image' in data:
-                    continue
-                assert config.has_section(data)
-                assert config.has_option(data, 'offset')
-                offset = config.get(data, 'offset')
-                # Append border mirroring to the preprocessing list.
-                if config.has_option(data, 'preprocess'):
-                    pp = config.get(data, 'Preprocess') + '\n'
-                else:
-                    pp = ''
-                pp += str(border_func)
-                config.set(data, 'preprocess', pp)
-                # Update offset.
-                fov = border_func['fov']
-                offset = Vec3d(offset) - Vec3d(fov)/2
-                config.set(data, 'offset', tuple(offset))
+        if border_func is not None:
+            if border_func['type'] is 'mirror_border':
+                for _, data in config.items('dataset'):
+                    # Apply only to images.
+                    if not 'image' in data:
+                        continue
+                    assert config.has_section(data)
+                    assert config.has_option(data, 'offset')
+                    offset = config.get(data, 'offset')
+                    # Append border mirroring to the preprocessing list.
+                    if config.has_option(data, 'preprocess'):
+                        pp = config.get(data, 'Preprocess') + '\n'
+                    else:
+                        pp = ''
+                    pp += str(border_func)
+                    config.set(data, 'preprocess', pp)
+                    # Update offset.
+                    fov = border_func['fov']
+                    offset = Vec3d(offset) - Vec3d(fov)/2
+                    config.set(data, 'offset', tuple(offset))
 
 
 if __name__ == "__main__":

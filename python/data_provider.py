@@ -53,7 +53,7 @@ class VolumeDataProvider(DataProvider):
         dprior = params.get('dprior', None)  # Optional.
 
         # Build Datasets.
-        print '[VolumeDataProvider]'
+        print '\n[VolumeDataProvider]'
         p = parser.Parser(dspec_path, net_spec, params, auto_mask=auto_mask)
         self.datasets = list()
         for dataset_id in drange:

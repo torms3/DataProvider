@@ -43,9 +43,10 @@ class VolumeDataset(Dataset):
                 It depends both on data and net specs.
     """
 
-    def __init__(self, config):
+    def __init__(self, config, dataset_id=-1):
         """Initialize VolumeDataset."""
         self.build_from_config(config)
+        self.dataset_id = dataset_id
 
     def build_from_config(self, config):
         """

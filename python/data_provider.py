@@ -59,7 +59,7 @@ class VolumeDataProvider(DataProvider):
         for dataset_id in drange:
             print 'constructing dataset %d...' % dataset_id
             config  = p.parse_dataset(dataset_id)
-            dataset = VolumeDataset(config)
+            dataset = VolumeDataset(config, dataset_id)
             self.datasets.append(dataset)
 
         # Sampling weight.

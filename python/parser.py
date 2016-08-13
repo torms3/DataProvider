@@ -33,6 +33,10 @@ class Parser(object):
         self.params    = params
         self.auto_mask = auto_mask
 
+        # Set dataset-specific params.
+        self.dparams = self._parse_dataset_params(config)
+
+
     def parse_dataset(self, dataset_id):
         """
         TODO(kisuk): Documentation.
@@ -62,7 +66,13 @@ class Parser(object):
         # Treat border.
         self._treat_border(config)
 
-        return config
+        # Dataset-specific params.
+        dparams = dict()
+        dparams['dataset_id'] = dataset_id
+        for k, v in self.dparams.iteritems():
+            dparams[k] = v[dataset_id]
+
+        return config, dparams
 
     def parse_data(self, config, name, data, idx):
         """
@@ -103,6 +113,17 @@ class Parser(object):
     ####################################################################
     ## Private Helper Methods
     ####################################################################
+
+    def _parse_dataset_params(self, config):
+        """
+        TODO(kisuk): Documentation.
+        """
+        ret = dict()
+        if config.has_section('params'):
+            opts = config.options('params')
+            for opt in opts:
+                ret[opt] = eval(config.get('params',opt))
+        return ret
 
     def _add_mask(self, config, name, data, idx):
         """Add mask for label.
@@ -227,7 +248,9 @@ if __name__ == "__main__":
 
     # Parser
     p = Parser(dspec_path, net_spec, params)
-    config = p.parse_dataset(0)
+    config, dparams = p.parse_dataset(0)
+    assert dparams['dataset_id']==0
+    print dparams
     f = open('zfish_dataset0.spec', 'w')
     config.write(f)
     f.close()

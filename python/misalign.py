@@ -16,15 +16,23 @@ class MisalignAugment(data_augmentation.DataAugment):
     Misalignment.
     """
 
-    def __init__(self, max_trans=20.0):
+    def __init__(self, max_trans=15.0):
         """Initialize MisalignAugment."""
+        self.set_max_translation(max_trans)
+
+    def set_max_translation(self, max_trans):
+        """Set the maximum amount of translation in x and y."""
         self.MAX_TRANS = max_trans
 
-    def prepare(self, spec):
+    def prepare(self, spec, **kwargs):
         """
         TODO(kisuk): Documentation.
         """
         self.spec = spec
+
+        # Max translation.
+        if 'max_trans' in kwargs:
+            self.set_max_translation(kwargs['max_trans'])
 
         # Random translation.
         # Always lower box is translated.

@@ -41,12 +41,22 @@ class VolumeDataset(Dataset):
 
         _range: Range of valid coordinates for accessing data given a net spec.
                 It depends both on data and net specs.
+
+        params: Dataset-specific parameters.
     """
 
-    def __init__(self, config, dataset_id=-1):
+    def __init__(self, config, **kwargs):
         """Initialize VolumeDataset."""
         self.build_from_config(config)
-        self.dataset_id = dataset_id
+        # Set dataset-specific params.
+        self.params = dict()
+        for k, v in kwargs.iteritems():
+            self.params[k] = v
+
+    def __getattr__(self, name):
+        """Access dataset-specific params."""
+        assert name in self.params
+        return self.params[name]
 
     def build_from_config(self, config):
         """

@@ -50,7 +50,7 @@ class DataAugmentor(object):
         """
         TODO(kisuk): Documentation.
         """
-        spec = self._prepare(dataset.get_spec())
+        spec = self._prepare(dataset)
         sample, transform = dataset.random_sample(spec=spec)
         for aug in self._aug_list:
             sample = aug.augment(sample)
@@ -58,10 +58,10 @@ class DataAugmentor(object):
         sample = OrderedDict(sorted(sample.items(), key=lambda x: x[0]))
         return sample, transform
 
-    def _prepare(self, spec):
-        ret = dict(spec)
+    def _prepare(self, dataset):
+        ret = dict(dataset.get_spec())
         for aug in reversed(self._aug_list):
-            ret = aug.prepare(ret)
+            ret = aug.prepare(ret, **dataset.params)
         return ret
 
 
@@ -70,7 +70,7 @@ class DataAugment(object):
     DataAugment interface.
     """
 
-    def prepare(self, spec):
+    def prepare(self, spec, **kwargs):
         raise NotImplementedError
 
     def augment(self, sample):
@@ -86,7 +86,7 @@ class FlipAugment(DataAugment):
     Random flip.
     """
 
-    def prepare(self, spec):
+    def prepare(self, spec, **kwargs):
         return dict(spec)
 
     def augment(self, sample):
@@ -99,7 +99,7 @@ class WarpAugment(DataAugment):
     Warping.
     """
 
-    def prepare(self, spec):
+    def prepare(self, spec, **kwargs):
         pass
 
     def augment(self, sample):

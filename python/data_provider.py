@@ -56,10 +56,10 @@ class VolumeDataProvider(DataProvider):
         print '\n[VolumeDataProvider]'
         p = parser.Parser(dspec_path, net_spec, params, auto_mask=auto_mask)
         self.datasets = list()
-        for dataset_id in drange:
-            print 'constructing dataset %d...' % dataset_id
-            config  = p.parse_dataset(dataset_id)
-            dataset = VolumeDataset(config, dataset_id)
+        for d in drange:
+            print 'constructing dataset %d...' % d
+            config, dparams = p.parse_dataset(d)
+            dataset = VolumeDataset(config, **dparams)
             self.datasets.append(dataset)
 
         # Sampling weight.

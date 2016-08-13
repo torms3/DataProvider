@@ -15,6 +15,9 @@ lbl = %(dir)s/r1.daan.lbl.h5
       %(dir)s/r2.selden.lbl.h5
       %(dir)s/r1.merlin.2.lbl.h5
 
+# [params]
+# max_trans = [20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0]
+
 [image]
 file = img
 preprocess = {'type':'standardize','mode':'2D'}

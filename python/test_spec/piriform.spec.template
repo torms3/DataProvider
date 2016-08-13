@@ -22,6 +22,9 @@ lbl = %(dir)s/stack1-label.h5
       %(dir)s/stack9-label.h5
       %(dir)s/stack10-label.h5
 
+# [params]
+# max_trans = [15.0, 15.0, 15.0, 10.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0]
+
 [image]
 file = img
 preprocess = {'type':'standardize','mode':'2D'}

@@ -41,7 +41,7 @@ class ForwardScanner(object):
             assert self.current is None
             idx = self.counter
             loc = self.locs[idx]
-            print '({}/{}) loc: {}'.format(idx, len(self.locs), tuple(loc))
+            print '({}/{}) loc: {}'.format(idx+1, len(self.locs), tuple(loc))
             ret, _ = self.dataset.get_sample(loc)
             self.current = loc
             self.counter += 1

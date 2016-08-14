@@ -190,7 +190,7 @@ class WritableTensorDataWithMask(WritableTensorData):
         if mask is None:
             mask = np.ones(patch.shape, dtype='float32')
         # Set patch.
-        WritableTensorData.set_patch(pos, mask*patch, op)
+        WritableTensorData.set_patch(self, pos, mask*patch, op)
         # Set normalization.
         self._norm.set_patch(pos, mask, op='+')
 
@@ -198,7 +198,7 @@ class WritableTensorDataWithMask(WritableTensorData):
         return self._norm
 
     def get_normalized_data(self):
-        return self._data/self._norm
+        return self._data/self._norm._data
 
 
 ########################################################################

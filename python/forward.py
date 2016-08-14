@@ -9,12 +9,17 @@ Kisuk Lee <kisuklee@mit.edu>, 2016
 import numpy as np
 
 from box import Box, centered_box
-from tensor import WritableTensorData as WTD
+from tensor import WritableTensorData as WTD, WritableTensorDataWithMask as WTDM
 from vector import *
 
 class ForwardScanner(object):
     """
     ForwardScanner.
+
+    Attributes:
+        dataset:
+        scan_spec:
+        params:
     """
 
     def __init__(self, dataset, scan_spec, params=None):
@@ -42,18 +47,22 @@ class ForwardScanner(object):
             self.counter += 1
         return ret
 
-    def push(self, sample):
+    def push(self, sample, **kwargs):
         """
         TODO(kisuk): Documentation
+
+        Args:
+            sample:
+            kwargs:
         """
         assert self.current is not None
         # Write to outputs.
         for k, v in sample.iteritems():
-            self.outputs[k].set_patch(self.current, v)
+            self.outputs[k].set_patch(self.current, v, **kwargs)
         self.current = None
 
     ####################################################################
-    ## Private Methods
+    ## Private Methods.
     ####################################################################
 
     def _setup(self):
@@ -132,6 +141,7 @@ class ForwardScanner(object):
         # Non-overlapping stride.
         if stride == 0:
             stride = int(self.default_stride[dim])
+            self.stride[dim] = stride
 
         # Automatic full spanning.
         if grid == 0:
@@ -157,6 +167,10 @@ class ForwardScanner(object):
         """
         self.outputs = dict()
 
+        # Inference with overlapping window.
+        diff = self.stride - self.default_stride
+        self.mask = True if diff[0]<0 or diff[1]<0 or diff[2]<0 else False
+
         rmin = self.locs[0]
         rmax = self.locs[-1]
 
@@ -166,7 +180,10 @@ class ForwardScanner(object):
             b = centered_box(rmax, fov)
             c = a.merge(b)
             shape = v[:-3] + tuple(c.size())
-            self.outputs[k] = WTD(shape, fov=fov, offset=c.min())
+            if self.mask:
+                self.outputs[k] = WTDM(shape, fov=fov, offset=c.min())
+            else:
+                self.outputs[k] = WTD(shape, fov=fov, offset=c.min())
 
 
 if __name__ == "__main__":

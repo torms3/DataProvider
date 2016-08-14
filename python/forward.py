@@ -7,6 +7,7 @@ Kisuk Lee <kisuklee@mit.edu>, 2016
 """
 
 import numpy as np
+import math
 
 from box import Box, centered_box
 from tensor import WritableTensorData as WTD, WritableTensorDataWithMask as WTDM
@@ -134,14 +135,17 @@ class ForwardScanner(object):
         assert cmin < cmax
 
         # Dimension-specific params.
-        stride = int(self.stride[dim])
+        stride = self.stride[dim]
         grid   = int(self.grid[dim])
         coord  = set()
 
         # Non-overlapping stride.
         if stride == 0:
             stride = int(self.default_stride[dim])
-            self.stride[dim] = stride
+        # Overlapping stride given by an overlapping ratio.
+        elif stride > 0 and stride < 1:
+            stride = math.ceil(stride * self.default_stride[dim])
+        self.stride[dim] = stride
 
         # Automatic full spanning.
         if grid == 0:

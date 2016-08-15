@@ -141,11 +141,12 @@ class ForwardScanner(object):
 
         # Non-overlapping stride.
         if stride == 0:
-            stride = int(self.default_stride[dim])
+            stride = self.default_stride[dim]
         # Overlapping stride given by an overlapping ratio.
         elif stride > 0 and stride < 1:
             stride = math.ceil(stride * self.default_stride[dim])
-        self.stride[dim] = stride
+        self.stride[dim] = int(stride)
+        strid = self.stride[dim]
 
         # Automatic full spanning.
         if grid == 0:

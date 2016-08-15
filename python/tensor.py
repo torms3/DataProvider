@@ -105,7 +105,7 @@ class TensorData(object):
         return Box(self._rg)
 
     ####################################################################
-    ## Private helper methods
+    ## Private helper methods.
     ####################################################################
 
     def _check_data(self, data):
@@ -149,7 +149,7 @@ class WritableTensorData(TensorData):
             data = np.zeros(data_or_shape, dtype='float32')
             TensorData.__init__(self, data, fov, offset)
 
-    def set_patch(self, pos, patch, op=''):
+    def set_patch(self, pos, patch, op='np.add'):
         """
         Write a patch of size _fov centered on pos.
         """
@@ -165,7 +165,8 @@ class WritableTensorData(TensorData):
         vmax = box.max()
         lval = 'self._data[:,vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]]'
         rval = 'patch'
-        exec (lval + op + '=' + rval)
+        # exec (lval + op + '=' + rval)
+        exec '{}={}({},{})'.format(lval, op, lval, rval)
 
 
 class WritableTensorDataWithMask(WritableTensorData):
@@ -182,7 +183,7 @@ class WritableTensorDataWithMask(WritableTensorData):
         # Set norm.
         self._norm = WritableTensorData(self.shape(), fov, offset)
 
-    def set_patch(self, pos, patch, op='', mask=None):
+    def set_patch(self, pos, patch, op='np.add', mask=None):
         """
         Write a patch of size _fov centered on pos.
         """
@@ -192,7 +193,7 @@ class WritableTensorDataWithMask(WritableTensorData):
         # Set patch.
         WritableTensorData.set_patch(self, pos, mask*patch, op)
         # Set normalization.
-        self._norm.set_patch(pos, mask, op='+')
+        self._norm.set_patch(pos, mask)
 
     def get_normalization(self):
         return self._norm

@@ -27,6 +27,8 @@ class ForwardScanner(object):
         """
         Initialize ForwardScanner.
         """
+        self._init()
+
         self.dataset   = dataset
         self.scan_spec = scan_spec
         self.params    = params if params is not None else dict()
@@ -66,6 +68,24 @@ class ForwardScanner(object):
     ## Private Methods.
     ####################################################################
 
+    def _init(self):
+        """Initialize all attributes."""
+        self.dataset        = None
+        self.scan_spec      = dict()
+        self.params         = dict()
+        self.offset         = (0,0,0)
+        self.stride         = (0,0,0)
+        self.grid           = (0,0,0)
+        self.vmin           = None
+        self.vmax           = None
+        self.default_stride = None
+        self.coords         = [None]*3
+        self.locs           = None
+        self.counter        = 0
+        self.current        = None
+        self.outputs        = dict()
+        self.mask           = False
+
     def _setup(self):
         """
         TODO(kisuk): Documentation.
@@ -103,8 +123,6 @@ class ForwardScanner(object):
         """
         TODO(kisuk): Documentation.
         """
-        self.coords = [None]*3
-
         self._setup_coord(0)  # z-dimension
         self._setup_coord(1)  # y-dimension
         self._setup_coord(2)  # x-dimension
@@ -114,9 +132,6 @@ class ForwardScanner(object):
             for y in self.coords[1]:
                 for x in self.coords[2]:
                     locs.append(Vec3d(z,y,x))
-        self.locs = locs
-        self.counter = 0
-        self.current = None
 
     def _setup_coord(self, dim):
         """
@@ -141,11 +156,12 @@ class ForwardScanner(object):
 
         # Non-overlapping stride.
         if stride == 0:
-            stride = int(self.default_stride[dim])
+            stride = self.default_stride[dim]
         # Overlapping stride given by an overlapping ratio.
         elif stride > 0 and stride < 1:
             stride = math.ceil(stride * self.default_stride[dim])
-        self.stride[dim] = stride
+        self.stride[dim] = int(stride)
+        stride = self.stride[dim]
 
         # Automatic full spanning.
         if grid == 0:
@@ -169,8 +185,6 @@ class ForwardScanner(object):
         """
         TODO(kisuk): Documentation.
         """
-        self.outputs = dict()
-
         # Inference with overlapping window.
         diff = self.stride - self.default_stride
         self.mask = True if diff[0]<0 or diff[1]<0 or diff[2]<0 else False

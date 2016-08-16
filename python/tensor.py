@@ -196,7 +196,7 @@ class WritableTensorDataWithMask(WritableTensorData):
         self._norm.set_patch(pos, mask)
 
     def get_normalization(self):
-        return self._norm
+        return self._norm._data
 
     def get_normalized_data(self):
         return self._data/self._norm._data

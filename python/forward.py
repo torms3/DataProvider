@@ -9,6 +9,7 @@ Kisuk Lee <kisuklee@mit.edu>, 2016
 import numpy as np
 import math
 
+import blend
 from box import Box, centered_box
 from tensor import WritableTensorData as WTD, WritableTensorDataWithMask as WTDM
 from vector import *
@@ -50,7 +51,7 @@ class ForwardScanner(object):
             self.counter += 1
         return ret
 
-    def push(self, sample, **kwargs):
+    def push(self, sample):
         """
         TODO(kisuk): Documentation
 
@@ -59,9 +60,7 @@ class ForwardScanner(object):
             kwargs:
         """
         assert self.current is not None
-        # Write to outputs.
-        for k, v in sample.iteritems():
-            self.outputs[k].set_patch(self.current, v, **kwargs)
+        self.outputs.push(self.current, sample)
         self.current = None
 
     ####################################################################
@@ -83,8 +82,7 @@ class ForwardScanner(object):
         self.locs           = None
         self.counter        = 0
         self.current        = None
-        self.outputs        = dict()
-        self.mask           = False
+        self.outputs        = None
 
     def _setup(self):
         """
@@ -182,27 +180,14 @@ class ForwardScanner(object):
         self.coords[dim] = sorted(coord)
 
     def _prepare_outputs(self):
-        """
-        TODO(kisuk): Documentation.
-        """
+        """Prepare outputs according to the blending mode."""
         # Inference with overlapping window.
         diff = self.stride - self.default_stride
-        self.mask = True if diff[0]<0 or diff[1]<0 or diff[2]<0 else False
-
-        rmin = self.locs[0]
-        rmax = self.locs[-1]
-
-        for k, v in self.scan_spec.iteritems():
-            fov = v[-3:]
-            a = centered_box(rmin, fov)
-            b = centered_box(rmax, fov)
-            c = a.merge(b)
-            shape = v[:-3] + tuple(c.size())
-            if self.mask:
-                self.outputs[k] = WTDM(shape, fov=fov, offset=c.min())
-            else:
-                self.outputs[k] = WTD(shape, fov=fov, offset=c.min())
-
+        overlap = True if diff[0]<0 or diff[1]<0 or diff[2]<0 else False
+        # Prepare outputs.
+        blend_mode = self.params.get('blend', '')
+        self.outputs = blend.prepare_outputs(self.scan_spec, self.locs,
+                                    overlap=overlap, blend_mode=blend_mode)
 
 if __name__ == "__main__":
 

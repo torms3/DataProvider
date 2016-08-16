@@ -127,11 +127,11 @@ class ForwardScanner(object):
         self._setup_coord(1)  # y-dimension
         self._setup_coord(2)  # x-dimension
 
-        locs = list()
+        self.locs = list()
         for z in self.coords[0]:
             for y in self.coords[1]:
                 for x in self.coords[2]:
-                    locs.append(Vec3d(z,y,x))
+                    self.locs.append(Vec3d(z,y,x))
 
     def _setup_coord(self, dim):
         """

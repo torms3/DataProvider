@@ -187,7 +187,7 @@ class ForwardScanner(object):
         # Prepare outputs.
         blend_mode = self.params.get('blend', '')
         self.outputs = blend.prepare_outputs(self.scan_spec, self.locs,
-                                    overlap=overlap, blend_mode=blend_mode)
+                                    blend=overlap, blend_mode=blend_mode)
 
 if __name__ == "__main__":
 

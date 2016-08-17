@@ -11,7 +11,7 @@ import numpy as np
 import box
 from tensor import WritableTensorData as WTD, WritableTensorDataWithMask as WTDM
 
-def prepare_outputs(spec, locs, overlap=False, blend_mode=''):
+def prepare_outputs(spec, locs, blend=False, blend_mode=''):
     blend_pool = ['','bump']
     b = blend_mode.lower()
     if b not in blend_pool:
@@ -20,7 +20,7 @@ def prepare_outputs(spec, locs, overlap=False, blend_mode=''):
         b = 'Blend'
     else:
         b = b[0].capitalize() + b[1:] + 'Blend'
-    outputs = eval(b + '(spec, locs, overlap)')
+    outputs = eval(b + '(spec, locs, blend)')
     return outputs
 
 
@@ -29,34 +29,29 @@ class Blend(object):
     Blend interface.
     """
 
-    def __init__(self, spec, locs, overlap=False):
+    def __init__(self, spec, locs, blend=False):
         """Initialize Blend."""
-        self.spec = spec
-        self.locs = locs
-        self._prepare_data(overlap)
-        self.overlap = overlap
+        self.spec  = spec
+        self.locs  = locs
+        self.blend = blend
+        self._prepare_data()
 
     def push(self, loc, sample):
         """Write to data."""
         for k, v in sample.iteritems():
             assert k in self.data
-            self.data[k].set_patch(loc, v)
+            self.data[k].set_patch(loc, v, op=self.op)
 
     def get_data(self, key):
         """Get inference output data."""
         assert key in self.data
-        ret = None
-        if self.overlap:
-            ret = self.data[key].get_normalized_data()
-        else:
-            ret = self.data[key].get_data()
-        return ret
+        return self.data[key].get_data()
 
     ####################################################################
     ## Private Methods.
     ####################################################################
 
-    def _prepare_data(self, overlap):
+    def _prepare_data(self):
         """
         TODO(kisuk): Documentation.
         """
@@ -65,6 +60,7 @@ class Blend(object):
         rmax = self.locs[-1]
 
         self.data = dict()
+        self.op   = None
         for k, v in self.spec.iteritems():
             fov = v[-3:]
             a = box.centered_box(rmin, fov)
@@ -72,8 +68,9 @@ class Blend(object):
             c = a.merge(b)
             shape = v[:-3] + tuple(c.size())
             # Inference with overlapping window.
-            if overlap:
+            if self.blend:
                 self.data[k] = WTDM(shape, fov, c.min())
+                self.op = 'np.add'
             else:
                 self.data[k] = WTD(shape, fov, c.min())
 
@@ -83,13 +80,13 @@ class BumpBlend(Blend):
     Blending with bump function.
     """
 
-    def __init__(self, spec, locs, overlap=False):
+    def __init__(self, spec, locs, blend=False):
         """Initialize BumpBlend."""
-        Blend.__init__(self, spec, locs, overlap)
+        Blend.__init__(self, spec, locs, blend)
 
         # Inference with overlapping window.
         self.max_logits = None
-        if overlap:
+        if blend:
             max_logits = dict()
             # Compute max_logit for numerical stability.
             for k, v in self.data.iteritems():
@@ -108,10 +105,7 @@ class BumpBlend(Blend):
         for k, v in sample.iteritems():
             assert k in self.data
             mask = self._get_mask(k, loc)
-            if mask is None:
-                self.data[k].set_patch(loc, v)
-            else:
-                self.data[k].set_patch(loc, v, mask=mask)
+            self.data[k].set_patch(loc, v, op=self.op, mask=mask)
 
     ####################################################################
     ## Private methods.
@@ -119,11 +113,10 @@ class BumpBlend(Blend):
 
     def _get_mask(self, key, loc):
         mask = None
-        if self.overlap:
+        if self.blend:
             assert key in self.max_logits
             max_logit = self.max_logits[key].get_patch(loc)
             mask = self._bump_map(max_logit.shape[-3:], max_logit[0,...])
-            # mask = mask.astype('float32')
         return mask
 
     def _bump_logit(self, z, y, x, t=1.5):

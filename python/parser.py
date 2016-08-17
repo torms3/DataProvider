@@ -223,6 +223,9 @@ class Parser(object):
                     fov = border_func['fov']
                     offset = Vec3d(offset) - Vec3d(fov)/2
                     config.set(data, 'offset', tuple(offset))
+            else:
+                msg = 'unknown border mode [%s].' % border_func['type']
+                raise RuntimeError(msg)
 
 
 if __name__ == "__main__":

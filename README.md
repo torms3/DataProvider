@@ -1,6 +1,5 @@
 # DataProvider
-Volumetric data provider for training 3D convolutional network.
-Currently support Python.
+Deep learning platform-independent volumetric data provider for training 3D convolutional network.
 
 Contact
 -------

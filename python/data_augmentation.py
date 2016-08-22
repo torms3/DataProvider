@@ -13,10 +13,10 @@ from transform import *
 """
 Data augmentaion pool.
 
-Whenever adding new data augmentation outside this module, its type name should
-be appended to this list.
+Whenever adding new data augmentation, its type name should be appended to this
+list.
 """
-aug_pool = ['flip','warp','misalign']
+aug_pool = ['flip','grey','warp','misalign']
 
 
 class DataAugmentor(object):
@@ -76,10 +76,6 @@ class DataAugment(object):
     def augment(self, sample):
         raise NotImplementedError
 
-"""
-Whenever adding new data augmentation outside this module, it should be properly
-imported below.
-"""
 
 class FlipAugment(DataAugment):
     """
@@ -94,6 +90,40 @@ class FlipAugment(DataAugment):
         return sample_func.flip(sample, rule=rule)
 
 
+class GreyAugment(DataAugment):
+    """
+    Greyscale value augmentation.
+    Randomly adjust contrast and brightness, and apply random gamma correction.
+    """
+
+    def __init__(self):
+        """Initialize constants."""
+        self.CONTRAST_FACTOR   = 0.3
+        self.BRIGHTNESS_FACTOR = 0.3
+
+    def prepare(self, spec, **kwargs):
+        return dict(spec)
+
+    def augment(self, sample):
+        """
+        Adapted from ELEKTRONN (http://elektronn.org/).
+        """
+        # TODO(kisuk): Pointer to input images (imgs).
+        raise NotImplementedError
+        n = len(imgs)
+        alpha = 1 + (np.random.rand(n) - 0.5)*self.CONTRAST_FACTOR
+        c = (np.random.rand(n) - 0.5)self.BRIGHTNESS_FACTOR
+        gamma = 2.0**(np.random.rand(n)*2 - 1)
+
+        # Greyscale augmentation.
+        for i in range(n):
+            key = imgs[i]
+            sample[key] *= alpha[i]
+            sample[key] += c[i]
+            sample[key] = np.clip(sample[key], 0, 1)
+            sample[key] **= gamma[i]
+
+
 class WarpAugment(DataAugment):
     """
     Warping.
@@ -105,5 +135,9 @@ class WarpAugment(DataAugment):
     def augment(self, sample):
         pass
 
+"""
+Whenever adding new data augmentation outside this module, it should be properly
+imported as below.
+"""
 
 from misalign import MisalignAugment

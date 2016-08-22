@@ -112,7 +112,7 @@ class GreyAugment(DataAugment):
         raise NotImplementedError
         n = len(imgs)
         alpha = 1 + (np.random.rand(n) - 0.5)*self.CONTRAST_FACTOR
-        c = (np.random.rand(n) - 0.5)self.BRIGHTNESS_FACTOR
+        c = (np.random.rand(n) - 0.5)*self.BRIGHTNESS_FACTOR
         gamma = 2.0**(np.random.rand(n)*2 - 1)
 
         # Greyscale augmentation.

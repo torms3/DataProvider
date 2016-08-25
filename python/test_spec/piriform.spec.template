@@ -27,11 +27,11 @@ lbl = %(dir)s/stack1-label.h5
 
 [image]
 file = img
-preprocess = {'type':'standardize','mode':'2D'}
+preprocess = dict(type='standardize',mode='2D')
 
 [label]
 file = lbl
-transform = {'type':'affinitize'}
+transform = dict(type='affinitize')
 
 [dataset]
 input = image

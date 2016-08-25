@@ -117,6 +117,22 @@ def standardize(img, mode='2D', dtype='float32'):
 
     return ret
 
+
+def rescale(img, min_val=0.0, max_val=1.0, dtype='float32'):
+    """Rescale."""
+    img = check_volume(img)
+    ret = np.zeros(img.shape, dtype=dtype)
+
+    # Rescale to [min_val, max_val].
+    ret[:] = img
+    ret -= np.min(ret)
+    ret /= np.ptp(ret)
+    ret *= (max_val - min_val)
+    ret += min_val
+
+    return ret
+
+
 ####################################################################
 ## Data Augmentations
 ####################################################################

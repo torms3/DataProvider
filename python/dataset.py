@@ -77,6 +77,7 @@ class VolumeDataset(Dataset):
                 self._label.append(name)
             else:
                 self._data[name] = ConfigData(config, data)
+                self._image.append(name)
 
         # Second pass for masks.
         for name, data in config.items('dataset'):
@@ -130,6 +131,7 @@ class VolumeDataset(Dataset):
             sample:     Dictionary mapping input layer's name to data.
             transform:  Dictionary mapping label layer's name to the type of
                         label transformation specified by user.
+
         """
         # self._spec is guaranteed to be ordered by key, so using OrderedDict
         # and iterating over already-sorted self._spec together guarantee the
@@ -142,7 +144,7 @@ class VolumeDataset(Dataset):
         for name in self._label:
             transform[name] = self._data[name].get_transform()
 
-        return sample, transform
+        return sample, transform, self._image
 
     def next_sample(self, spec=None):
         """Fetch next sample in a sample sequence."""
@@ -172,6 +174,7 @@ class VolumeDataset(Dataset):
     def _reset(self):
         """Reset all attributes."""
         self._data  = dict()
+        self._image = list()
         self._label = list()
         self._spec  = None
         self._range = None

@@ -73,7 +73,7 @@ class MisalignAugment(data_augmentation.DataAugment):
 
         return ret
 
-    def augment(self, sample):
+    def augment(self, sample, **kwargs):
         """Apply misalignment data augmentation."""
 
         ret = dict()

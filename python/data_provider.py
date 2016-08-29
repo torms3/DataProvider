@@ -109,7 +109,7 @@ class VolumeDataProvider(DataProvider):
         Returns:
             Randomly chosen dataset.
         """
-        # Trivial case
+        # Trivial case.
         if len(self.datasets)==1:
             return self.datasets[0]
 

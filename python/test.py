@@ -18,15 +18,11 @@ if __name__ == "__main__":
     # Parameters.
     params = dict()
     params['border']  = dict(type='mirror_border', fov=fov)
-    params['augment'] = [dict(type='misalign', max_trans=30.0), dict(type='flip')]
-    params['drange']  = [0,1,2,3]
+    params['augment'] = [dict(type='grey'), dict(type='misalign', max_trans=30.0), dict(type='flip')]
+    params['drange']  = [1]
 
     # Create VolumeDataProvider.
     dp = VolumeDataProvider(dspec_path, net_spec, params)
-
-    for d in dp.datasets:
-        print d.dataset_id
-        print d.max_trans
 
     # for _ in range(100):
     #     sample = dp.random_sample()
@@ -38,7 +34,7 @@ if __name__ == "__main__":
     for name, data in sample.iteritems():
         f.create_dataset('/' + name, data=data)
     f.close()
-    #
+
     # # Dump the whole dataset.
     # print 'Save as file...'
     # dataset = dp.datasets[0]._data  # Illegal access. Don't try this at home.

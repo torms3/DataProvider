@@ -13,8 +13,8 @@ from transform import *
 """
 Data augmentaion pool.
 
-Whenever adding new data augmentation, its type name should be appended to this
-list.
+Whenever adding a new data augmentation, its type name should be appended to
+this list.
 """
 aug_pool = ['flip','grey','warp','misalign']
 
@@ -51,9 +51,9 @@ class DataAugmentor(object):
         TODO(kisuk): Documentation.
         """
         spec = self._prepare(dataset)
-        sample, transform = dataset.random_sample(spec=spec)
+        sample, transform, imgs = dataset.random_sample(spec=spec)
         for aug in self._aug_list:
-            sample = aug.augment(sample)
+            sample = aug.augment(sample, imgs=imgs)
         # Ensure that sample is ordered by key.
         sample = OrderedDict(sorted(sample.items(), key=lambda x: x[0]))
         return sample, transform
@@ -73,7 +73,7 @@ class DataAugment(object):
     def prepare(self, spec, **kwargs):
         raise NotImplementedError
 
-    def augment(self, sample):
+    def augment(self, sample, **kwargs):
         raise NotImplementedError
 
 
@@ -85,7 +85,7 @@ class FlipAugment(DataAugment):
     def prepare(self, spec, **kwargs):
         return dict(spec)
 
-    def augment(self, sample):
+    def augment(self, sample, **kwargs):
         rule = np.random.rand(4) > 0.5
         return sample_func.flip(sample, rule=rule)
 
@@ -104,24 +104,45 @@ class GreyAugment(DataAugment):
     def prepare(self, spec, **kwargs):
         return dict(spec)
 
-    def augment(self, sample):
+    # def augment(self, sample, **kwargs):
+    #     """
+    #     Adapted from ELEKTRONN (http://elektronn.org/).
+    #     """
+    #     imgs = kwargs['imgs']
+    #     n = len(imgs)
+    #     alpha = 1 + (np.random.rand(n) - 0.5)*self.CONTRAST_FACTOR
+    #     c = (np.random.rand(n) - 0.5)*self.BRIGHTNESS_FACTOR
+    #     gamma = 2.0**(np.random.rand(n)*2 - 1)
+    #
+    #     # Greyscale augmentation.
+    #     for i in range(n):
+    #         key = imgs[i]
+    #         sample[key] *= alpha[i]
+    #         sample[key] += c[i]
+    #         sample[key] = np.clip(sample[key], 0, 1)
+    #         sample[key] **= gamma[i]
+    #
+    #     return sample
+
+    def augment(self, sample, **kwargs):
         """
         Adapted from ELEKTRONN (http://elektronn.org/).
         """
-        # TODO(kisuk): Pointer to input images (imgs).
-        raise NotImplementedError
+        imgs = kwargs['imgs']
         n = len(imgs)
-        alpha = 1 + (np.random.rand(n) - 0.5)*self.CONTRAST_FACTOR
-        c = (np.random.rand(n) - 0.5)*self.BRIGHTNESS_FACTOR
-        gamma = 2.0**(np.random.rand(n)*2 - 1)
 
         # Greyscale augmentation.
         for i in range(n):
             key = imgs[i]
-            sample[key] *= alpha[i]
-            sample[key] += c[i]
-            sample[key] = np.clip(sample[key], 0, 1)
-            sample[key] **= gamma[i]
+            for z in xrange(sample[key].shape[-3]):
+                img = sample[key][...,z,:,:]
+                img *= 1 + (np.random.rand() - 0.5)*self.CONTRAST_FACTOR
+                img += (np.random.rand() - 0.5)*self.BRIGHTNESS_FACTOR
+                img = np.clip(img, 0, 1)
+                img **= 2.0**(np.random.rand()*2 - 1)
+                sample[key][...,z,:,:] = img
+
+        return sample
 
 
 class WarpAugment(DataAugment):
@@ -132,7 +153,7 @@ class WarpAugment(DataAugment):
     def prepare(self, spec, **kwargs):
         pass
 
-    def augment(self, sample):
+    def augment(self, sample, **kwargs):
         pass
 
 """

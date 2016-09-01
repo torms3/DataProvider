@@ -8,6 +8,7 @@ Kisuk Lee <kisuklee@mit.edu>, 2015-2016
 
 import numpy as np
 import transform
+import utils
 
 class LabelFunction(object):
     """
@@ -55,13 +56,15 @@ def affinitize(sample, key, rebalancing=True):
 
 def multiclass_expansion(sample, key, N, rebalancing=True):
     """For semantic segmentation."""
-    lbls = transform.multiclass_expansion(sample[key], N)
-    msks = np.tile(sample[key+'_mask'], (N,1,1,1))
+    lbl  = sample[key]
+    msk  = utils.check_volume(sample[key+'_mask'])
+    lbls = transform.multiclass_expansion(lbl, N)
+    msks = np.tile(msk, (N,1,1,1))
     # Update sample.
     sample[key] = lbls
     sample[key+'_mask'] = msks
     # Rebalancing.
     if rebalancing:
-        wmsk = transform.rebalance_class(sample[key])
+        wmsk = transform.rebalance_class(lbl)
         wmsk = np.tile(wmsk, (N,1,1,1))
         sample[key+'_mask'] *= wmsk

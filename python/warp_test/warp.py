@@ -33,6 +33,6 @@ def _cutPatch(img, lab, ps, fov):
     off = np.array(fov)/2
     cut_lab = lab[off[0] + shift[0]:shift[0] + ps[0] - off[0],
                   off[1] + shift[1]:shift[1] + ps[1] - off[1],
-                  off[2] + shift[2]: shift[2] + ps[2] - off[2]]
+                  off[2] + shift[2]:shift[2] + ps[2] - off[2]]
 
     return cut_img, cut_lab

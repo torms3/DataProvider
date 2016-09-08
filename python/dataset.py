@@ -187,6 +187,8 @@ class VolumeDataset(Dataset):
         x = np.random.randint(0, s[2])
         # Global coordinate system.
         return Vec3d(z,y,x) + self._range.min()
+        # DEBUG
+        # return self._range.min()
 
     def _update_range(self):
         """

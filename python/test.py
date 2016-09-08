@@ -18,13 +18,13 @@ if __name__ == "__main__":
     # Parameters.
     params = dict()
     params['border']  = dict(type='mirror_border', fov=fov)
-    params['augment'] = [dict(type='grey'), dict(type='misalign', max_trans=30.0), dict(type='flip')]
+    params['augment'] = [dict(type='grey',mode='mix',skip_ratio=0.2)]
     params['drange']  = [1]
 
     # Create VolumeDataProvider.
     dp = VolumeDataProvider(dspec_path, net_spec, params)
 
-    # for _ in range(100):
+    # for _ in range(10000):
     #     sample = dp.random_sample()
 
     # Dump a single randome sample.

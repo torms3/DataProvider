@@ -46,7 +46,7 @@ class ForwardScanner(object):
             idx = self.counter
             loc = self.locs[idx]
             print '({}/{}) loc: {}'.format(idx+1, len(self.locs), tuple(loc))
-            ret, _, _ = self.dataset.get_sample(loc)
+            ret, _ = self.dataset.get_sample(loc)
             self.current = loc
             self.counter += 1
         return ret

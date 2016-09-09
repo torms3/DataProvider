@@ -106,6 +106,13 @@ def warp3dJoint(img, lab, patch_size, rot=0, shear=0, scale=(1, 1, 1), stretch=(
     img = warp3dFast(img, patch_size, rot, shear, scale, stretch, twist)
     return img, lab
 
+
+def warp3d(img, patch_size, rot=0, shear=0, scale=(1, 1, 1), stretch=(0, 0, 0, 0), twist=0):
+    return warp3dFast(img, patch_size, rot, shear, scale, stretch, twist)
+
+def warp3dLab(lab, patch_size, size, rot=0, shear=0, scale=(1, 1, 1), stretch=(0, 0, 0, 0), twist=0):
+    return _warp3dFastLab(lab, patch_size, size, rot, shear, scale, stretch, twist)
+
 ### Utilities #################################################################
 ###############################################################################
 
@@ -236,7 +243,7 @@ def getWarpParams(patch_size, amount=1.0):
         print 'WARNING: warpAugment amount > 1 this requires more than 1.4 bigger patches before warping'
     rot_max = 15 * amount
     shear_max = 3 * amount
-    scale_max = 1.1 * amount
+    scale_max = 1.3 * amount
     stretch_max = 0.1 * amount
     n_dim = len(patch_size)
 
@@ -244,17 +251,27 @@ def getWarpParams(patch_size, amount=1.0):
     if n_dim == 3:
         twist = rot_max * 2 * (np.random.rand() - 0.5)
         rot = min(rot_max - abs(twist), rot_max * (np.random.rand()))
-        scale = 1 + (scale_max - 1) * np.random.rand(3)
+        scale = 1 - (scale_max - 1) * np.random.rand(3)
+        scale[0] = scale[1]
+        scale[2] = 1
         stretch = stretch_max * 2 * (np.random.rand(4) - 0.5)
     elif n_dim == 2:
         rot = rot_max * 2 * (np.random.rand() - 0.5)
-        scale = 1 + (scale_max - 1) * np.random.rand(2)
-        scale[0] = 1  # do not change along z!
+        scale = 1 - (scale_max - 1) * np.random.rand(2)
         stretch = stretch_max * 2 * (np.random.rand(2) - 0.5)
         twist = None
 
+    # DEBUG
+    # rot     = 0
+    # shear   = 0
+    # scale   = (0.75,0.75,1)
+    # stretch = (0,0,0,0)
+    # twist   = 0
+
     req_size, _, _ = getRequiredPatchSize(patch_size, rot, shear, scale,
                                           stretch, twist)
+    # DEBUG
+    # print req_size
     return req_size, rot, shear, scale, stretch, twist
 
 

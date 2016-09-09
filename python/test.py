@@ -2,6 +2,7 @@
 import h5py
 
 from data_provider import VolumeDataProvider
+import time
 from vector import Vec3d
 
 if __name__ == "__main__":
@@ -17,15 +18,19 @@ if __name__ == "__main__":
 
     # Parameters.
     params = dict()
-    params['border']  = dict(type='mirror_border', fov=fov)
-    params['augment'] = [dict(type='grey',mode='mix',skip_ratio=0.2)]
+    # params['border']  = dict(type='mirror_border', fov=fov)
+    params['border']  = None
+    # params['augment'] = [dict(type='grey',mode='mix',skip_ratio=0.2)]
+    params['augment'] = [dict(type='warp')]
     params['drange']  = [1]
 
     # Create VolumeDataProvider.
     dp = VolumeDataProvider(dspec_path, net_spec, params)
 
-    # for _ in range(10000):
+    # for i in range(10000):
+    #     start = time.time()
     #     sample = dp.random_sample()
+    #     print time.time() - start
 
     # Dump a single randome sample.
     sample = dp.random_sample()

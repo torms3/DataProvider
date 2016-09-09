@@ -3,5 +3,5 @@ cy:
 
 clean:
 	rm -rf build
-	rm linear_deformation/*.so
-	rm linear_deformation/_warping.c
+	rm warping/*.so
+	rm warping/_warping.c

@@ -104,6 +104,9 @@ class VolumeDataset(Dataset):
         #   deepcopy it?
         return copy.deepcopy(self._spec)
 
+    def get_imgs(self):
+        return copy.deepcopy(self._image)
+
     def set_spec(self, spec):
         """Set spec and update valid range."""
         # Order by key
@@ -144,7 +147,7 @@ class VolumeDataset(Dataset):
         for name in self._label:
             transform[name] = self._data[name].get_transform()
 
-        return sample, transform, self._image
+        return sample, transform
 
     def next_sample(self, spec=None):
         """Fetch next sample in a sample sequence."""

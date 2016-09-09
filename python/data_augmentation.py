@@ -16,7 +16,7 @@ Data augmentaion pool.
 Whenever adding a new data augmentation, its type name should be appended to
 this list.
 """
-aug_pool = ['flip','grey','warp','misalign']
+aug_pool = ['warp','flip','grey','misalign']
 
 
 class DataAugmentor(object):
@@ -51,9 +51,9 @@ class DataAugmentor(object):
         TODO(kisuk): Documentation.
         """
         spec = self._prepare(dataset)
-        sample, transform, imgs = dataset.random_sample(spec=spec)
+        sample, transform = dataset.random_sample(spec=spec)
         for aug in self._aug_list:
-            sample = aug.augment(sample, imgs=imgs)
+            sample = aug.augment(sample, imgs=dataset.get_imgs())
         # Ensure that sample is ordered by key.
         sample = OrderedDict(sorted(sample.items(), key=lambda x: x[0]))
         return sample, transform
@@ -61,7 +61,7 @@ class DataAugmentor(object):
     def _prepare(self, dataset):
         ret = dict(dataset.get_spec())
         for aug in reversed(self._aug_list):
-            ret = aug.prepare(ret, **dataset.params)
+            ret = aug.prepare(ret, imgs=dataset.get_imgs(), **dataset.params)
         return ret
 
 
@@ -180,3 +180,4 @@ imported as below.
 """
 
 from misalign import MisalignAugment
+from warp import WarpAugment

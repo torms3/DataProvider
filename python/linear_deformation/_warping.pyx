@@ -1,5 +1,5 @@
 """
-wraps warping.c
+Adapted from ELEKTRONN (http://elektronn.org/).
 """
 
 import numpy as np
@@ -168,52 +168,65 @@ def warp3dFast(img, patch_size, rot=0, shear=0, scale=(1,1,1), stretch=(0,0,0,0)
 
     """
     assert len(img.shape)==4
+
+    # Rotation, shear, twist.
     rot   = rot   * np.pi / 180
     shear = shear * np.pi / 180
     twist = twist * np.pi / 180
 
-    scale   = np.array(scale, dtype=np.float32, order='C', ndmin=1)
-    scale   = 1.0/scale
+    # Scale.
+    scale = np.array(scale, dtype=np.float32, order='C', ndmin=1)
+    scale = 1.0/scale
     cdef float [:] scale_view = scale
     cdef float * scale_ptr = &scale_view[0]
 
+    # Perspective stretch.
     stretch = np.array(stretch, dtype=np.float32, order='C', ndmin=1)
     cdef float [:] stretch_view = stretch
     cdef float * stretch_ptr = &stretch_view[0]
 
+    # Image.
     img = np.ascontiguousarray(img, dtype=np.float32)
     cdef float [:, :, :, :] img_view = img
     cdef float * in_ptr = &img_view[0, 0, 0, 0]
 
+    # Image shape.
     cdef int [:] in_sh_view = np.ascontiguousarray(img.shape, dtype=np.int32)
     cdef int * in_sh_ptr = &in_sh_view[0]
 
+    # Output.
     out_shape = (patch_size[0], img.shape[1], patch_size[1], patch_size[2])
     out_arr = np.zeros(out_shape, dtype=np.float32)
     cdef float [:, :, :, :] out_view = out_arr
     cdef float * out_ptr = &out_view[0, 0, 0, 0]
 
+    # Output shape.
     cdef int [:] ps_view = np.ascontiguousarray(out_arr.shape, dtype=np.int32)
-    cdef int * ps_ptr  = &ps_view[0]
+    cdef int * ps_ptr = &ps_view[0]
 
-    fastwarp3d_opt_zxy(in_ptr, out_ptr, in_sh_ptr, ps_ptr, rot, shear, scale_ptr, stretch_ptr, twist)
+    fastwarp3d_opt_zxy(in_ptr, out_ptr, in_sh_ptr, ps_ptr, rot, shear,
+                        scale_ptr, stretch_ptr, twist)
     return out_arr
 
 
 def _warp3dFastLab(lab, patch_size, img_sh, rot, shear, scale, stretch, twist):
+    # Rotation, shear, twist.
     rot   = rot   * np.pi / 180
     shear = shear * np.pi / 180
     twist = twist * np.pi / 180
 
-    scale   = np.array(scale, dtype=np.float32, order='C', ndmin=1)
-    scale   = 1.0/scale
+    # Scale.
+    scale = np.array(scale, dtype=np.float32, order='C', ndmin=1)
+    scale = 1.0/scale
     cdef float [:] scale_view = scale
     cdef float * scale_ptr = &scale_view[0]
 
+    # Perspective stretch.
     stretch = np.array(stretch, dtype=np.float32, order='C', ndmin=1)
     cdef float [:] stretch_view = stretch
     cdef float * stretch_ptr = &stretch_view[0]
 
+    # Label.
     new_lab_sh = (img_sh[0], 1, img_sh[1],img_sh[2])
     new_lab = np.zeros(new_lab_sh, dtype=np.float32)
     off = list(map(lambda x: (x[0]-x[1])//2, zip(img_sh, lab.shape)))
@@ -222,6 +235,7 @@ def _warp3dFastLab(lab, patch_size, img_sh, rot, shear, scale, stretch, twist):
     cdef float [:, :, :, :] lab_view = lab
     cdef float * in_ptr = &lab_view[0, 0, 0, 0]
 
+    # Label shape.
     cdef int [:] in_sh_view = np.ascontiguousarray(lab.shape, dtype=np.int32)
     cdef int * in_sh_ptr = &in_sh_view[0]
 
@@ -231,10 +245,11 @@ def _warp3dFastLab(lab, patch_size, img_sh, rot, shear, scale, stretch, twist):
     cdef float [:, :, :, :] out_view = out_arr
     cdef float * out_ptr = &out_view[0, 0, 0, 0]
 
+    # Output shape.
     cdef int [:] ps_view = np.ascontiguousarray(out_arr.shape, dtype=np.int32)
-    cdef int * ps_ptr  = &ps_view[0]
+    cdef int * ps_ptr = &ps_view[0]
 
     fastwarp3d_opt_zxy(in_ptr, out_ptr, in_sh_ptr, ps_ptr, rot, shear,
-                               scale_ptr, stretch_ptr, twist)
+                        scale_ptr, stretch_ptr, twist)
     out_arr = out_arr.astype(np.int16)[:,0]
     return out_arr

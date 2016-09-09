@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 __doc__ = """
 
-Warping (ELEKTRONN)
+Adapted from ELEKTRONN (http://elektronn.org/).
 
 """
 

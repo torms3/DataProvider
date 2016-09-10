@@ -191,7 +191,7 @@ class VolumeDataset(Dataset):
         # Global coordinate system.
         return Vec3d(z,y,x) + self._range.min()
         # DEBUG
-        # return self._range.min()
+        #return self._range.min()
 
     def _update_range(self):
         """

@@ -116,6 +116,7 @@ class GreyAugment(DataAugment):
         return dict(spec)
 
     def augment(self, sample, **kwargs):
+        #print '\n[GreyAugment]'  # DEBUG
         ret = sample
         if np.random.rand() > self.ratio:
             if self.mode == 'mix':
@@ -129,6 +130,7 @@ class GreyAugment(DataAugment):
         """
         Adapted from ELEKTRONN (http://elektronn.org/).
         """
+        #print '2D greyscale augmentation'  # DEBUG
         imgs = kwargs['imgs']
         n = len(imgs)
 
@@ -149,6 +151,8 @@ class GreyAugment(DataAugment):
         """
         Adapted from ELEKTRONN (http://elektronn.org/).
         """
+        #print '3D greyscale augmentation'  # DEBUG
+
         imgs = kwargs['imgs']
         n = len(imgs)
 

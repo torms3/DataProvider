@@ -235,7 +235,7 @@ def getRequiredPatchSize(patch_size, rot, shear, scale, stretch, twist=None):
     return req_size.astype(np.int), eff_size.astype(np.int), left_exc.astype(np.int)
 
 
-def getWarpParams(patch_size, amount=1.0):
+def getWarpParams(patch_size, amount=1.0, **kwargs):
     """
     To be called from CNNData. Get warping parameters + required warping input patch size.
     """
@@ -243,7 +243,7 @@ def getWarpParams(patch_size, amount=1.0):
         print 'WARNING: warpAugment amount > 1 this requires more than 1.4 bigger patches before warping'
     rot_max = 15 * amount
     shear_max = 3 * amount
-    scale_max = 1.3 * amount
+    scale_max = 1.2 * amount
     stretch_max = 0.1 * amount
     n_dim = len(patch_size)
 
@@ -251,9 +251,8 @@ def getWarpParams(patch_size, amount=1.0):
     if n_dim == 3:
         twist = rot_max * 2 * (np.random.rand() - 0.5)
         rot = min(rot_max - abs(twist), rot_max * (np.random.rand()))
-        scale = 1 - (scale_max - 1) * np.random.rand(3)
-        scale[0] = scale[1]
-        scale[2] = 1
+        scale = 1 - (scale_max - 1) * np.random.rand()
+        scale = (scale, scale, 1)
         stretch = stretch_max * 2 * (np.random.rand(4) - 0.5)
     elif n_dim == 2:
         rot = rot_max * 2 * (np.random.rand() - 0.5)
@@ -262,16 +261,20 @@ def getWarpParams(patch_size, amount=1.0):
         twist = None
 
     # DEBUG
-    # rot     = 0
-    # shear   = 0
-    # scale   = (0.75,0.75,1)
-    # stretch = (0,0,0,0)
-    # twist   = 0
+    #if 'rot' in kwargs:  # 0
+    #    rot = kwargs['rot']
+    #if 'shear' in kwargs:  # 0
+    #    shear = kwargs['shear']
+    #if 'scale' in kwargs:  # (1,1,1)
+    #    scale = kwargs['scale']
+    #if 'stretch' in kwargs:  # (1,1,1,1)
+    #    stretch = kwargs['stretch']
+    #if 'twist' in kwargs:  # 0
+    #    twist = kwargs['twist']
 
     req_size, _, _ = getRequiredPatchSize(patch_size, rot, shear, scale,
                                           stretch, twist)
-    # DEBUG
-    # print req_size
+
     return req_size, rot, shear, scale, stretch, twist
 
 

@@ -23,15 +23,21 @@ class WarpAugment(data_augmentation.DataAugment):
         5. Perspective stretch
     """
 
-    def __init__(self):
+    def __init__(self, skip_ratio=0.3):
         """Initialize WarpAugment."""
-        pass
+        self.ratio = skip_ratio
 
     def prepare(self, spec, **kwargs):
         """
         Randomly draw warp parameters and compute required (mostly
         larger than original) image sizes.
         """
+        # Skip.
+        self.skip = False
+        if self.ratio < np.random.rand():
+            self.skip = True
+            return dict(spec)
+
         imgs = kwargs['imgs']
 
         # Compute the largest image size.
@@ -42,7 +48,7 @@ class WarpAugment(data_augmentation.DataAugment):
 
         # Randomly draw warp parameters.
         # TODO(kisuk): Optional parameter 'amount'?
-        params = warping.getWarpParams(maxsz)
+        params = warping.getWarpParams(maxsz, **kwargs)
         self.size = tuple(x for x in params[0])  # Convert to tuple.
         size_diff = tuple(x - y for x, y in zip(self.size,maxsz))
         self.rot     = params[1]
@@ -66,6 +72,20 @@ class WarpAugment(data_augmentation.DataAugment):
 
     def augment(self, sample, **kwargs):
         """Apply warp data augmentation."""
+        # DEBUG
+        #print '\n[WarpAugment]'
+
+        if self.skip:
+            return sample
+
+        # DEBUG
+        #print 'rot      = {}'.format(self.rot)
+        #print 'shear    = {}'.format(self.shear)
+        #print 'scale    = {}'.format(self.scale)
+        #print 'stretch  = {}'.format(self.stretch)
+        #print 'twist    = {}'.format(self.twist)
+        #print 'req_size = {}'.format(self.size)
+
         imgs = kwargs['imgs']
 
         # Apply warp to each tensor.

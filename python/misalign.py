@@ -75,6 +75,10 @@ class MisalignAugment(data_augmentation.DataAugment):
 
     def augment(self, sample, **kwargs):
         """Apply misalignment data augmentation."""
+        # DEBUG
+        #print '\n[MisalignAugment]'
+        #print 'misalign     z = {}'.format(self.pivot)
+        #print 'misalign (x,y) = ({},{})'.format(self.x_t,self.y_t)
 
         ret = dict()
 

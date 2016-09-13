@@ -261,16 +261,16 @@ def getWarpParams(patch_size, amount=1.0, **kwargs):
         twist = None
 
     # DEBUG
-    #if 'rot' in kwargs:  # 0
-    #    rot = kwargs['rot']
-    #if 'shear' in kwargs:  # 0
-    #    shear = kwargs['shear']
-    #if 'scale' in kwargs:  # (1,1,1)
-    #    scale = kwargs['scale']
-    #if 'stretch' in kwargs:  # (1,1,1,1)
-    #    stretch = kwargs['stretch']
-    #if 'twist' in kwargs:  # 0
-    #    twist = kwargs['twist']
+    if 'rot' in kwargs:  # 0
+       rot = kwargs['rot']
+    if 'shear' in kwargs:  # 0
+       shear = kwargs['shear']
+    if 'scale' in kwargs:  # (1,1,1)
+       scale = kwargs['scale']
+    if 'stretch' in kwargs:  # (1,1,1,1)
+       stretch = kwargs['stretch']
+    if 'twist' in kwargs:  # 0
+       twist = kwargs['twist']
 
     req_size, _, _ = getRequiredPatchSize(patch_size, rot, shear, scale,
                                           stretch, twist)

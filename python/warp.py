@@ -27,6 +27,10 @@ class WarpAugment(data_augmentation.DataAugment):
         """Initialize WarpAugment."""
         self.ratio = skip_ratio
 
+        # DEBUG
+        # self.count = dict(skip=0, warp=0)
+        # self.counter = 0
+
     def prepare(self, spec, **kwargs):
         """
         Randomly draw warp parameters and compute required (mostly
@@ -34,7 +38,7 @@ class WarpAugment(data_augmentation.DataAugment):
         """
         # Skip.
         self.skip = False
-        if self.ratio < np.random.rand():
+        if self.ratio > np.random.rand():
             self.skip = True
             return dict(spec)
 
@@ -73,7 +77,14 @@ class WarpAugment(data_augmentation.DataAugment):
     def augment(self, sample, **kwargs):
         """Apply warp data augmentation."""
         # DEBUG
-        #print '\n[WarpAugment]'
+        # print '\n[WarpAugment]'
+        # self.counter += 1
+        # if self.skip:
+        #     self.count['skip'] += 1
+        # else:
+        #     self.count['warp'] += 1
+        # for k,v in self.count.iteritems():
+        #     print '{}={}'.format(k,'%0.3f'%(v/float(self.counter)))
 
         if self.skip:
             return sample

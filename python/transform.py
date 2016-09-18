@@ -133,6 +133,17 @@ def rescale(img, min_val=0.0, max_val=1.0, dtype='float32'):
     return ret
 
 
+def divideby(img, val=255.0, dtype='float32'):
+    """Rescale."""
+    img = check_volume(img)
+    ret = np.zeros(img.shape, dtype=dtype)
+
+    ret[:] = img
+    ret /= val
+
+    return ret
+
+
 ####################################################################
 ## Data Augmentations
 ####################################################################

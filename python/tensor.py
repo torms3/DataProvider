@@ -201,7 +201,10 @@ class WritableTensorDataWithMask(WritableTensorData):
         return self._norm._data
 
     def get_data(self):
-        return self._data/self._norm._data
+        # return self._data/self._norm._data
+        # Temporary in-place normalization.
+        self._data = np.divide(self._data, self._norm._data, self._data)
+        return self._data
 
     def get_unnormalized_data(self):
         return WritableTensorData.get_data(self)

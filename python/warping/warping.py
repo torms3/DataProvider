@@ -247,6 +247,10 @@ def getWarpParams(patch_size, amount=1.0, **kwargs):
     stretch_max = 0.1 * amount
     n_dim = len(patch_size)
 
+    # Data-specific max.
+    if 'scale_max' in kwargs:
+       scale_max = kwargs['scale_max']
+
     shear = shear_max * 2 * (np.random.rand() - 0.5)
     if n_dim == 3:
         twist = rot_max * 2 * (np.random.rand() - 0.5)

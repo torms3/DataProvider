@@ -8,21 +8,21 @@ from vector import Vec3d
 if __name__ == "__main__":
 
     # Data spec path.
-    dspec_path = 'test_spec/piriform.spec'
+    dspec_path = 'test_spec/pinky.spec'
 
     # Net specification.
-    fov   = Vec3d(9,109,109)
-    outsz = Vec3d(10,100,100)
-    insz  = outsz + fov - Vec3d(1,1,1)
-    net_spec = dict(input=tuple(insz), label=tuple(outsz))
+    # fov   = Vec3d(9,109,109)
+    # outsz = Vec3d(10,100,100)
+    # insz  = outsz + fov - Vec3d(1,1,1)
+    # net_spec = dict(input=tuple(insz), label=tuple(outsz))
+    net_spec = dict(input=(1,208,208), label=(1,100,100))
 
     # Parameters.
     params = dict()
-    # params['border']  = dict(type='mirror_border', fov=fov)
+    params['drange']  = [0,1,2,3,4]
+    params['dprior']  = None
     params['border']  = None
-    # params['augment'] = [dict(type='grey',mode='mix',skip_ratio=0.2)]
-    params['augment'] = [dict(type='warp')]
-    params['drange']  = [1]
+    params['augment'] = [dict(type='flip')]
 
     # Create VolumeDataProvider.
     dp = VolumeDataProvider(dspec_path, net_spec, params)

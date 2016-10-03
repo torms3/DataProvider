@@ -50,10 +50,19 @@ class DataAugmentor(object):
         """
         TODO(kisuk): Documentation.
         """
-        spec = self._prepare(dataset)
-        sample, transform = dataset.random_sample(spec=spec)
+        # Tolerant to failure due to data augmentation.
+        while True:
+            try:
+                spec = self._prepare(dataset)
+                sample, transform = dataset.random_sample(spec=spec)
+                break
+            except:
+                pass
+
+        # Apply data augmentation.
         for aug in self._aug_list:
             sample = aug.augment(sample, imgs=dataset.get_imgs())
+
         # Ensure that sample is ordered by key.
         sample = OrderedDict(sorted(sample.items(), key=lambda x: x[0]))
         return sample, transform

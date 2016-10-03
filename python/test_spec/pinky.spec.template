@@ -1,0 +1,34 @@
+[files]
+# dir = /path/to/pinky/data
+img = %(dir)s/ground_truth/vol19/chann.h5
+      %(dir)s/ground_truth/vol20/chann.h5
+      %(dir)s/ground_truth/vol21/chann.h5
+      %(dir)s/ground_truth/vol22/chann.h5
+      %(dir)s/ground_truth/vol23/chann.h5
+      %(dir)s/ground_truth/vol24/chann.h5
+      %(dir)s/ground_truth/vol27/chann.h5
+      %(dir)s/ground_truth/vol29/chann.h5
+      %(dir)s/ground_truth/vol31/chann.h5
+      %(dir)s/ground_truth/vol33/chann.h5
+lbl = %(dir)s/ground_truth/vol19/seg.h5
+      %(dir)s/ground_truth/vol20/seg.h5
+      %(dir)s/ground_truth/vol21/seg.h5
+      %(dir)s/ground_truth/vol22/seg.h5
+      %(dir)s/ground_truth/vol23/seg.h5
+      %(dir)s/ground_truth/vol24/seg.h5
+      %(dir)s/ground_truth/vol27/seg.h5
+      %(dir)s/ground_truth/vol29/seg.h5
+      %(dir)s/ground_truth/vol31/seg.h5
+      %(dir)s/ground_truth/vol33/seg.h5
+
+[image]
+file = img
+preprocess = dict(type='divideby')
+
+[label]
+file = lbl
+transform = dict(type='binary_class')
+
+[dataset]
+input = image
+label = label

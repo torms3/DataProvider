@@ -181,6 +181,40 @@ def flip(data, rule):
 
     return data
 
+
+def revert_flip(data, rule, is_affinity=False):
+    """
+    TODO(kisuk): Documentation.
+    """
+    data = check_tensor(data)
+
+    assert np.size(rule)==4
+    if is_affinity:
+        assert data.shape[0]==3
+
+    # Transpose in xy.
+    if rule[3]:
+        data = data.transpose(0,1,3,2)
+        # Swap x/y-affinity maps.
+        if is_affinity:
+            data[[0,1],...] = data[[1,0],...]
+    # x reflection
+    if rule[2]:
+        data = data[:,:,:,::-1]
+    # y reflection
+    if rule[1]:
+        data = data[:,:,::-1,:]
+    # z reflection
+    if rule[0]:
+        data = data[:,::-1,:,:]
+        # Special treatment for z-affinity.
+        if is_affinity:
+            data[2,1:,:,:] = data[2,:-1,:,:]
+            data[2,0,:,:].fill(0)
+
+    return data
+
+
 ####################################################################
 ## Label Transformations
 ####################################################################

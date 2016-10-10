@@ -258,7 +258,7 @@ def binary_class(img, dtype='float32'):
     return multiclass_expansion(img, N=2, dtype=dtype)
 
 
-def affinitize(img, dtype='float32'):
+def affinitize(img, dst=(1,1,1), dtype='float32'):
     """
     Transform segmentation to 3D affinity graph.
 
@@ -271,9 +271,31 @@ def affinitize(img, dtype='float32'):
     img = check_volume(img)
     ret = np.zeros((3,) + img.shape, dtype=dtype)
 
-    ret[2,1:,:,:] = (img[1:,:,:]==img[:-1,:,:]) & (img[1:,:,:]>0)  # z affinity
-    ret[1,:,1:,:] = (img[:,1:,:]==img[:,:-1,:]) & (img[:,1:,:]>0)  # y affinity
-    ret[0,:,:,1:] = (img[:,:,1:]==img[:,:,:-1]) & (img[:,:,1:]>0)  # x affinity
+    (dz,dy,dx) = dst
+
+    # z-affinity.
+    assert dz and abs(dz) < img.shape[-3]
+    if dz > 0:
+        ret[2,dz:,:,:] = (img[dz:,:,:]==img[:-dz,:,:]) & (img[dz:,:,:]>0)
+    else:
+        dz = abs(dz)
+        ret[2,:-dz,:,:] = (img[dz:,:,:]==img[:-dz,:,:]) & (img[dz:,:,:]>0)
+
+    # y-affinity.
+    assert dy and abs(dy) < img.shape[-2]
+    if dy > 0:
+        ret[1,:,dy:,:] = (img[:,dy:,:]==img[:,:-dy,:]) & (img[:,dy:,:]>0)
+    else:
+        dy = abs(dy)
+        ret[1,:,:-dy,:] = (img[:,dy:,:]==img[:,:-dy,:]) & (img[:,dy:,:]>0)
+
+    # x-affinity.
+    assert dx and abs(dx) < img.shape[-1]
+    if dx > 0:
+        ret[0,:,:,dx:] = (img[:,:,dx:]==img[:,:,:-dx]) & (img[:,:,dx:]>0)
+    else:
+        dx = abs(dx)
+        ret[0,:,:,:-dx] = (img[:,:,dx:]==img[:,:,:-dx]) & (img[:,:,dx:]>0)
 
     return ret
 
@@ -281,7 +303,7 @@ def affinitize(img, dtype='float32'):
 ## Mask Transformations
 ####################################################################
 
-def affinitize_mask(msk, dtype='float32'):
+def affinitize_mask(msk, dst=(1,1,1), dtype='float32'):
     """
     Transform binary mask to affinity mask.
 
@@ -294,9 +316,31 @@ def affinitize_mask(msk, dtype='float32'):
     msk = check_volume(msk)
     ret = np.zeros((3,) + msk.shape, dtype=dtype)
 
-    ret[2,1:,:,:] = (msk[1:,:,:]>0) | (msk[:-1,:,:]>0)  # z affinity
-    ret[1,:,1:,:] = (msk[:,1:,:]>0) | (msk[:,:-1,:]>0)  # y affinity
-    ret[0,:,:,1:] = (msk[:,:,1:]>0) | (msk[:,:,:-1]>0)  # x affinity
+    (dz,dy,dx) = dst
+
+    # z-affinity.
+    assert dz and abs(dz) < msk.shape[-3]
+    if dz > 0:
+        ret[2,dz:,:,:] = (msk[dz:,:,:]>0) | (msk[:-dz,:,:]>0)
+    else:
+        dz = abs(dz)
+        ret[2,:-dz,:,:] = (msk[dz:,:,:]>0) | (msk[:-dz,:,:]>0)
+
+    # y-affinity.
+    assert dy and abs(dy) < msk.shape[-2]
+    if dy > 0:
+        ret[1,:,dy:,:] = (msk[:,dy:,:]>0) | (msk[:,:-dy,:]>0)
+    else:
+        dy = abs(dy)
+        ret[1,:,:-dy,:] = (msk[:,dy:,:]>0) | (msk[:,:-dy,:]>0)
+
+    # x-affinity.
+    assert dx and abs(dx) < msk.shape[-1]
+    if dx > 0:
+        ret[0,:,:,dx:] = (msk[:,:,dx:]>0) | (msk[:,:,:-dx]>0)
+    else:
+        dx = abs(dx)
+        ret[0,:,:,:-dx] = (msk[:,:,dx:]>0) | (msk[:,:,:-dx]>0)
 
     return ret
 

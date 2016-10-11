@@ -130,9 +130,10 @@ class VolumeDataProvider(DataProvider):
         """
         affinitized = False
         for key, spec in transform.iteritems():
-            if spec['type'] == 'affinitize':
-                affinitized = True
-            label_func.evaluate(sample, key, spec)
+            if spec is not None:
+                if spec['type'] == 'affinitize':
+                    affinitized = True
+                label_func.evaluate(sample, key, spec)
 
         # Crop by 1 if affinitized.
         if affinitized:

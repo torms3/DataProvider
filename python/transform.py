@@ -182,15 +182,22 @@ def flip(data, rule):
     return data
 
 
-def revert_flip(data, rule, is_affinity=False):
+def revert_flip(data, rule, dst=None):
     """
     TODO(kisuk): Documentation.
     """
     data = check_tensor(data)
 
     assert np.size(rule)==4
+
+    # Special treat for affinity.
+    is_affinity = False if dst is None else True
     if is_affinity:
-        assert data.shape[0]==3
+        (dz,dy,dx) = dst
+        assert data.shape[-4]==3
+        assert dx and abs(dx) < data.shape[-1]
+        assert dy and abs(dy) < data.shape[-2]
+        assert dz and abs(dz) < data.shape[-3]
 
     # Transpose in xy.
     if rule[3]:
@@ -201,16 +208,39 @@ def revert_flip(data, rule, is_affinity=False):
     # x reflection
     if rule[2]:
         data = data[:,:,:,::-1]
+        # Special treatment for x-affinity.
+        if is_affinity:
+            if dx > 0:
+                data[0,:,:,dx:] = data[0,:,:,:-dx]
+                data[0,:,:,:dx].fill(0)
+            else:
+                dx = abs(dx)
+                data[0,:,:,:-dx] = data[0,:,:,dx:]
+                data[0,:,:,-dx:].fill(0)
     # y reflection
     if rule[1]:
         data = data[:,:,::-1,:]
+        # Special treatment for y-affinity.
+        if is_affinity:
+            if dy > 0:
+                data[1,:,dy:,:] = data[1,:,:-dy,:]
+                data[1,:,:dy,:].fill(0)
+            else:
+                dy = abs(dy)
+                data[1,:,:-dy,:] = data[1,:,dy:,:]
+                data[1,:,-dy:,:].fill(0)
     # z reflection
     if rule[0]:
         data = data[:,::-1,:,:]
         # Special treatment for z-affinity.
         if is_affinity:
-            data[2,1:,:,:] = data[2,:-1,:,:]
-            data[2,0,:,:].fill(0)
+            if dz > 0:
+                data[2,dz:,:,:] = data[2,:-dz,:,:]
+                data[2,:dz,:,:].fill(0)
+            else:
+                dz = abs(dz)
+                data[2,:-dz,:,:] = data[2,dz:,:,:]
+                data[2,-dz:,:,:].fill(0)
 
     return data
 

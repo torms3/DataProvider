@@ -86,7 +86,7 @@ class VolumeDataset(Dataset):
                     # Lazy filling of mask shape. Since the shape of mask should
                     # be the same as the shape of corresponding label, it can be
                     # known only after having processed label in the first pass.
-                    label = data.strip('_mask')
+                    label, _ = data.split('_mask')
                     shape = self._data[label].shape()
                     config.set(data, 'shape', shape)
                 self._data[name] = ConfigData(config, data)

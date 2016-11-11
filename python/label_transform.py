@@ -38,7 +38,7 @@ def binarize(sample, key, rebalancing=True):
 
 def binary_class(sample, key, rebalancing=True):
     binarize(sample, key, False)
-    multiclass_expansion(sample, key, 2, rebalancing)
+    multiclass_expansion(sample, key, [0,1], rebalancing)
 
 
 def affinitize(sample, key, rebalancing=True):
@@ -54,17 +54,17 @@ def affinitize(sample, key, rebalancing=True):
         sample[key+'_mask'] *= wmsk
 
 
-def multiclass_expansion(sample, key, N, rebalancing=True):
+def multiclass_expansion(sample, key, ids, rebalancing=True):
     """For semantic segmentation."""
     lbl  = sample[key]
     msk  = utils.check_volume(sample[key+'_mask'])
-    lbls = transform.multiclass_expansion(lbl, N)
-    msks = np.tile(msk, (N,1,1,1))
+    lbls = transform.multiclass_expansion(lbl, ids)
+    msks = np.tile(msk, (len(ids),1,1,1))
     # Update sample.
     sample[key] = lbls
     sample[key+'_mask'] = msks
     # Rebalancing.
     if rebalancing:
         wmsk = transform.rebalance_class(lbl)
-        wmsk = np.tile(wmsk, (N,1,1,1))
+        wmsk = np.tile(wmsk, (len(ids),1,1,1))
         sample[key+'_mask'] *= wmsk

@@ -268,14 +268,21 @@ def binarize(img, dtype='float32'):
     return ret
 
 
-def multiclass_expansion(img, N, dtype='float32'):
-    """
-    TODO(kisuk): Semantic segmentation.
+def multiclass_expansion(img, ids, dtype='float32'):
+    """Expand an indexed image to one-hot representation for multiclass
+    classification.
+
+    Args:
+        img: 3D indexed image, with each index corresponding to each class.
+        ids: a list of class IDs to expand.
+
+    Returns:
+        ret: an expanded 4D tensor.
     """
     img = check_volume(img)
-    ret = np.zeros((N,) + img.shape, dtype=dtype)
-    for l in range(N):
-        ret[l,...] = (img == l)
+    ret = np.zeros((len(ids),) + img.shape, dtype=dtype)
+    for i, l in enumerate(ids):
+        ret[i,...] = (img == l)
     return ret
 
 
@@ -285,7 +292,7 @@ def binary_class(img, dtype='float32'):
     """
     img = check_volume(img)
     img = binarize(img, dtype=dtype)
-    return multiclass_expansion(img, N=2, dtype=dtype)
+    return multiclass_expansion(img, ids=[0,1], dtype=dtype)
 
 
 def affinitize(img, dst=(1,1,1), dtype='float32'):

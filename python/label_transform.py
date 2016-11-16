@@ -12,7 +12,7 @@ import utils
 
 class LabelFunction(object):
     """
-    TODO(kisuk): Documentation.
+    Transform label.
     """
 
     def evaluate(self, sample, key, spec):
@@ -58,7 +58,8 @@ def multiclass_expansion(sample, key, ids, rebalancing=True):
     """For semantic segmentation."""
     lbl  = sample[key]
     msk  = utils.check_volume(sample[key+'_mask'])
-    lbls = transform.multiclass_expansion(lbl, ids)
+    lbls, msk2 = transform.multiclass_expansion(lbl, ids)
+    msk *= msk2
     msks = np.tile(msk, (len(ids),1,1,1))
     # Update sample.
     sample[key] = lbls

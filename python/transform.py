@@ -278,12 +278,16 @@ def multiclass_expansion(img, ids, dtype='float32'):
 
     Returns:
         ret: an expanded 4D tensor.
+        msk:
     """
     img = check_volume(img)
     ret = np.zeros((len(ids),) + img.shape, dtype=dtype)
+    msk = np.ones(img.shape, dtype=dtype)
     for i, l in enumerate(ids):
-        ret[i,...] = (img == l)
-    return ret
+        idx = (img == l)
+        ret[i,...] = idx.astype(dtype)
+        msk[idx] = 0
+    return ret, msk
 
 
 def binary_class(img, dtype='float32'):
@@ -292,7 +296,8 @@ def binary_class(img, dtype='float32'):
     """
     img = check_volume(img)
     img = binarize(img, dtype=dtype)
-    return multiclass_expansion(img, ids=[0,1], dtype=dtype)
+    ret, _ = multiclass_expansion(img, ids=[0,1], dtype=dtype)
+    return ret
 
 
 def affinitize(img, dst=(1,1,1), dtype='float32'):

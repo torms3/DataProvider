@@ -282,11 +282,11 @@ def multiclass_expansion(img, ids, dtype='float32'):
     """
     img = check_volume(img)
     ret = np.zeros((len(ids),) + img.shape, dtype=dtype)
-    msk = np.ones(img.shape, dtype=dtype)
+    msk = np.zeros(img.shape, dtype=dtype)
     for i, l in enumerate(ids):
         idx = (img == l)
+        msk[idx] = 1
         ret[i,...] = idx.astype(dtype)
-        msk[idx] = 0
     return ret, msk
 
 

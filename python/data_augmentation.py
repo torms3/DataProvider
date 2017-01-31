@@ -140,12 +140,10 @@ class GreyAugment(DataAugment):
         Adapted from ELEKTRONN (http://elektronn.org/).
         """
         #print '2D greyscale augmentation'  # DEBUG
-        imgs = kwargs['imgs']
-        n = len(imgs)
 
         # Greyscale augmentation.
-        for i in range(n):
-            key = imgs[i]
+        imgs = kwargs['imgs']
+        for key in imgs:
             for z in xrange(sample[key].shape[-3]):
                 img = sample[key][...,z,:,:]
                 img *= 1 + (np.random.rand() - 0.5)*self.CONTRAST_FACTOR
@@ -162,12 +160,9 @@ class GreyAugment(DataAugment):
         """
         #print '3D greyscale augmentation'  # DEBUG
 
-        imgs = kwargs['imgs']
-        n = len(imgs)
-
         # Greyscale augmentation.
-        for i in range(n):
-            key = imgs[i]
+        imgs = kwargs['imgs']
+        for key in imgs:
             sample[key] *= 1 + (np.random.rand() - 0.5)*self.CONTRAST_FACTOR
             sample[key] += (np.random.rand() - 0.5)*self.BRIGHTNESS_FACTOR
             sample[key] = np.clip(sample[key], 0, 1)

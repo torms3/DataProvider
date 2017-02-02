@@ -23,8 +23,13 @@ class MissingAugment(data_augmentation.DataAugment):
 
     def __init__(self, max_sec=1, skip_ratio=0.3):
         """Initialize MissingSectionAugment."""
+        assert max_sec >= 0
+        assert skip_ratio >= 0.0 and skip_ratio <= 1.0
         self.set_max_sections(max_sec)
         self.set_skip_ratio(skip_ratio)
+
+        # DEBUG(kisuk)
+        # self.hist = [0] * (max_sec + 1)
 
     def set_max_sections(self, max_sec):
         """Set the maximum number of missing sections to introduce."""
@@ -45,8 +50,10 @@ class MissingAugment(data_augmentation.DataAugment):
 
         if np.random.rand() > self.ratio:
             # Randomly draw the number of sections to introduce.
-            num_sec = np.random.randint(0, self.MAX_SEC + 1)
-            print "num_sec = %d" % num_sec
+            num_sec = np.random.randint(1, self.MAX_SEC + 1)
+
+            # DEBUG(kisuk)
+            # print "num_sec = %d" % num_sec
 
             # Assume that the sample contains only one input volume,
             # or multiple input volumes of same size.
@@ -65,5 +72,19 @@ class MissingAugment(data_augmentation.DataAugment):
             # Discard the selected sections.
             for key in imgs:
                 ret[key][...,locs,:,:] *= 0
+
+        # DEBUG(kisuk): Record keeping.
+        #     self.hist[num_sec] += 1
+        # else:
+        #     self.hist[0] += 1
+
+        # DEBUG(kisuk)
+        # count = sum(self.hist)
+        # hist = [x/float(count) for x in self.hist]
+        # stat = "[ "
+        # for v in hist:
+        #     stat += "{} ".format("%0.3f" % v)
+        # stat += "]"
+        # print stat
 
         return ret

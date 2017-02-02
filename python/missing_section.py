@@ -9,7 +9,7 @@ Kisuk Lee <kisuklee@mit.edu>, 2017
 import data_augmentation
 import numpy as np
 
-class MissingSectionAugment(data_augmentation.DataAugment):
+class MissingAugment(data_augmentation.DataAugment):
     """
     Introduce missing section(s) to a training example. The number of missing
     sections to introduce is randomly drawn from the uniform distribution
@@ -22,10 +22,10 @@ class MissingSectionAugment(data_augmentation.DataAugment):
     """
 
     def __init__(self, max_sec=1):
-        """Initialize MissingSectionAugment."""
+        """Initialize MissingAugment."""
         self.set_max_sections(max_sec)
 
-    def set_max_translation(self, max_sec):
+    def set_max_sections(self, max_sec):
         """Set the maximum number of missing sections to introduce."""
         self.MAX_SEC = max_sec
 
@@ -38,6 +38,7 @@ class MissingSectionAugment(data_augmentation.DataAugment):
         """Apply missing section data augmentation."""
         # Randomly draw the number of sections to introduce.
         num_sec = np.random.randint(0, self.MAX_SEC + 1)
+        print "num_sec = %d" % num_sec
 
         # Assume that the sample contains only one input volume,
         # or multiple input volumes of same size.
@@ -46,8 +47,8 @@ class MissingSectionAugment(data_augmentation.DataAugment):
         for key in imgs:
             zdim = self.spec[key][-3]
             assert num_sec < zdim
-            zdims.add(dim)
-        assert len(zdim) == 1
+            zdims.add(zdim)
+        assert len(zdims) == 1
         zdim = zdims.pop()
 
         # Randomly draw z-slices to black out.

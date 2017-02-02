@@ -16,7 +16,7 @@ Data augmentaion pool.
 Whenever adding a new data augmentation, its type name should be appended to
 this list.
 """
-aug_pool = ['warp','flip','grey','misalign']
+aug_pool = ['warp','flip','grey','misalign','missing']
 
 
 class DataAugmentor(object):
@@ -189,3 +189,4 @@ imported as below.
 
 from misalign import MisalignAugment
 from warp import WarpAugment
+from missing_section import MissingAugment

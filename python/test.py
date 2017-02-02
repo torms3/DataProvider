@@ -32,7 +32,7 @@ if __name__ == "__main__":
     #     sample = dp.random_sample()
     #     print time.time() - start
 
-    # Dump a single randome sample.
+    # Dump a single random sample.
     sample = dp.random_sample()
     print 'Save as file...'
     f = h5py.File('sample.h5')

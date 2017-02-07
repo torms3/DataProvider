@@ -160,8 +160,14 @@ class VolumeDataset(Dataset):
             original_spec = self._spec
             self.set_spec(spec)
 
-        pos = self._random_location()
-        ret = self.get_sample(pos)
+        try:
+            pos = self._random_location()
+            ret = self.get_sample(pos)
+        except:
+            # Return to original spec.
+            if spec is not None:
+                self.set_spec(original_spec)
+            raise
 
         # Return to original spec.
         if spec is not None:

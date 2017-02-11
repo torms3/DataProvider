@@ -47,13 +47,12 @@ class BoxAugment(data_augmentation.DataAugment):
         # Random box augmentation.
         count = 0
         goal  = bbox.volume()*self.density
-
         while True:
             # Random location.
             m = self.min_dim  # Margin.
-            z = np.random.randint(m, self.dim[0] - m)
-            y = np.random.randint(m, self.dim[1] - m)
-            x = np.random.randint(m, self.dim[2] - m)
+            z = np.random.randint(0, self.dim[0])
+            y = np.random.randint(0, self.dim[1])
+            x = np.random.randint(0, self.dim[2])
             loc = Vec3d(z,y,x) + self.offset
             # Random box size.
             dim = np.random.randint(self.min_dim, self.max_dim + 1, 3)

@@ -18,11 +18,11 @@ class BoxAugment(data_augmentation.DataAugment):
 
     def __init__(self):
         """Initialize BoxAugment."""
-        self.min_dim = 20
-        self.max_dim = 50
-        self.aspect_ratio = 6
+        self.min_dim = 30
+        self.max_dim = 80
+        self.aspect_ratio = 10
         self.density = 0.2
-        self.alpha = 0.15
+        self.alpha = 0.5
 
     def prepare(self, spec, **kwargs):
         """Prepare mask."""
@@ -47,11 +47,13 @@ class BoxAugment(data_augmentation.DataAugment):
         # Random box augmentation.
         count = 0
         goal  = bbox.volume()*self.density
+
         while True:
             # Random location.
-            z = np.random.randint(0, self.dim[0])
-            y = np.random.randint(0, self.dim[1])
-            x = np.random.randint(0, self.dim[2])
+            m = self.min_dim  # Margin.
+            z = np.random.randint(m, self.dim[0] - m)
+            y = np.random.randint(m, self.dim[1] - m)
+            x = np.random.randint(m, self.dim[2] - m)
             loc = Vec3d(z,y,x) + self.offset
             # Random box size.
             dim = np.random.randint(self.min_dim, self.max_dim + 1, 3)
@@ -82,7 +84,7 @@ class BoxAugment(data_augmentation.DataAugment):
             b.translate(-self.offset)
             vmin = b.min()
             vmax = b.max()
-            sample[key][...,-3:] *= self.mask[
+            sample[key][...,:,:,:] *= self.mask[
                 vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]]
 
         return sample

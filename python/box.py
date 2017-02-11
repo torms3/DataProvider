@@ -47,6 +47,9 @@ class Box(object):
     def size(self):
         return Vec3d(self._size)
 
+    def volume(self):
+        return self._size[0]*self._size[1]*self._size[2]
+
     def contains(self, v):
         """Return true if a point is inside the box."""
         (x,y,z) = Vec3d(v)

@@ -15,10 +15,6 @@ class MissingAugment(data_augmentation.DataAugment):
     sections to introduce is randomly drawn from the uniform distribution
     between [0, MAX_SEC]. Default MAX_SEC is 1, which can be overwritten by
     user-specified value.
-
-    TODO(kisuk):
-        1. Specific control of the location to introduce missing sections
-        2. Weight mask modification (put more weight on the missing section(s))
     """
 
     def __init__(self, max_sec=1, skip_ratio=0.3, mode='mix'):

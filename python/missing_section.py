@@ -34,7 +34,7 @@ class MissingAugment(data_augmentation.DataAugment):
     def set_skip_ratio(self, ratio):
         """Set the probability of skipping augmentation."""
         assert skip_ratio >= 0.0 and skip_ratio <= 1.0
-        self.ratio = ratio
+        self.skip_ratio = ratio
 
     def set_mode(self, mode):
         """Set full/partial/mix missing section mode."""
@@ -48,8 +48,8 @@ class MissingAugment(data_augmentation.DataAugment):
 
     def augment(self, sample, **kwargs):
         """Apply missing section data augmentation."""
-        if np.random.rand() > self.ratio:
-            self._do_augment(sample, kwargs)
+        if np.random.rand() > self.skip_ratio:
+            self._do_augment(sample, **kwargs)
 
         # DEBUG(kisuk): Record keeping.
         #     self.hist[num_sec] += 1

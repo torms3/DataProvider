@@ -33,7 +33,7 @@ class MissingAugment(data_augmentation.DataAugment):
 
     def set_skip_ratio(self, ratio):
         """Set the probability of skipping augmentation."""
-        assert skip_ratio >= 0.0 and skip_ratio <= 1.0
+        assert ratio >= 0.0 and ratio <= 1.0
         self.skip_ratio = ratio
 
     def set_mode(self, mode):

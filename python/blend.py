@@ -10,6 +10,7 @@ import numpy as np
 
 import box
 from tensor import WritableTensorData as WTD, WritableTensorDataWithMask as WTDM
+import time
 
 def prepare_outputs(spec, locs, blend=False, blend_mode=''):
     blend_pool = ['','bump']
@@ -104,8 +105,12 @@ class BumpBlend(Blend):
         """Blend with data."""
         for k, v in sample.iteritems():
             assert k in self.data
+            t0 = time.time()
             mask = self._get_mask(k, loc)
+            t1 = time.time() - t0
             self.data[k].set_patch(loc, v, op=self.op, mask=mask)
+            t2 = time.time() - t0
+            print 'get_mask: %.3f, set_patch: %.3f' % (t1, t2-t1)
 
     ####################################################################
     ## Private methods.

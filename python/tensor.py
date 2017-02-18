@@ -11,6 +11,7 @@ import numpy as np
 
 from box import *
 from vector import *
+import time
 
 class TensorData(object):
     """Read-only tensor data.
@@ -193,9 +194,13 @@ class WritableTensorDataWithMask(WritableTensorData):
         if mask is None:
             mask = np.ones(patch.shape, dtype='float32')
         # Set patch.
+        t0 = time.time()
         WritableTensorData.set_patch(self, pos, mask*patch, op)
+        t1 = time.time() - t0
         # Set normalization.
         self._norm.set_patch(pos, mask, op='np.add')
+        t2 = time.time() - t0
+        print 'set_patch: %.3f, set_mask: %.3f' % (t1, t2-t1)
 
     def get_norm(self):
         return self._norm._data

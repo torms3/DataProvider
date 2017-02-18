@@ -85,6 +85,8 @@ class BumpBlend(Blend):
         """Initialize BumpBlend."""
         Blend.__init__(self, spec, locs, blend)
 
+        self.logit_maps = dict()
+
         # Inference with overlapping window.
         self.max_logits = None
         if blend:
@@ -128,14 +130,18 @@ class BumpBlend(Blend):
         return -(x*(1-x))**(-t)-(y*(1-y))**(-t)-(z*(1-z))**(-t)
 
     def _bump_logit_map(self, dim):
-        x = range(dim[-1])
-        y = range(dim[-2])
-        z = range(dim[-3])
-        zv, yv, xv = np.meshgrid(z, y, x, indexing='ij')
-        xv = (xv+1.0)/(dim[-1]+1.0)
-        yv = (yv+1.0)/(dim[-2]+1.0)
-        zv = (zv+1.0)/(dim[-3]+1.0)
-        return self._bump_logit(zv, yv, xv)
+        ret = self.logit_maps(dim)
+        if ret is None:
+            x = range(dim[-1])
+            y = range(dim[-2])
+            z = range(dim[-3])
+            zv, yv, xv = np.meshgrid(z, y, x, indexing='ij')
+            xv = (xv+1.0)/(dim[-1]+1.0)
+            yv = (yv+1.0)/(dim[-2]+1.0)
+            zv = (zv+1.0)/(dim[-3]+1.0)
+            ret = self._bump_logit(zv, yv, xv)
+            self.logit_maps[dim] = ret
+        return ret
 
     def _bump_map(self, dim, max_logit):
         return np.exp(self._bump_logit_map(dim) - max_logit)

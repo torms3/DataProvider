@@ -168,6 +168,8 @@ class WritableTensorData(TensorData):
         rval = 'patch'
         if op is None:
             exec '{}={}'.format(lval, rval)
+        elif op is np.add:
+            self._data[:,vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] = patch
         else:
             exec '{}={}({},{})'.format(lval, op, lval, rval)
 

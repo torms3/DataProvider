@@ -130,7 +130,7 @@ class BumpBlend(Blend):
         return -(x*(1-x))**(-t)-(y*(1-y))**(-t)-(z*(1-z))**(-t)
 
     def _bump_logit_map(self, dim):
-        ret = self.logit_maps(dim)
+        ret = self.logit_maps.get(dim)
         if ret is None:
             x = range(dim[-1])
             y = range(dim[-2])

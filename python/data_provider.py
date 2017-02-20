@@ -141,3 +141,15 @@ class VolumeDataProvider(DataProvider):
                 sample[key] = tensor_func.crop(data, (1,1,1))
 
         return sample
+
+
+class Sampler(object):
+    """
+    Draw samples from the data provider.
+    This is a function object for asynchronous sampling.
+    """
+    def __init__(self, dp):
+        self.dp = dp
+
+    def __call__(self):
+        return self.dp.random_sample()

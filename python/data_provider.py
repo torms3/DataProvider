@@ -146,10 +146,24 @@ class VolumeDataProvider(DataProvider):
 class Sampler(object):
     """
     Draw samples from the data provider.
-    This is a function object for asynchronous sampling.
     """
-    def __init__(self, dp):
+    def __init__(self, dp, f=None):
+        """
+        Initialize sampler.
+
+        Args:
+            dp: Data provider.
+            f:  Sample transformer.
+        """
         self.dp = dp
+        self.f  = f
 
     def __call__(self):
-        return self.dp.random_sample()
+        """Draw a sample, transform if needed."""
+        sample = self.dp.random_sample()
+        if self.f is not None:
+            sample = self.f(sample)
+        return sample
+
+    def set_f(self, f):
+        self.f = f

@@ -287,6 +287,7 @@ def multiclass_expansion(img, ids, dtype='float32'):
         idx = (img == l)
         msk[idx] = 1
         ret[i,...] = idx.astype(dtype)
+    msk = np.tile(msk, (len(ids),1,1,1))
     return ret, msk
 
 
@@ -391,7 +392,7 @@ def affinitize_mask(msk, dst=(1,1,1), dtype='float32'):
 ####################################################################
 
 def rebalance_class(img, msk=None, dtype='float32'):
-    """Class-rebalancing."""
+    """Multiclass rebalancing."""
     img = check_volume(img)
     ret = np.zeros(img.shape, dtype=dtype)
 
@@ -415,27 +416,33 @@ def rebalance_class(img, msk=None, dtype='float32'):
     return ret
 
 
-# def rebalance_class(img, dtype='float32'):
-#     """Class-rebalancing."""
-#     img = check_volume(img)
-#     ret = np.zeros(img.shape, dtype=dtype)
-#
-#     _, idx, cnt = np.unique(img, return_inverse=True, return_counts=True)
-#     assert(len(cnt)>0)
-#
-#     if len(cnt)==1:
-#         # TODO(kisuk):
-#         #   This is to make rebalancing exactly the same as in ZNNv1 and v4,
-#         #   but not sure about how reasonable this value (0.5) is, and about
-#         #   if this can also be applied to multiclass case (e.g. semantic
-#         #   segmentation).
-#         ret[:] = 0.5
-#     else:
-#         weights = 1.0/cnt
-#         weights = weights/np.sum(weights)
-#         ret = weights[idx.reshape(ret.shape)]
-#
-#     return ret
+def rebalance_binary_class(img, msk=None, dtype='float32'):
+    """Binary-class rebalancing.
+
+    Profile:
+        (18,158,158): 5.6 ms
+    """
+    img = check_volume(img)
+    ret = np.zeros(img.shape, dtype=dtype)
+
+    if msk is None:
+        msk   = np.ones(img.shape, dtype=bool)
+        idx   = img > 0
+        total = img.size
+    else:
+        msk   = msk > 0
+        idx   = (img > 0) & msk
+        total = np.count_nonzero(msk)
+
+    count = np.count_nonzero(idx)
+    if count > 0:
+        weight = [1.0/count, 1.0/(total - count)]
+        weight = weight/np.sum(weight)
+        ret[idx] = weight[0]
+        ret[~idx & msk] = weight[1]
+
+    return ret
+
 
 ########################################################################
 ## Unit Testing

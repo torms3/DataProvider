@@ -41,7 +41,6 @@ class ForwardScanner(object):
         """
         TODO(kisuk): Documentation.
         """
-        t0 = time.time()
         ret = None
         if self.counter < len(self.locs):
             assert self.current is None
@@ -51,7 +50,6 @@ class ForwardScanner(object):
             ret, _ = self.dataset.get_sample(loc)
             self.current = loc
             self.counter += 1
-        print 'pull: %.3f' % (time.time()-t0)
         return ret
 
     def push(self, sample):
@@ -62,11 +60,9 @@ class ForwardScanner(object):
             sample:
             kwargs:
         """
-        t0 = time.time()
         assert self.current is not None
         self.outputs.push(self.current, sample)
         self.current = None
-        print 'push: %.3f' % (time.time()-t0)
 
     ####################################################################
     ## Private Methods.

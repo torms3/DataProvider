@@ -147,23 +147,23 @@ class Sampler(object):
     """
     Draw samples from the data provider.
     """
-    def __init__(self, dp, pp=None):
+    def __init__(self, dp, f=None):
         """
         Initialize sampler.
 
         Args:
             dp: Data provider.
-            tf: Transform function object.
+            f:  Sample transformer.
         """
         self.dp = dp
-        self.tf = tf
+        self.f  = f
 
     def __call__(self):
-        """Draw a sample, transform and return."""
+        """Draw a sample, transform if needed."""
         sample = self.dp.random_sample()
-        if self.tf is not None:
-            sample = self.tf(sample)
+        if self.f is not None:
+            sample = self.f(sample)
         return sample
 
-    def set_transform(self, tf):
-        self.tf = tf
+    def set_f(self, f):
+        self.f = f

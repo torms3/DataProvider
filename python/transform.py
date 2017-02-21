@@ -268,7 +268,7 @@ def binarize(img, dtype='float32'):
     return ret
 
 
-def multiclass_expansion(img, ids, rebalance=False, dtype='float32'):
+def multiclass_expansion(img, ids, dtype='float32'):
     """Expand an indexed image to one-hot representation for multiclass
     classification.
 
@@ -287,6 +287,7 @@ def multiclass_expansion(img, ids, rebalance=False, dtype='float32'):
         idx = (img == l)
         msk[idx] = 1
         ret[i,...] = idx.astype(dtype)
+    msk = np.tile(msk, (len(ids),1,1,1))
     return ret, msk
 
 

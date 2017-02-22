@@ -36,13 +36,12 @@ class Parser(object):
         # Set dataset-specific params.
         self.dparams = self._parse_dataset_params(config)
 
-
     def parse_dataset(self, dataset_id):
         """
-        TODO(kisuk): Documentation.
+        Parse each dataset specified by data spec.
 
         Args:
-            dataset_id:
+            dataset_id
 
         Returns:
             dataset: ConfigParser object containing dataset info.
@@ -76,7 +75,7 @@ class Parser(object):
 
     def parse_data(self, config, name, data, idx):
         """
-        TODO(kisuk): Documentation.
+        Parse each data volume of the dataset being parsed.
 
         Args:
             config:

@@ -16,13 +16,17 @@ class BoxAugment(data_augmentation.DataAugment):
     Add random box masks.
     """
 
-    def __init__(self):
+    def __init__(self, min_dim, max_dim, aspect_ratio, density):
         """Initialize BoxAugment."""
-        self.min_dim = 30
-        self.max_dim = 80
-        self.aspect_ratio = 10
-        self.density = 0.2
-        self.alpha = 0.5
+        self.min_dim = min_dim
+        self.max_dim = max_dim
+        self.aspect_ratio = aspect_ratio
+        self.density = density
+        # self.min_dim = 20
+        # self.max_dim = 60
+        # self.aspect_ratio = 6
+        # self.density = 0.2
+        # self.alpha = 0.5
 
     def prepare(self, spec, **kwargs):
         """Prepare mask."""
@@ -59,7 +63,7 @@ class BoxAugment(data_augmentation.DataAugment):
             # Anisotropy.
             dim[0] /= self.aspect_ratio
             # Alpha.
-            alpha = np.random.rand() * self.alpha
+            # alpha = np.random.rand() * self.alpha
             # Box.
             box = bbox.intersect(centered_box(loc, dim))
             # Local coordiate.
@@ -67,7 +71,8 @@ class BoxAugment(data_augmentation.DataAugment):
             vmin = box.min()
             vmax = box.max()
             # Apply box.
-            self.mask[vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] *= alpha
+            # self.mask[vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] *= alpha
+            self.mask[vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] = 0
             # Stop condition.
             count += box.volume()
             if count > goal:

@@ -102,7 +102,7 @@ class FlipAugment(DataAugment):
 class GreyAugment(DataAugment):
     """
     Greyscale value augmentation.
-    Randomly adjust contrast and brightness, and apply random gamma correction.
+    Randomly adjust contrast/brightness, and apply random gamma correction.
     """
 
     def __init__(self, mode='3D', skip_ratio=0.3):
@@ -110,14 +110,12 @@ class GreyAugment(DataAugment):
         Initialize parameters.
 
         Args:
-            mode:
-            ratio:
+            mode: 2D, 3D, or mix
+            skip_ratio:
         """
+        assert mode=='3D' or mode=='2D' or mode=='mix'
         self.mode  = mode
         self.ratio = skip_ratio
-
-        assert mode=='3D' or mode=='2D' or mode=='mix'
-
         self.CONTRAST_FACTOR   = 0.3
         self.BRIGHTNESS_FACTOR = 0.3
 
@@ -169,18 +167,6 @@ class GreyAugment(DataAugment):
             sample[key] **= 2.0**(np.random.rand()*2 - 1)
 
         return sample
-
-
-class WarpAugment(DataAugment):
-    """
-    Warping.
-    """
-
-    def prepare(self, spec, **kwargs):
-        pass
-
-    def augment(self, sample, **kwargs):
-        pass
 
 """
 Whenever adding new data augmentation outside this module, it should be properly

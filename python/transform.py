@@ -435,7 +435,7 @@ def rebalance_binary_class(img, msk=None, dtype='float32'):
         total = np.count_nonzero(msk)
 
     count = np.count_nonzero(idx)
-    if count > 0:
+    if count > 0 and (total - count) > 0:
         weight = [1.0/count, 1.0/(total - count)]
         weight = weight/np.sum(weight)
         ret[idx] = weight[0]

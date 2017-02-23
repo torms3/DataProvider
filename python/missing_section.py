@@ -52,7 +52,7 @@ class MissingAugment(data_augmentation.DataAugment):
     def augment(self, sample, **kwargs):
         """Apply missing section data augmentation."""
         if np.random.rand() > self.skip_ratio:
-            self._do_augment(sample, **kwargs)
+            sample = self._do_augment(sample, **kwargs)
 
         # DEBUG(kisuk): Record keeping.
         #     self.hist[num_sec] += 1

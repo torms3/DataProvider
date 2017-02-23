@@ -54,18 +54,18 @@ class DataAugmentor(object):
         while True:
             try:
                 spec = self._prepare(dataset)
-                sample, transform = dataset.random_sample(spec=spec)
+                sample = dataset.random_sample(spec=spec)
                 break
             except:
                 pass
 
         # Apply data augmentation.
         for aug in self._aug_list:
-            sample = aug.augment(sample, imgs=dataset.get_imgs())
+            sample = aug(sample, imgs=dataset.get_imgs())
 
         # Ensure that sample is ordered by key.
         sample = OrderedDict(sorted(sample.items(), key=lambda x: x[0]))
-        return sample, transform
+        return sample
 
     def _prepare(self, dataset):
         ret = dict(dataset.get_spec())
@@ -82,7 +82,7 @@ class DataAugment(object):
     def prepare(self, spec, **kwargs):
         raise NotImplementedError
 
-    def augment(self, sample, **kwargs):
+    def __call__(self, sample, **kwargs):
         raise NotImplementedError
 
 
@@ -94,20 +94,19 @@ class FlipAugment(DataAugment):
     def prepare(self, spec, **kwargs):
         return dict(spec)
 
-    def augment(self, sample, **kwargs):
+    def __call__(self, sample, **kwargs):
         rule = np.random.rand(4) > 0.5
         return sample_func.flip(sample, rule=rule)
 
 
 class GreyAugment(DataAugment):
-    """
-    Greyscale value augmentation.
+    """Greyscale value augmentation.
+
     Randomly adjust contrast/brightness, and apply random gamma correction.
     """
 
     def __init__(self, mode='3D', skip_ratio=0.3):
-        """
-        Initialize parameters.
+        """Initialize parameters.
 
         Args:
             mode: 2D, 3D, or mix
@@ -122,7 +121,7 @@ class GreyAugment(DataAugment):
     def prepare(self, spec, **kwargs):
         return dict(spec)
 
-    def augment(self, sample, **kwargs):
+    def __call__(self, sample, **kwargs):
         #print '\n[GreyAugment]'  # DEBUG
         ret = sample
         if np.random.rand() > self.ratio:

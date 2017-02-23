@@ -3,71 +3,60 @@ __doc__ = """
 
 Read-only/writable TensorData classes.
 
-Kisuk Lee <kisuklee@mit.edu>, 2015-2016
+Kisuk Lee <kisuklee@mit.edu>, 2015-2017
 """
 
 import math
 import numpy as np
+import time
 
 from box import *
 from vector import *
-import time
-
 
 class TensorData(object):
-    """Read-only tensor data.
+    """
+    Read-only tensor data.
 
     The 1st dimension is regarded as parallel channels, and arbitrary access
     along this dimension is not allowed. Threfore, every data access should be
-    made through 3D vector, not 4D.
+    made through a 3D vector, not 4D.
 
     Attributes:
-        _data:   numpy 4D array (channel,z,y,x)
-        _dim:    Dimension of each channel
-        _offset: Coordinate offset from the origin
-        _bb:     Bounding box
-        _fov:    Patch size
-        _rg:     Range (update dep.: dim, offset, fov)
+        _data:   4D numpy array. (channel,z,y,x)
+        _dim:    Dimension of each channel.
+        _offset: Coordinate offset from the origin.
+        _bb:     Bounding box.
+        _fov:    Patch size.
+        _rg:     Range. (update dep.: dim, offset, fov)
     """
 
     def __init__(self, data, fov=(0,0,0), offset=(0,0,0)):
-        """
-        Initialize a TensorData object.
-        """
+        """Initialize a TensorData object."""
         # Set immutable attributes.
         self._data   = self._check_data(data)
         self._dim    = Vec3d(self._data.shape[1:])
         self._offset = Vec3d(offset)
-
         # Set bounding box.
         self._bb = Box((0,0,0), self._dim)
         self._bb.translate(self._offset)
-
         # Set fov (patch size).
         self.set_fov(fov)
 
     def set_fov(self, fov):
-        """
-        Set a nonnegative field of view (FoV), i.e., patch size.
-        """
+        """Set a nonnegative field of view (FoV), i.e., patch size."""
         # Zero FoV indicates covering the whole volume.
         fov = Vec3d(fov)
         if fov == (0,0,0):
             fov = Vec3d(self._dim)
-
         # FoV should be nonnegative, and smaller than data dimension.
         assert fov==minimum(maximum(fov,(0,0,0)), self._dim)
-
         # Set FoV.
         self._fov = fov
-
         # Update range.
         self._set_range()
 
     def get_patch(self, pos):
-        """
-        Extract a patch of size _fov centered on pos.
-        """
+        """Extract a patch of size _fov centered on pos."""
         # Check validity.
         assert self._rg.contains(pos)
         # Local coordinate system
@@ -80,7 +69,7 @@ class TensorData(object):
                                     vmin[2]:vmax[2]])
 
     ####################################################################
-    ## Public methods for accessing attributes
+    ## Public methods for accessing attributes.
     ####################################################################
 
     def get_data(self):
@@ -114,11 +103,9 @@ class TensorData(object):
         # Data should be either numpy 3D or 4D array.
         assert isinstance(data, np.ndarray)
         assert data.ndim==3 or data.ndim==4
-
         # Add channel dimension if data is 3D array.
         if data.ndim == 3:
             data = data[np.newaxis,...]
-
         return data
 
     def _set_range(self):
@@ -127,7 +114,6 @@ class TensorData(object):
         btm  = self._fov - top - (1,1,1)  # Bottom margin
         vmin = self._offset + top
         vmax = self._offset + self._dim - btm
-
         self._rg = Box(vmin, vmax)
 
     # String representaion (for printing and debugging).
@@ -152,9 +138,7 @@ class WritableTensorData(TensorData):
             TensorData.__init__(self, data, fov, offset)
 
     def set_patch(self, pos, patch, op=None):
-        """
-        Write a patch of size _fov centered on pos.
-        """
+        """Write a patch of size _fov centered on pos."""
         assert self._rg.contains(pos)
         patch = self._check_data(patch)
         dim = patch.shape[1:]
@@ -188,9 +172,7 @@ class WritableTensorDataWithMask(WritableTensorData):
         self._norm = WritableTensorData(self.shape(), fov, offset)
 
     def set_patch(self, pos, patch, op='np.add', mask=None):
-        """
-        Write a patch of size _fov centered on pos.
-        """
+        """Write a patch of size _fov centered on pos."""
         # Default mask.
         if mask is None:
             mask = np.ones(patch.shape, dtype='float32')

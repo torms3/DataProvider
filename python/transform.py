@@ -246,7 +246,7 @@ def revert_flip(data, rule, dst=None):
 
 
 ####################################################################
-## Label Transformations
+## Label Transformations.
 ####################################################################
 
 def binarize(img, dtype='float32'):
@@ -388,7 +388,7 @@ def affinitize_mask(msk, dst=(1,1,1), dtype='float32'):
     return ret
 
 ####################################################################
-## Rebalancing
+## Rebalancing.
 ####################################################################
 
 def rebalance_class(img, msk=None, dtype='float32'):

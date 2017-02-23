@@ -14,13 +14,13 @@ from utils import check_tensor, check_volume
 from vector import Vec3d
 
 class WarpAugment(data_augmentation.DataAugment):
-    """
-    Warp.
-        1. Continuous rotation
-        2. Shear
-        3. Twist
-        4. Scale
-        5. Perspective stretch
+    """Warping augmentation.
+
+    1. Continuous rotation
+    2. Shear
+    3. Twist
+    4. Scale
+    5. Perspective stretch
     """
 
     def __init__(self, skip_ratio=0.3):

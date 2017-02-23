@@ -3,7 +3,7 @@ __doc__ = """
 
 DaraProvider classes.
 
-Kisuk Lee <kisuklee@mit.edu>, 2015-2016
+Kisuk Lee <kisuklee@mit.edu>, 2015-2017
 """
 
 from collections import OrderedDict
@@ -28,16 +28,15 @@ class DataProvider(object):
 
 class VolumeDataProvider(DataProvider):
     """
-    DataProvider for volumetric data.
+    Volumetric data provider.
 
     Attributes:
         datasets: List of datasets.
-        _sampling_weights: Probability of each dataset being chosen at each
-                            iteration.
+        _sampling_weights: Probability of each dataset being chosen.
         _net_spec: Dictionary mapping layers' name to their input dimension.
     """
 
-    def __init__(self, dspec_path, net_spec, params, auto_mask=True):
+    def __init__(self, dspec_path, net_spec, params):
         """
         Initialize DataProvider.
 
@@ -45,8 +44,6 @@ class VolumeDataProvider(DataProvider):
             dspec_path: Path to the dataset specification file.
             net_spec:   Net specification.
             params:     Various options.
-            auto_mask:  Whether to automatically generate mask from
-                        corresponding label.
         """
         # Params.
         drange = params['drange']            # Required.
@@ -54,7 +51,7 @@ class VolumeDataProvider(DataProvider):
 
         # Build Datasets.
         print '\n[VolumeDataProvider]'
-        p = parser.Parser(dspec_path, net_spec, params, auto_mask=auto_mask)
+        p = parser.Parser(dspec_path, net_spec, params)
         self.datasets = list()
         for d in drange:
             print 'constructing dataset %d...' % d
@@ -91,9 +88,7 @@ class VolumeDataProvider(DataProvider):
         # Pick one dataset randomly.
         dataset = self._get_random_dataset()
         # Draw a random sample and apply data augmenation.
-        sample, transform = self._data_aug.random_sample(dataset)
-        # Transform sample.
-        sample = self._transform(sample, transform)
+        sample, _ = self._data_aug.random_sample(dataset)
         # Ensure that sample is ordered by key.
         return OrderedDict(sorted(sample.items(), key=lambda x: x[0]))
 
@@ -123,24 +118,6 @@ class VolumeDataProvider(DataProvider):
         idx = np.nonzero(sq)[0][0]
 
         return self.datasets[idx]
-
-    def _transform(self, sample, transform):
-        """
-        TODO(kisuk): Documentation.
-        """
-        affinitized = False
-        for key, spec in transform.iteritems():
-            if spec is not None:
-                if spec['type'] == 'affinitize':
-                    affinitized = True
-                label_func.evaluate(sample, key, spec)
-
-        # Crop by 1 if affinitized.
-        if affinitized:
-            for key, data in sample.iteritems():
-                sample[key] = tensor_func.crop(data, (1,1,1))
-
-        return sample
 
 
 class Sampler(object):

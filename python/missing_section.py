@@ -11,17 +11,20 @@ import numpy as np
 
 class MissingAugment(data_augmentation.DataAugment):
     """
+    Missing section data augmentation.
+
     Introduce missing section(s) to a training example. The number of missing
     sections to introduce is randomly drawn from the uniform distribution
     between [0, MAX_SEC]. Default MAX_SEC is 1, which can be overwritten by
-    user-specified value.
+    a user-specified value.
     """
 
-    def __init__(self, max_sec=1, skip_ratio=0.3, mode='mix'):
+    def __init__(self, max_sec=1, skip_ratio=0.3, mode='full', consecutive=False):
         """Initialize MissingSectionAugment."""
         self.set_max_sections(max_sec)
         self.set_skip_ratio(skip_ratio)
         self.set_mode(mode)
+        self.consecutive = consecutive
 
         # DEBUG(kisuk)
         # self.hist = [0] * (max_sec + 1)
@@ -75,8 +78,8 @@ class MissingAugment(data_augmentation.DataAugment):
         # DEBUG(kisuk)
         # print "num_sec = %d" % num_sec
 
-        # Assume that the sample contains only one input volume,
-        # or multiple input volumes of same size.
+        # Assume that the sample contains only one input volume, or multiple
+        # input volumes of same size.
         imgs  = kwargs['imgs']
         zdims = set([])
         for key in imgs:
@@ -87,17 +90,21 @@ class MissingAugment(data_augmentation.DataAugment):
         zdim = zdims.pop()
 
         # Randomly draw z-slices to black out.
-        zlocs = np.random.choice(zdim, num_sec, replace=False)
+        if self.consecutive:
+            zloc  = np.random.randint(0, zdim - num_sec + 1)
+            zlocs = range(zloc, zloc + num_sec)
+        else:
+            zlocs = np.random.choice(zdim, num_sec, replace=False)
 
         # Apply full or partial missing sections according to the mode.
         if self.mode == 'full':
             for key in imgs:
-                sample[key][...,zlocs,:,:] *= 0
+                sample[key][...,zlocs,:,:] = 0
         else:
             for z in zlocs:
                 if self.mode == 'mix' and np.random.rand() > 0.5:
                     for key in imgs:
-                        sample[key][...,z,:,:] *= 0
+                        sample[key][...,z,:,:] = 0
                 else:
                     xdim = self.spec[key][-1]
                     ydim = self.spec[key][-2]
@@ -107,18 +114,18 @@ class MissingAugment(data_augmentation.DataAugment):
                     # 1st quadrant.
                     if np.random.rand() > 0.5:
                         for key in imgs:
-                            sample[key][...,z,:y,:x] *= 0
+                            sample[key][...,z,:y,:x] = 0
                     # 2nd quadrant.
                     if np.random.rand() > 0.5:
                         for key in imgs:
-                            sample[key][...,z,y:,:x] *= 0
+                            sample[key][...,z,y:,:x] = 0
                     # 3nd quadrant.
                     if np.random.rand() > 0.5:
                         for key in imgs:
-                            sample[key][...,z,:y,x:] *= 0
+                            sample[key][...,z,:y,x:] = 0
                     # 4nd quadrant.
                     if np.random.rand() > 0.5:
                         for key in imgs:
-                            sample[key][...,z,y:,x:] *= 0
+                            sample[key][...,z,y:,x:] = 0
 
         return sample

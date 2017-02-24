@@ -67,6 +67,9 @@ class VolumeDataset(Dataset):
         self._spec = OrderedDict(sorted(spec.items(), key=lambda x: x[0]))
         self._update_range()
 
+    def has_spec(self):
+        return self._spec is not None
+
     def num_sample(self):
         """Return the number of samples."""
         s = self._range.size()
@@ -99,6 +102,8 @@ class VolumeDataset(Dataset):
 
     def random_sample(self, spec=None):
         """Fetch sample randomly"""
+        assert self.has_spec()
+
         # Dynamically change spec.
         if spec is not None:
             original_spec = self._spec
@@ -155,3 +160,49 @@ class VolumeDataset(Dataset):
             r = self._data[key].range()
             vr = r if vr is None else vr.intersect(r)
         self._range = vr
+
+
+########################################################################
+## VolumeDataset demo.
+########################################################################
+if __name__ == "__main__":
+
+    import argparse
+    import emio
+    import h5py
+    import os
+    import time
+
+    dsc = 'VolumeDataset demo.'
+    parser = argparse.ArgumentParser(description=dsc)
+
+    parser.add_argument('z', type=int, help='sample z dim.')
+    parser.add_argument('y', type=int, help='sample y dim.')
+    parser.add_argument('x', type=int, help='sample x dim.')
+    parser.add_argument('img', help='image file (h5 or tif) path.')
+    parser.add_argument('lbl', help='label file (h5 or tif) path.')
+
+    args = parser.parse_args()
+
+    # Load data.
+    img = emio.imread(args.img)
+    lbl = emio.imread(args.lbl)
+
+    # Create dataset and add data.
+    vdset = VolumeDataset()
+    vdset.add_raw_data(key='input', data=img)
+    vdset.add_raw_data(key='label', data=lbl)
+
+    # Random sample.
+    size = (args.z, args.y, args.x)
+    spec = dict(input=size, label=size)
+    vdset.set_spec(spec)
+    sample = vdset.random_sample()
+
+    # Dump a single random sample.
+    print 'Save as file...'
+    os.remove('sample.h5')
+    f = h5py.File('sample.h5')
+    for key, data in sample.iteritems():
+        f.create_dataset('/' + key, data=data)
+    f.close()

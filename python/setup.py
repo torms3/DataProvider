@@ -1,6 +1,15 @@
 #!/usr/bin/env python
 
-from setuptools import setup, find_packages
+from Cython.Build import cythonize
+# from distutils.core import setup
+from setuptools import setup, find_packages, Extension
+
+extensions = [
+    Extension(
+        "dataprovider.augmentation.warping._warping",
+        sources=['dataprovider/augmentation/warping/*.pyx']
+    ),
+]
 
 setup(
     name='dataprovider',
@@ -10,5 +19,8 @@ setup(
     author_email='kisuklee@mit.edu',
     url='https://github.com/torms3/DataProvider',
     # packages=find_packages()
-    packages=['dataprovider','dataprovider.augmentation'],
+    packages=['dataprovider',
+              'dataprovider.augmentation',
+              'dataprovider.augmentation.warping'],
+    ext_modules = cythonize(extensions)
 )

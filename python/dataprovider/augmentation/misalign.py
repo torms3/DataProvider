@@ -84,10 +84,10 @@ class Misalign(augmentor.DataAugment):
 
     def augment(self, sample, **kwargs):
         # DEBUG(kisuk)
-        print "\n[Misalign]"
-        for k, v in sample.iteritems():
-            print "Slip = {}".format(self.slip)
-            print "{} at {}".format(k, self.pivot[k])
+        # print "\n[Misalign]"
+        # for k, v in sample.iteritems():
+        #     print "Slip = {}".format(self.slip)
+        #     print "{} at {}".format(k, self.pivot[k])
 
         ret = dict()
 

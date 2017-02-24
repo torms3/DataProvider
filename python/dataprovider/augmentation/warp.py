@@ -7,12 +7,13 @@ Kisuk Lee <kisuklee@mit.edu>, 2017
 """
 
 import numpy as np
+import time
 
 import augmentor
 from ..box import Box
 from ..utils import check_tensor, check_volume
 from ..vector import Vec3d
-from warping import warping
+from .warping import warping
 
 class Warp(augmentor.DataAugment):
     """
@@ -33,9 +34,9 @@ class Warp(augmentor.DataAugment):
         than original) image sizes."""
         # Skip.
         self.skip = False
-        if self.ratio > np.random.rand():
+        if self.skip_ratio > np.random.rand():
             self.skip = True
-            return dict(spec)
+            return spec
 
         imgs = kwargs['imgs']
 
@@ -71,8 +72,9 @@ class Warp(augmentor.DataAugment):
 
     def __call__(self, sample, **kwargs):
         """Apply warp data augmentation."""
-        # DEBUG
-        # print '\n[WarpAugment]'
+        # DEBUG(kisuk)
+        # t0 = time.time()
+        # print '\n[Warp]'
         # self.counter += 1
         # if self.skip:
         #     self.count['skip'] += 1
@@ -84,13 +86,13 @@ class Warp(augmentor.DataAugment):
         if self.skip:
             return sample
 
-        # DEBUG
-        #print 'rot      = {}'.format(self.rot)
-        #print 'shear    = {}'.format(self.shear)
-        #print 'scale    = {}'.format(self.scale)
-        #print 'stretch  = {}'.format(self.stretch)
-        #print 'twist    = {}'.format(self.twist)
-        #print 'req_size = {}'.format(self.size)
+        # DEBUG(kisuk)
+        # print 'rot      = {}'.format(self.rot)
+        # print 'shear    = {}'.format(self.shear)
+        # print 'scale    = {}'.format(self.scale)
+        # print 'stretch  = {}'.format(self.stretch)
+        # print 'twist    = {}'.format(self.twist)
+        # print 'req_size = {}'.format(self.size)
 
         imgs = kwargs['imgs']
 
@@ -105,6 +107,8 @@ class Warp(augmentor.DataAugment):
                 v = warping.warp3dLab(v, self.spec[k][-3:], self.size,
                     self.rot, self.shear, self.scale, self.stretch, self.twist)
             sample[k] = np.transpose(v, (1,0,2,3))
+        # DEBUG(kisuk)
+        # print "Elapsed: %.3f" % (time.time()-t0)
         return sample
 
     ####################################################################

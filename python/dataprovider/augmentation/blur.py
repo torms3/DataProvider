@@ -11,7 +11,7 @@ from scipy.ndimage.filters import gaussian_filter
 
 import augmentor
 
-class Blur(Augmentor.DataAugment):
+class Blur(augmentor.DataAugment):
     """
     Introduce out-of-focus section(s) to a training example.
 
@@ -52,6 +52,7 @@ class Blur(Augmentor.DataAugment):
         num_sec = np.random.randint(1, self.MAX_SEC + 1)
 
         # DEBUG(kisuk)
+        print "\n[Blur]"
         print "num_sec = %d" % num_sec
 
         # Assume that the sample contains only one input volume, or multiple
@@ -69,7 +70,7 @@ class Blur(Augmentor.DataAugment):
         zdim = dim[-3]
 
         # Randomly draw z-slices to blur.
-        zlocs = np.random.choice(zdim, num_sec, replace=False)
+        zlocs = sorted(np.random.choice(zdim, num_sec, replace=False))
 
         # Apply full or partial missing sections according to the mode.
         if self.mode == 'full':
@@ -79,13 +80,13 @@ class Blur(Augmentor.DataAugment):
                     img = sample[key][...,z,:,:]
                     sample[key][...,z,:,:] = gaussian_filter(img, sigma=sigma)
                     # DEBUG(kisuk)
-                    print 'z = {}, sigma = {}'.format(z,sigma)
+                    print 'z = {}, sigma = {}'.format(z+1,sigma)
         else:
             for z in zlocs:
                 # Random sigma.
                 sigma = np.random.rand() * self.sigma_max
                 # DEBUG(kisuk)
-                print 'z = {}, sigma = {}'.format(z,sigma)
+                print 'z = {}, sigma = {}'.format(z+1,sigma)
                 # Blurring.
                 for key in imgs:
                     img = sample[key][...,z,:,:]

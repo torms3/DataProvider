@@ -1,37 +1,35 @@
 #!/usr/bin/env python
 __doc__ = """
 
-Box augmentation.
+Box occlusion augmentation.
 
 Kisuk Lee <kisuklee@mit.edu>, 2017
 """
 
-from box import *
-import data_augmentation
 import math
 import numpy as np
 
-class BoxAugment(data_augmentation.DataAugment):
+from ..box import *
+import augmentor
+
+class BoxOcclusion(augmentor.DataAugment):
     """
-    Add random box masks.
+    Add random box occlusion masks.
     """
 
-    def __init__(self, min_dim, max_dim, aspect_ratio, density):
+    def __init__(self, min_dim=20, max_dim=60, aspect_ratio=6, density=0.2):
         """Initialize BoxAugment."""
         self.min_dim = min_dim
         self.max_dim = max_dim
         self.aspect_ratio = aspect_ratio
         self.density = density
-        # self.min_dim = 20
-        # self.max_dim = 60
-        # self.aspect_ratio = 6
-        # self.density = 0.2
-        # self.alpha = 0.5
+
+        # TODO(kisuk): Allow nonzero alpha?
+        self.alpha = 0.0
 
     def prepare(self, spec, **kwargs):
-        """Prepare mask."""
-        # No change in spec.
-        self.spec = spec
+        # No change in sample spec.
+        self.spec = dict(spec)
 
         # Find union of bounding boxes.
         self.bbox = dict()
@@ -63,7 +61,7 @@ class BoxAugment(data_augmentation.DataAugment):
             # Anisotropy.
             dim[0] /= self.aspect_ratio
             # Alpha.
-            # alpha = np.random.rand() * self.alpha
+            alpha = np.random.rand() * self.alpha
             # Box.
             box = bbox.intersect(centered_box(loc, dim))
             # Local coordiate.
@@ -71,17 +69,15 @@ class BoxAugment(data_augmentation.DataAugment):
             vmin = box.min()
             vmax = box.max()
             # Apply box.
-            # self.mask[vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] *= alpha
-            self.mask[vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] = 0
+            self.mask[vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] *= alpha
             # Stop condition.
             count += box.volume()
             if count > goal:
                 break;
 
-        return dict(spec)
+        return spec
 
-    def augment(self, sample, **kwargs):
-        """Apply box data augmentation."""
+    def __call__(self, sample, **kwargs):
         imgs = kwargs['imgs']
         for key in imgs:
             b = self.bbox[key]
@@ -90,5 +86,4 @@ class BoxAugment(data_augmentation.DataAugment):
             vmax = b.max()
             sample[key][...,:,:,:] *= self.mask[
                 vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]]
-
         return sample

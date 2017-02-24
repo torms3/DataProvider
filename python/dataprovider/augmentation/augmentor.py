@@ -93,7 +93,7 @@ class Augmentor(object):
 from box import BoxOcclusion
 from blur import Blur
 from flip import Flip
-# from warp import Warp
+from warp import Warp
 from misalign import Misalign
 from missing_section import MissingSection
 from greyscale import Greyscale

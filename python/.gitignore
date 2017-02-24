@@ -2,3 +2,6 @@ dist
 build
 dataprovider.egg-info
 deprecated
+_warping.c
+_warping.so
+sample.h5

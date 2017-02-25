@@ -184,6 +184,7 @@ if __name__ == "__main__":
     import h5py
     import os
     import time
+    import transform
 
     dsc = 'VolumeDataset demo.'
     parser = argparse.ArgumentParser(description=dsc)
@@ -200,6 +201,9 @@ if __name__ == "__main__":
     img = emio.imread(args.img)
     lbl = emio.imread(args.lbl)
 
+    # Preprocess.
+    img = transform.divideby(img, val=255.0)
+
     # Create dataset and add data.
     vdset = VolumeDataset()
     vdset.add_raw_data(key='input', data=img)
@@ -213,8 +217,10 @@ if __name__ == "__main__":
 
     # Dump a single random sample.
     print 'Save as file...'
-    os.remove('sample.h5')
-    f = h5py.File('sample.h5')
+    fname = 'sample.h5'
+    if os.path.exists(fname):
+        os.remove(fname)
+    f = h5py.File(fname)
     for key, data in sample.iteritems():
         f.create_dataset('/' + key, data=data)
     f.close()

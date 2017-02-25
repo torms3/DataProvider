@@ -9,8 +9,8 @@ Kisuk Lee <kisuklee@mit.edu>, 2017
 import math
 import numpy as np
 
-from ..box import *
 import augmentor
+from ..box import *
 
 class BoxOcclusion(augmentor.DataAugment):
     """

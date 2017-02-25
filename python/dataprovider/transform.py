@@ -39,6 +39,8 @@ class SampleFunction(object):
             ret[key] = transform_tensor(func, data, *args, **kwargs)
         return ret
 
+sample_func = SampleFunction()
+
 
 class TensorFunction(object):
     """
@@ -57,23 +59,25 @@ class TensorFunction(object):
         del d['type']
         return transform_tensor(func, data, **d)
 
-
-sample_func = SampleFunction()
 tensor_func = TensorFunction()
 
 
-def crop(img, offset=(0,0,0), size=None):
+class Crop(object):
     """
-    TODO(kisuk): Documentation.
+    Crop a 4D tensor.
     """
-    img = check_volume(img)
-    if size is None:
-        size = tuple(Vec3d(img.shape) - Vec3d(offset))
-    ret = np.zeros(size, dtype=img.dtype)
-    v1  = Vec3d(offset)
-    v2  = v1 + Vec3d(size)
-    ret[:] = img[v1[0]:v2[0],v1[1]:v2[1],v1[2]:v2[2]]
-    return ret
+
+    def __call__(self, data, offset=(0,0,0), size=None):
+        data = check_tensor(data)
+        if size is None:
+            size = tuple(Vec3d(data.shape[-3:]) - Vec3d(offset))
+        ret = np.zeros_like(data)
+        v1  = Vec3d(offset)
+        v2  = v1 + Vec3d(size)
+        ret[...,:,:,:] = data[...,v1[0]:v2[0],v1[1]:v2[1],v1[2]:v2[2]]
+        return ret
+
+crop = Crop()
 
 ####################################################################
 ## Preprocessing

@@ -11,22 +11,17 @@ if __name__ == "__main__":
     dspec_path = 'test_spec/pinky.spec'
 
     # Net specification.
-    # fov   = Vec3d(9,109,109)
-    # outsz = Vec3d(10,100,100)
-    # insz  = outsz + fov - Vec3d(1,1,1)
-    # net_spec = dict(input=tuple(insz), label=tuple(outsz))
-    net_spec = dict(input=(1,208,208), label=(1,100,100))
+    net_spec = dict(input=(32,158,158), label=(32,158,158))
 
     # Parameters.
     params = dict()
-    params['drange']  = [0,1,2,3,4]
-    params['dprior']  = None
-    params['border']  = None
+    params['drange']  = [0]
     params['augment'] = [dict(type='flip')]
 
     # Create VolumeDataProvider.
     dp = VolumeDataProvider(dspec_path, net_spec, params)
 
+    # Loop.
     # for i in range(10000):
     #     start = time.time()
     #     sample = dp.random_sample()

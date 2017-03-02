@@ -11,17 +11,20 @@ import numpy as np
 
 class MissingAugment(data_augmentation.DataAugment):
     """
+    Missing section data augmentation.
+
     Introduce missing section(s) to a training example. The number of missing
     sections to introduce is randomly drawn from the uniform distribution
     between [0, MAX_SEC]. Default MAX_SEC is 1, which can be overwritten by
-    user-specified value.
+    a user-specified value.
     """
 
-    def __init__(self, max_sec=1, skip_ratio=0.3, mode='mix'):
+    def __init__(self, max_sec=1, skip_ratio=0.3, mode='full', consecutive=False):
         """Initialize MissingSectionAugment."""
         self.set_max_sections(max_sec)
         self.set_skip_ratio(skip_ratio)
         self.set_mode(mode)
+        self.consecutive = consecutive
 
         # DEBUG(kisuk)
         # self.hist = [0] * (max_sec + 1)
@@ -49,7 +52,7 @@ class MissingAugment(data_augmentation.DataAugment):
     def augment(self, sample, **kwargs):
         """Apply missing section data augmentation."""
         if np.random.rand() > self.skip_ratio:
-            self._do_augment(sample, **kwargs)
+            sample = self._do_augment(sample, **kwargs)
 
         # DEBUG(kisuk): Record keeping.
         #     self.hist[num_sec] += 1
@@ -73,52 +76,64 @@ class MissingAugment(data_augmentation.DataAugment):
         num_sec = np.random.randint(1, self.MAX_SEC + 1)
 
         # DEBUG(kisuk)
-        # print "num_sec = %d" % num_sec
+        print "num_sec = %d" % num_sec
 
-        # Assume that the sample contains only one input volume,
-        # or multiple input volumes of same size.
-        imgs  = kwargs['imgs']
-        zdims = set([])
+        # Assume that the sample contains only one input volume, or multiple
+        # input volumes of same size.
+        imgs = kwargs['imgs']
+        dims = set([])
         for key in imgs:
-            zdim = self.spec[key][-3]
-            assert num_sec < zdim
-            zdims.add(zdim)
-        assert len(zdims) == 1
-        zdim = zdims.pop()
+            dim = self.spec[key][-3:]
+            assert num_sec < dim[-3]
+            dims.add(dim)
+        assert len(dims) == 1
+        dim  = dims.pop()
+        xdim = dim[-1]
+        ydim = dim[-2]
+        zdim = dim[-3]
 
         # Randomly draw z-slices to black out.
-        zlocs = np.random.choice(zdim, num_sec, replace=False)
+        if self.consecutive:
+            zloc  = np.random.randint(0, zdim - num_sec + 1)
+            zlocs = range(zloc, zloc + num_sec)
+        else:
+            zlocs = np.random.choice(zdim, num_sec, replace=False)
 
         # Apply full or partial missing sections according to the mode.
         if self.mode == 'full':
             for key in imgs:
-                sample[key][...,zlocs,:,:] *= 0
+                sample[key][...,zlocs,:,:] = 0
         else:
+            # Draw a random xy-coordinate.
+            x = np.random.randint(0, xdim)
+            y = np.random.randint(0, ydim)
+            rule = np.random.rand(4) > 0.5
+
             for z in zlocs:
                 if self.mode == 'mix' and np.random.rand() > 0.5:
                     for key in imgs:
-                        sample[key][...,z,:,:] *= 0
+                        sample[key][...,z,:,:] = 0
                 else:
-                    xdim = self.spec[key][-1]
-                    ydim = self.spec[key][-2]
-                    # Draw a random xy-coordinate.
-                    x = np.random.randint(0, xdim)
-                    y = np.random.randint(0, ydim)
+                    # Independent coordinates across sections.
+                    if not self.consecutive:
+                        x = np.random.randint(0, xdim)
+                        y = np.random.randint(0, ydim)
+                        rule = np.random.rand(4) > 0.5
                     # 1st quadrant.
-                    if np.random.rand() > 0.5:
+                    if rule[0]:
                         for key in imgs:
-                            sample[key][...,z,:y,:x] *= 0
+                            sample[key][...,z,:y,:x] = 0
                     # 2nd quadrant.
-                    if np.random.rand() > 0.5:
+                    if rule[1]:
                         for key in imgs:
-                            sample[key][...,z,y:,:x] *= 0
+                            sample[key][...,z,y:,:x] = 0
                     # 3nd quadrant.
-                    if np.random.rand() > 0.5:
+                    if rule[2]:
                         for key in imgs:
-                            sample[key][...,z,:y,x:] *= 0
+                            sample[key][...,z,:y,x:] = 0
                     # 4nd quadrant.
-                    if np.random.rand() > 0.5:
+                    if rule[3]:
                         for key in imgs:
-                            sample[key][...,z,y:,x:] *= 0
+                            sample[key][...,z,y:,x:] = 0
 
         return sample

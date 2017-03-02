@@ -71,10 +71,10 @@ class Crop(object):
         data = check_tensor(data)
         if size is None:
             size = tuple(Vec3d(data.shape[-3:]) - Vec3d(offset))
-        ret = np.zeros_like(data)
+        ret = np.zeros((data.shape[-4],) + size, data.dtype)
         v1  = Vec3d(offset)
         v2  = v1 + Vec3d(size)
-        ret[...,:,:,:] = data[...,v1[0]:v2[0],v1[1]:v2[1],v1[2]:v2[2]]
+        ret[...] = data[...,v1[0]:v2[0],v1[1]:v2[1],v1[2]:v2[2]]
         return ret
 
 crop = Crop()
@@ -267,11 +267,30 @@ def binarize(img, dtype='float32'):
         img: 3D indexed image, with each index corresponding to each segment.
 
     Returns:
-        ret: Binarized image.
+        Binarized image.
     """
     img = check_volume(img)
     ret = np.zeros(img.shape, dtype=dtype)
     ret[:] = (img>0).astype(dtype)
+    return ret
+
+
+def binarize_center_object(img, dtype='float32'):
+    """Binarize center object.
+
+    Args:
+        img: 3D indexed image, with each index corresponding to each segment.
+
+    Returns:
+        Binarized image.
+    """
+    img = check_volume(img)
+    ret = np.zeros(img.shape, dtype=dtype)
+
+    # Center object.
+    z, y, x = img.shape[-3:]
+    center_id = img[...,z/2,y/2,x/2]
+    ret[:] = (img==center_id).astype(dtype)
     return ret
 
 
@@ -449,31 +468,3 @@ def rebalance_binary_class(img, msk=None, dtype='float32'):
         ret[~idx & msk] = weight[1]
 
     return ret
-
-
-########################################################################
-## Unit Testing
-########################################################################
-if __name__ == "__main__":
-
-    import unittest
-
-    ####################################################################
-    class UnitTestTransform(unittest.TestCase):
-
-        def setup(self):
-            pass
-
-        def testCrop(self):
-            img = np.random.rand(4,4,4)
-            a = crop(img, (3,3,3))
-            b = img[:-1,:-1,:-1]
-            self.assertTrue(np.array_equal(a,b))
-            a = crop(img, (3,3,3), (1,1,1))
-            b = img[1:,1:,1:]
-            self.assertTrue(np.array_equal(a,b))
-
-    ####################################################################
-    unittest.main()
-
-    ####################################################################

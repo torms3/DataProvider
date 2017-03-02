@@ -243,7 +243,7 @@ def getWarpParams(patch_size, amount=1.0, **kwargs):
         print 'WARNING: warpAugment amount > 1 this requires more than 1.4 bigger patches before warping'
     rot_max = 15 * amount
     shear_max = 3 * amount
-    scale_max = 1.2 * amount
+    scale_max = 1.1 * amount
     stretch_max = 0.1 * amount
     n_dim = len(patch_size)
 

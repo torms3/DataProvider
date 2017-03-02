@@ -4,7 +4,7 @@ import h5py
 import os
 import time
 
-from dataprovider import VolumeDataset, Augmentor
+from dataprovider import VolumeDataset, Augmentor, Affinity
 import emio
 import transform
 
@@ -36,7 +36,7 @@ if __name__ == "__main__":
     vdset.add_raw_data(key='label', data=lbl)
 
     # Set sample spec.
-    size = (args.z, args.y, args.x)
+    size = (1+args.z, 1+args.y, 1+args.x)
     spec = dict(input=size, label=size)
     vdset.set_spec(spec)
 
@@ -50,6 +50,12 @@ if __name__ == "__main__":
     augment.add_augment('flip')
     # augment.add_augment('box', min_dim=50, max_dim=100, aspect_ratio=10, density=0.2)
 
+    # Data transformation.
+    dst = list()
+    for i in xrange(1):
+        dst.append((i+1,3**i,3**i))
+    transform = Affinity(dst, 'label', 'label', crop=(1,1,1), rebalance=True)
+
     # Failure test.
     elapsed = 0.0
     for i in range(args.iter):
@@ -58,7 +64,7 @@ if __name__ == "__main__":
         spec   = augment.prepare(vdset.get_spec(), imgs=['input'])
         sample = vdset.random_sample(spec=spec)
         sample = augment(sample, imgs=['input'])
-        # TODO(kisuk): Transform.
+        sample = transform(sample)
         elapsed += time.time() - t0
         print "Iteration %7d, elapsed: %.3f" % (i+1, elapsed/(i+1))
 

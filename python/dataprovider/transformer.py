@@ -6,6 +6,9 @@ Transformer classes.
 Kisuk Lee <kisuklee@mit.edu>, 2017
 """
 
+import numpy as np
+import time
+
 import transform as tf
 
 class Transformer(object):
@@ -40,27 +43,38 @@ class Affinity(Transformer):
 
     def __call__(self, sample):
         """Affinity label processing."""
+        # DEBUG(kisuk)
+        t0 = time.time()
         seg  = sample[self.source]
         msk  = np.ones_like(seg)
         affs = list()
         msks = list()
         # Affinitize.
+        t1 = time.time()
         for dst in self.dst:
             affs.append(tf.affinitize(seg, dst=dst))
             msks.append(tf.affinitize_mask(msk, dst=dst))
-        aff = np.concatenate(affs[:idx], axis=0)
-        msk = np.concatenate(msks[:idx], axis=0)
+        t2 = time.time()
+        aff = np.concatenate(affs, axis=0)
+        msk = np.concatenate(msks, axis=0)
+        t3 = time.time()
         # Rebalancing.
         if self.rebalance:
             for c in xrange(aff.shape[0]):
-                msk[c,...] *= tf.rebalance_binary_class(aff[c,...],msk=msk[c,...])
+                msk[c,...] *= tf.rebalance_binary_class(aff[c,...], msk=msk[c,...])
+        t4 = time.time()
         # Update sample.
         sample[self.target] = aff
         sample[self.target+'_mask'] = msk
         # Crop.
+        t5 = time.time()
         if self.crop is not None:
             for k, v in sample.iteritems():
                 sample[k] = tf.crop(v, offset=self.crop)
+        t6 = time.time()
+        # DEBUG(kisuk)
+        print "Affinitize: %.3f (%.3f, %.3f, %.3f, %.3f)" % (time.time()-t0,
+                t2-t1,t3-t2,t4-t3,t6-t5)
         return sample
 
 
@@ -91,7 +105,30 @@ class Semantic(Transformer):
         # Rebalancing.
         if self.rebalance:
             for i, _ in enumerate(self.ids):
-                msk[i,...] = tf.rebalance_binary_class(lbl[i,...],msk[i,...])
+                msk[i,...] = tf.rebalance_binary_class(lbl[i,...], msk[i,...])
+        # Replace sample.
+        sample[self.target] = lbl
+        sample[self.target+'_mask'] = msk
+        return sample
+
+
+class ObjectInstance(Transformer):
+    """
+    Object instance segmentation.
+    """
+
+    def __init__(self, source, target, rebalance=False):
+        self.source = source
+        self.target = target
+        self.rebalance = rebalance
+
+    def __call__(self, sample):
+        seg = sample[self.source]
+        # Binarize.
+        lbl = tf.binarize_center_object(seg)
+        # Rebalancing.
+        if self.rebalance:
+            msk = tf.rebalance_binary_class(lbl, msk=np.ones_like(lbl))
         # Replace sample.
         sample[self.target] = lbl
         sample[self.target+'_mask'] = msk

@@ -9,7 +9,7 @@ import data_augmentation
 import numpy as np
 from utils import check_tensor
 
-class Misalign(data_augmentation.DataAugment):
+class MisalignAugment(data_augmentation.DataAugment):
     """
     Misalignment data augmentation.
     """

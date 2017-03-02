@@ -6,6 +6,8 @@ Transformer classes.
 Kisuk Lee <kisuklee@mit.edu>, 2017
 """
 
+import numpy as np
+
 import transform as tf
 
 class Transformer(object):

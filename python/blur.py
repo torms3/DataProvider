@@ -44,7 +44,7 @@ class BlurAugment(data_augmentation.DataAugment):
         num_sec = np.random.randint(1, self.MAX_SEC + 1)
 
         # DEBUG(kisuk)
-        print "num_sec = %d" % num_sec
+        # print "num_sec = %d" % num_sec
 
         # Assume that the sample contains only one input volume, or multiple
         # input volumes of same size.
@@ -71,13 +71,13 @@ class BlurAugment(data_augmentation.DataAugment):
                     img = sample[key][...,z,:,:]
                     sample[key][...,z,:,:] = gaussian_filter(img, sigma=sigma)
                     # DEBUG(kisuk)
-                    print 'z = {}, sigma = {}'.format(z,sigma)
+                    # print 'z = {}, sigma = {}'.format(z,sigma)
         else:
             for z in zlocs:
                 # Random sigma.
                 sigma = np.random.rand() * self.sigma_max
                 # DEBUG(kisuk)
-                print 'z = {}, sigma = {}'.format(z,sigma)
+                # print 'z = {}, sigma = {}'.format(z,sigma)
                 # Blurring.
                 for key in imgs:
                     img = sample[key][...,z,:,:]

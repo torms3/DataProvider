@@ -76,7 +76,7 @@ class MissingAugment(data_augmentation.DataAugment):
         num_sec = np.random.randint(1, self.MAX_SEC + 1)
 
         # DEBUG(kisuk)
-        print "num_sec = %d" % num_sec
+        # print "num_sec = %d" % num_sec
 
         # Assume that the sample contains only one input volume, or multiple
         # input volumes of same size.

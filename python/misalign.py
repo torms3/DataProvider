@@ -5,12 +5,11 @@ Karan Kathpalia <karank@cs.princeton.edu>
 Kisuk Lee <kisuklee@mit.edu>, 2016-2017
 """
 
+import data_augmentation
 import numpy as np
+from utils import check_tensor
 
-import augmentor
-from ..utils import check_tensor
-
-class Misalign(augmentor.DataAugment):
+class Misalign(data_augmentation.DataAugment):
     """
     Misalignment data augmentation.
     """

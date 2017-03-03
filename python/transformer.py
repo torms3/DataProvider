@@ -23,7 +23,7 @@ class Affinity(Transformer):
     Expand segmentation into affinity represntation.
     """
 
-    def __init__(self, dst, source, target, crop=None, rebalance=False):
+    def __init__(self, dst, source, target, crop=None, rebalance=True):
         """Initialize parameters.
         Args:
             dst: List of 3-tuples, each indicating affinity distance in (z,y,x).
@@ -69,7 +69,7 @@ class Semantic(Transformer):
     Expand semantic segmentation into multiclass represntation.
     """
 
-    def __init__(self, ids, source, target, rebalance=False):
+    def __init__(self, ids, source, target, rebalance=True):
         self.ids = ids
         self.source = source
         self.target = target
@@ -84,6 +84,31 @@ class Semantic(Transformer):
         if self.rebalance:
             for i, _ in enumerate(self.ids):
                 msk[i,...] = tf.rebalance_binary_class(lbl[i,...],msk[i,...])
+        # Update sample.
+        sample[self.target] = lbl
+        sample[self.target+'_mask'] = msk
+        return sample
+
+
+class Synapse(Transformer):
+    """
+    Transform synapse segmentation into binary representation.
+    """
+
+    def __init__(self, source, target, rebalance=True):
+        self.source = source
+        self.target = target
+        self.rebalance = rebalance
+
+    def __call__(self, sample):
+        """Synapse label processing."""
+        syn = sample[self.source]
+        # Binarize.
+        lbl = tf.binarize(syn)
+        msk = np.ones_like(lbl)
+        # Rebalancing.
+        if self.rebalance:
+            msk = tf.rebalance_binary_class(lbl,msk)
         # Update sample.
         sample[self.target] = lbl
         sample[self.target+'_mask'] = msk

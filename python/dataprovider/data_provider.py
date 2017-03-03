@@ -9,9 +9,10 @@ Kisuk Lee <kisuklee@mit.edu>, 2017
 from collections import OrderedDict
 import numpy as np
 
-from .augmentation.augmentor import Augmentor
+from .augmentation.augmentor import DataAugment, Augmentor
 from dataset import VolumeDataset
-from transformer import Transformer
+from transformer import Transform, Transformer
+from sequence import *
 
 class DataProvider(object):
     """
@@ -22,6 +23,9 @@ class DataProvider(object):
         raise NotImplementedError
 
     def random_sample(self):
+        raise NotImplementedError
+
+    def __call__(self):
         raise NotImplementedError
 
 
@@ -42,32 +46,45 @@ class VolumeDataProvider(DataProvider):
             for d in datasets:
                 self.add_dataset(d)
         # Data augmentation.
-        self.set_augment(aug)
+        self.set_augmentor(aug)
         # Sample transformation.
-        self.set_transform(tf)
+        self.set_transformer(tf)
 
     def add_dataset(self, dataset):
         assert isinstance(dataset, Dataset)
         self.datasets.append(dataset)
 
-    def set_augment(self, aug):
+    def add_augment(self, aug):
+        assert isinstance(aug, DataAugment)
+        self.augment.append(aug)
+
+    def add_transform(self, tf):
+        assert isinstance(tf, Transform)
+        self.transform.append(tf)
+
+    def set_augmentor(self, aug):
         if isinstance(aug, Augmentor):
             self.augment = aug
         else:
             self.augment = Augmentor()
 
-    def set_transform(self, tf):
+    def set_transformer(self, tf):
         if isinstance(tf, Transformer):
             self.transform = tf
         else:
             self.transform = Transformer()
 
-    def next_sample(self):
+    def next_sample(self, **kwargs):
         """Fetch the next sample in a predefined sequence, if any."""
-        raise NotImplementedError
+        return self._sample('next', **kwargs)
 
     def random_sample(self, **kwargs):
         """Fetch sample randomly."""
+        return self._sample('random', **kwargs)
+
+    def _sample(self, mode, **kwargs):
+        assert len(self.datasets) > 0
+        assert mode is 'random' or mode is 'next'
         # Pick one dataset randomly.
         drange = range(len(self.datasets))
         if 'drange' in kwargs:
@@ -80,7 +97,7 @@ class VolumeDataProvider(DataProvider):
         while True:
             try:
                 spec = self.augment.prepare(spec, **params)
-                sample = dataset.random_sample(spec=spec)
+                sample = getattr(dataset, mode+'_sample')(spec=spec)
                 break
             except:
                 pass
@@ -90,5 +107,5 @@ class VolumeDataProvider(DataProvider):
         sample = OrderedDict(sorted(sample.items(), key=lambda x: x[0]))
         return sample
 
-    def __call__(self, **kwargs):
-        return self.transform(self.random_sample(**kwargs), **kwargs)
+    def __call__(self, mode, **kwargs):
+        return self.transform(self._sample(mode, **kwargs), **kwargs)

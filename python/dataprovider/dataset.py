@@ -11,6 +11,7 @@ import copy
 import numpy as np
 
 from box import Box
+from sequence import SampleSequence
 from tensor import TensorData
 from vector import Vec3d
 
@@ -38,6 +39,7 @@ class VolumeDataset(Dataset):
                 which can be either a list or tuple with at least 3 elements.
         _range: Range of valid coordinates for accessing data given the sample
                 spec. It depends both on the data and sample spec.
+        _sequence:
     """
 
     def __init__(self, **kwargs):
@@ -56,6 +58,11 @@ class VolumeDataset(Dataset):
         assert isinstance(data, TensorData)
         self._data[key] = data
 
+    def set_sequence(self, seq):
+        """Add sample sequence generator."""
+        assert isinstance(seq, SampleSequence)
+        self._sequence = seq
+
     def get_sample(self, pos):
         """Extract a sample centered on pos.
 
@@ -69,36 +76,48 @@ class VolumeDataset(Dataset):
         """
         sample = OrderedDict()
         for key in self._spec.keys():
-            sample[key] = self._data[key].get_patch(pos)
+            patch = self._data[key].get_patch(pos)
+            if patch is None:
+                raise
+            else:
+                sample[key] = patch
         return sample
 
     def next_sample(self, spec=None):
         """Fetch the next sample in a predefined sequence, if any."""
-        raise NotImplementedError
+        if self._sequence is None:
+            ret = self.random_sample(spec=spec)
+        else:
+            assert self.has_spec()
+            original_spec = self.get_spec()
+            try:
+                # Dynamically change spec.
+                if spec is not None: self.set_spec(spec)
+                # Pick a random sample.
+                pos = self._sequence()
+                ret = self.get_sample(pos)
+                # Revert to the original sample spec.
+                if spec is not None: self.set_spec(original_spec)
+            except:
+                self.set_spec(original_spec)
+                raise
+        return ret
 
     def random_sample(self, spec=None):
         """Fetch sample randomly"""
         assert self.has_spec()
-
-        # Dynamically change spec.
-        if spec is not None:
-            original_spec = self._spec
-            try:
-                self.set_spec(spec)
-            except:
-                # It's very important to revert to the original sample spec
-                # when failed to set the dynamic spec.
-                self.set_spec(original_spec)
-                raise
-
-        # Pick a random sample.
-        pos = self._random_location()
-        ret = self.get_sample(pos)
-
-        # Revert to the original sample spec.
-        if spec is not None:
+        original_spec = self.get_spec()
+        try:
+            # Dynamically change spec.
+            if spec is not None: self.set_spec(spec)
+            # Pick a random sample.
+            pos = self._random_location()
+            ret = self.get_sample(pos)
+            # Revert to the original sample spec.
+            if spec is not None: self.set_spec(original_spec)
+        except:
             self.set_spec(original_spec)
-
+            raise
         return ret
 
     ####################################################################
@@ -143,10 +162,11 @@ class VolumeDataset(Dataset):
 
     def _reset(self):
         """Reset all attributes."""
-        self._params = dict()
-        self._data   = dict()
-        self._spec   = None
-        self._range  = None
+        self._params   = dict()
+        self._data     = dict()
+        self._spec     = None
+        self._range    = None
+        self._sequence = None
 
     def _random_location(self):
         """Return one of the valid locations randomly."""
@@ -162,7 +182,7 @@ class VolumeDataset(Dataset):
 
         Compute the intersection of the valid range of each TensorData.
         """
-        assert self._spec is not None
+        assert self.has_spec()
         # Valid range.
         vr = None
         for key, dim in self._spec.iteritems():

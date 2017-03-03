@@ -42,13 +42,13 @@ if __name__ == "__main__":
 
     # Data augmentation.
     augment = Augmentor()
-    augment.add_augment('misalign', max_trans=30, slip_ratio=0.5)
-    augment.add_augment('warp')
-    augment.add_augment('missing', max_sec=3, mode='mix', consecutive=True, skip_ratio=0.3)
-    augment.add_augment('blur', max_sec=5, mode='mix', skip_ratio=0.3)
-    augment.add_augment('greyscale', mode='mix', skip_ratio=0.3)
-    augment.add_augment('flip')
-    # augment.add_augment('box', min_dim=50, max_dim=100, aspect_ratio=10, density=0.2)
+    augment.append('misalign', max_trans=30, slip_ratio=0.5)
+    augment.append('warp')
+    augment.append('missing', max_sec=3, mode='mix', consecutive=True, skip_ratio=0.3)
+    augment.append('blur', max_sec=5, mode='mix', skip_ratio=0.3)
+    augment.append('greyscale', mode='mix', skip_ratio=0.3)
+    augment.append('flip')
+    # augment.append('box', min_dim=50, max_dim=100, aspect_ratio=10, density=0.2)
 
     # Data transformation.
     dst = list()

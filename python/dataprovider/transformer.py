@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 __doc__ = """
 
-Transformer classes.
+Transform classes.
 
 Kisuk Lee <kisuklee@mit.edu>, 2017
 """
@@ -13,19 +13,37 @@ import transform as tf
 
 class Transformer(object):
     """
-    Transformer interface.
+    A sequence of transfors.
+    """
+
+    def __init__(self):
+        self._transforms = list()
+
+    def __call__(self, sample, **kwargs):
+        for tf in self._transforms:
+            sample = tf(sample, **kwargs)
+        return sample
+
+    def append(self, tf):
+        assert isinstance(tf, Transform)
+        self._transforms.append(tf)
+
+
+class Transform(object):
+    """
+    Transform interface.
     """
 
     def __call__(self, sample, **kwargs):
         return sample
 
 
-class Affinity(Transformer):
+class Affinity(Transform):
     """
     Expand segmentation into affinity represntation.
     """
 
-    def __init__(self, dst, source, target, crop=None, rebalance=False):
+    def __init__(self, dst, source, target, crop=None, rebalance=True):
         """Initialize parameters.
 
         Args:
@@ -43,47 +61,36 @@ class Affinity(Transformer):
 
     def __call__(self, sample):
         """Affinity label processing."""
-        # DEBUG(kisuk)
-        t0 = time.time()
         seg  = sample[self.source]
         msk  = np.ones_like(seg)
         affs = list()
         msks = list()
         # Affinitize.
-        t1 = time.time()
         for dst in self.dst:
             affs.append(tf.affinitize(seg, dst=dst))
             msks.append(tf.affinitize_mask(msk, dst=dst))
-        t2 = time.time()
         aff = np.concatenate(affs, axis=0)
         msk = np.concatenate(msks, axis=0)
-        t3 = time.time()
         # Rebalancing.
         if self.rebalance:
             for c in xrange(aff.shape[0]):
                 msk[c,...] *= tf.rebalance_binary_class(aff[c,...], msk=msk[c,...])
-        t4 = time.time()
         # Update sample.
         sample[self.target] = aff
         sample[self.target+'_mask'] = msk
         # Crop.
-        t5 = time.time()
         if self.crop is not None:
             for k, v in sample.iteritems():
                 sample[k] = tf.crop(v, offset=self.crop)
-        t6 = time.time()
-        # DEBUG(kisuk)
-        print "Affinitize: %.3f (%.3f, %.3f, %.3f, %.3f)" % (time.time()-t0,
-                t2-t1,t3-t2,t4-t3,t6-t5)
         return sample
 
 
-class Semantic(Transformer):
+class Semantic(Transform):
     """
     Expand semantic segmentation into multiclass represntation.
     """
 
-    def __init__(self, ids, source, target, rebalance=False):
+    def __init__(self, ids, source, target, rebalance=True):
         """Initialize parameters.
 
         Args:
@@ -112,12 +119,12 @@ class Semantic(Transformer):
         return sample
 
 
-class ObjectInstance(Transformer):
+class ObjectInstance(Transform):
     """
     Object instance segmentation.
     """
 
-    def __init__(self, source, target, rebalance=False):
+    def __init__(self, source, target, rebalance=True):
         self.source = source
         self.target = target
         self.rebalance = rebalance

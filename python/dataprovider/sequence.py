@@ -24,7 +24,7 @@ class SampleSequence(object):
 
     def __init__(self, probmap, length):
         self.set_probability(probmap)
-        self.length = length
+        self.set_length(length)
         self.sample()
 
     def set_probability(self, probmap):
@@ -32,8 +32,13 @@ class SampleSequence(object):
             probmap = emio.imread(probmap)
         assert isinstance(probmap, np.ndarray)
         self.probmap = probmap
+        self.round = 0
 
-    def get_sample_coord(self):
+    def set_length(self, length):
+        assert length > 0
+        self.length = length
+
+    def __call__(self):
         # Resample if sequence is empty.
         if len(self.pointer) == 0:
             self.sample()
@@ -45,6 +50,7 @@ class SampleSequence(object):
 
     def sample(self):
         """Randomly generate a sample sequence of given length."""
+        self.next_round()
         rnd = np.random.rand(*self.probmap.shape)
         idx = self.probmap > rnd
         seq = np.nonzero(idx)
@@ -55,3 +61,16 @@ class SampleSequence(object):
         # according to the given length.
         pointer = np.random.permutation(len(seq[0]))
         self.pointer = list(pointer[:self.length])
+
+    def next_round(self):
+        self.round += 1
+
+
+class InstanceSequence(SampleSequence):
+    """
+    prob**1, prob**2, prob**3, ...
+    """
+
+    def next_round(self):
+        super(InstanceSequence, self).next_round()
+        self.probmap **= self.round

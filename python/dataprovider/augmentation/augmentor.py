@@ -50,8 +50,8 @@ class Augmentor(object):
     def __init__(self):
         self._augments = list()
 
-    def add_augment(self, aug, **kwargs):
-        """Add data augmentation.
+    def append(self, aug, **kwargs):
+        """Append data augmentation.
 
         Augmentation type and parameters should be specified.
 

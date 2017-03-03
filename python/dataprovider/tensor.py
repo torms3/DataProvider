@@ -57,16 +57,17 @@ class TensorData(object):
 
     def get_patch(self, pos):
         """Extract a patch of size _fov centered on pos."""
-        # Check validity.
-        assert self._rg.contains(pos)
-        # Local coordinate system
-        loc  = pos - self._offset
-        box  = centered_box(loc, self._fov)
-        vmin = box.min()
-        vmax = box.max()
-        return np.copy(self._data[:,vmin[0]:vmax[0],
-                                    vmin[1]:vmax[1],
-                                    vmin[2]:vmax[2]])
+        ret = None
+        if self._rg.contains(pos):
+            # Local coordinate system
+            loc  = pos - self._offset
+            box  = centered_box(loc, self._fov)
+            vmin = box.min()
+            vmax = box.max()
+            ret  = np.copy(self._data[:,vmin[0]:vmax[0],
+                                        vmin[1]:vmax[1],
+                                        vmin[2]:vmax[2]])
+        return ret
 
     ####################################################################
     ## Public methods for accessing attributes.

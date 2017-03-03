@@ -84,7 +84,7 @@ class Semantic(Transformer):
         if self.rebalance:
             for i, _ in enumerate(self.ids):
                 msk[i,...] = tf.rebalance_binary_class(lbl[i,...],msk[i,...])
-        # Replace sample.
+        # Update sample.
         sample[self.target] = lbl
         sample[self.target+'_mask'] = msk
         return sample

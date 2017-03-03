@@ -69,14 +69,15 @@ class Semantic(Transformer):
     Expand semantic segmentation into multiclass represntation.
     """
 
-    def __init__(self, ids, key, rebalance=False):
+    def __init__(self, ids, source, target, rebalance=False):
         self.ids = ids
-        self.key = key
+        self.source = source
+        self.target = target
         self.rebalance = rebalance
 
     def __call__(self, sample):
         """Semantic label processing."""
-        sem = sample[self.key]
+        sem = sample[self.source]
         # Semantic class expansion.
         lbl, msk = tf.multiclass_expansion(sem, ids=self.ids)
         # Rebalancing.
@@ -84,6 +85,6 @@ class Semantic(Transformer):
             for i, _ in enumerate(self.ids):
                 msk[i,...] = tf.rebalance_binary_class(lbl[i,...],msk[i,...])
         # Replace sample.
-        sample[self.key] = lbl
-        sample[self.key+'_mask'] = msk
+        sample[self.target] = lbl
+        sample[self.target+'_mask'] = msk
         return sample

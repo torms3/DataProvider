@@ -146,24 +146,29 @@ class VolumeDataProvider(DataProvider):
 class Sampler(object):
     """
     Draw samples from the data provider.
-    """
-    def __init__(self, dp, f=None):
-        """
-        Initialize sampler.
 
-        Args:
-            dp: Data provider.
-            f:  Sample transformer.
-        """
+    Attributes:
+        dp: Data provider.
+        f:  List of sample transformer.
+    """
+
+    def __init__(self, dp):
         self.dp = dp
-        self.f  = f
+        self.f  = list()
 
     def __call__(self):
         """Draw a sample, transform if needed."""
         sample = self.dp.random_sample()
-        if self.f is not None:
-            sample = self.f(sample)
+        if len(self.f) > 0:
+            for f in self.f:
+                sample = f(sample)
         return sample
 
     def set_f(self, f):
-        self.f = f
+        """Reset list, then add a transformer."""
+        self.f = list()
+        self.add_f(f)
+
+    def add_f(self, f):
+        """Add a sample transformer."""
+        self.f.append(f)

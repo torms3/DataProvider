@@ -25,6 +25,7 @@ class Affinity(Transformer):
 
     def __init__(self, dst, source, target, crop=None, rebalance=True):
         """Initialize parameters.
+
         Args:
             dst: List of 3-tuples, each indicating affinity distance in (z,y,x).
             source: Key to source data from which to construct affinity.
@@ -41,7 +42,7 @@ class Affinity(Transformer):
     def __call__(self, sample):
         """Affinity label processing."""
         seg  = sample[self.source]
-        msk  = np.ones_like(seg)
+        msk  = get_mask(sample, self.source)
         affs = list()
         msks = list()
         # Affinitize.
@@ -80,6 +81,8 @@ class Semantic(Transformer):
         sem = sample[self.source]
         # Semantic class expansion.
         lbl, msk = tf.multiclass_expansion(sem, ids=self.ids)
+        # Combine with a given mask.
+        msk *= get_mask(sample, self.source)
         # Rebalancing.
         if self.rebalance:
             for i, _ in enumerate(self.ids):
@@ -105,7 +108,7 @@ class Synapse(Transformer):
         syn = sample[self.source]
         # Binarize.
         lbl = tf.binarize(syn)
-        msk = np.ones_like(lbl)
+        msk = get_mask(sample, self.source)
         # Rebalancing.
         if self.rebalance:
             msk = tf.rebalance_binary_class(lbl,msk)
@@ -113,3 +116,17 @@ class Synapse(Transformer):
         sample[self.target] = lbl
         sample[self.target+'_mask'] = msk
         return sample
+
+####################################################################
+## Helper.
+####################################################################
+
+def get_mask(sample, key):
+    """Return mask if any, or else default one (all ones)."""
+    msk = None
+    if key in sample:
+        if key+'_mask' in sample:
+            msk = sample[key+'_mask']
+        else:
+            msk = np.ones_lie(sample[key])
+    return msk

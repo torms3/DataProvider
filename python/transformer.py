@@ -126,7 +126,7 @@ def get_mask(sample, key):
     msk = None
     if key in sample:
         if key+'_mask' in sample:
-            msk = sample[key+'_mask']
+            msk = sample[key+'_mask'].astype(sample[key].dtype)
         else:
-            msk = np.ones_lie(sample[key])
+            msk = np.ones_like(sample[key])
     return msk

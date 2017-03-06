@@ -10,7 +10,7 @@ from collections import OrderedDict
 import numpy as np
 
 from .augmentation.augmentor import DataAugment, Augmentor
-from dataset import VolumeDataset
+from dataset import Dataset, VolumeDataset
 from transformer import Transform, Transformer
 from sequence import *
 
@@ -91,11 +91,12 @@ class VolumeDataProvider(DataProvider):
             drange = kwargs['drange']
         idx = np.random.choice(len(drange), 1)
         dataset = self.datasets[idx]
-        spec    = dataset.get_spec()
         params  = dataset.get_params()
+        params.update(kwargs)
         # Pick sample randomly.
         while True:
             try:
+                spec = dataset.get_spec()
                 spec = self.augment.prepare(spec, **params)
                 sample = getattr(dataset, mode+'_sample')(spec=spec)
                 break

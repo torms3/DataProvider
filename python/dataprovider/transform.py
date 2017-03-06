@@ -456,6 +456,7 @@ def rebalance_binary_class(img, msk=None, dtype='float32'):
         idx   = img > 0
         total = img.size
     else:
+        msk   = check_volume(msk)
         msk   = msk > 0
         idx   = (img > 0) & msk
         total = np.count_nonzero(msk)

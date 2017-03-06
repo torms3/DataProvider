@@ -59,10 +59,10 @@ class Affinity(Transform):
         self.crop = crop
         self.rebalance = rebalance
 
-    def __call__(self, sample):
+    def __call__(self, sample, **kwargs):
         """Affinity label processing."""
         seg  = sample[self.source]
-        msk  = np.ones_like(seg)
+        msk  = get_mask(sample, self.source)
         affs = list()
         msks = list()
         # Affinitize.
@@ -104,16 +104,43 @@ class Semantic(Transform):
         self.target = target
         self.rebalance = rebalance
 
-    def __call__(self, sample):
+    def __call__(self, sample, **kwargs):
         """Semantic label processing."""
         sem = sample[self.source]
         # Semantic class expansion.
         lbl, msk = tf.multiclass_expansion(sem, ids=self.ids)
+        # Combine with a given mask.
+        msk *= get_mask(sample, self.source)
         # Rebalancing.
         if self.rebalance:
             for i, _ in enumerate(self.ids):
                 msk[i,...] = tf.rebalance_binary_class(lbl[i,...], msk[i,...])
         # Replace sample.
+        sample[self.target] = lbl
+        sample[self.target+'_mask'] = msk
+        return sample
+
+
+class Synapse(Transformer):
+    """
+    Transform synapse segmentation into binary representation.
+    """
+
+    def __init__(self, source, target, rebalance=True):
+        self.source = source
+        self.target = target
+        self.rebalance = rebalance
+
+    def __call__(self, sample, **kwargs):
+        """Synapse label processing."""
+        syn = sample[self.source]
+        # Binarize.
+        lbl = tf.binarize(syn)
+        msk = get_mask(sample, self.source)
+        # Rebalancing.
+        if self.rebalance:
+            msk = tf.rebalance_binary_class(lbl,msk)
+        # Update sample.
         sample[self.target] = lbl
         sample[self.target+'_mask'] = msk
         return sample
@@ -129,7 +156,7 @@ class ObjectInstance(Transform):
         self.target = target
         self.rebalance = rebalance
 
-    def __call__(self, sample):
+    def __call__(self, sample, **kwargs):
         seg = sample[self.source]
         # Binarize.
         lbl = tf.binarize_center_object(seg)
@@ -140,3 +167,17 @@ class ObjectInstance(Transform):
         sample[self.target] = lbl
         sample[self.target+'_mask'] = msk
         return sample
+
+####################################################################
+## Helper.
+####################################################################
+
+def get_mask(sample, key):
+    """Return mask if any, or else default one (all ones)."""
+    msk = None
+    if key in sample:
+        if key+'_mask' in sample:
+            msk = sample[key+'_mask'].astype('float32')
+        else:
+            msk = np.ones_like(sample[key])
+    return msk

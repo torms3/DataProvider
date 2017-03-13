@@ -42,7 +42,7 @@ class Misalign(augmentor.DataAugment):
 
             # Randomly draw x/y translation independently.
             ret, pvt, zs = dict(), dict(), list()
-            for k, v in self.spec.iteritems():
+            for k, v in spec.iteritems():
                 z, y, x = v[-3:]
                 assert z > 0
                 x_dim  = self.x_t + v[-1]
@@ -62,7 +62,7 @@ class Misalign(augmentor.DataAugment):
             # Trivial 2D case
             if zmin == 1:
                 self.do_augment = False
-                ret = dict(spec)
+                ret = spec
             else:
                 self.do_augment = True
                 # Introduce misalignment at pivot.

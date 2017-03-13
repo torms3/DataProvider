@@ -76,11 +76,12 @@ class VolumeDataset(Dataset):
         """
         sample = OrderedDict()
         for key in self._spec.keys():
-            patch = self._data[key].get_patch(pos)
-            if patch is None:
-                raise
-            else:
-                sample[key] = patch
+            if key in self._data:
+                patch = self._data[key].get_patch(pos)
+                if patch is None:
+                    raise
+                else:
+                    sample[key] = patch
         return sample
 
     def next_sample(self, spec=None):
@@ -186,11 +187,12 @@ class VolumeDataset(Dataset):
         # Valid range.
         vr = None
         for key, dim in self._spec.iteritems():
-            # Update patch size.
-            self._data[key].set_fov(dim[-3:])
-            # Update valid range.
-            r = self._data[key].range()
-            vr = r if vr is None else vr.intersect(r)
+            if key in self._data:
+                # Update patch size.
+                self._data[key].set_fov(dim[-3:])
+                # Update valid range.
+                r = self._data[key].range()
+                vr = r if vr is None else vr.intersect(r)
         self._range = vr
 
 

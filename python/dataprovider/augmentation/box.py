@@ -28,9 +28,6 @@ class BoxOcclusion(augmentor.DataAugment):
         self.alpha = 0.0
 
     def prepare(self, spec, **kwargs):
-        # No change in sample spec.
-        self.spec = dict(spec)
-
         # Find union of bounding boxes.
         self.bbox = dict()
         bbox = None

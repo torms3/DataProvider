@@ -85,7 +85,7 @@ void NN3d_zxy(const float *src, float u, float v, float w, int ch,
 
 int fastwarp3d_opt_zxy(const float *src, float *dest_d,
                        const int sh[4], // z,ch,x,y
-                       const int ps[4], // z,ch, x,y
+                       const int ps[4], // z,ch,x,y
                        const float rot, const float shear, const float scale[3],
                        const float stretch_in[4], const float twist_in) {
     // Loop/coord indices
@@ -147,4 +147,3 @@ int fastwarp3d_opt_zxy(const float *src, float *dest_d,
     }
     return 0;
 }
-

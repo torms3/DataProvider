@@ -37,7 +37,6 @@ class Blur(augmentor.DataAugment):
 
     def prepare(self, spec, **kwargs):
         # No change in spec.
-        self.spec = dict(spec)
         self.skip = np.random.rand() < self.skip_ratio
         return spec
 
@@ -60,7 +59,7 @@ class Blur(augmentor.DataAugment):
         imgs = kwargs['imgs']
         dims = set([])
         for key in imgs:
-            dim = self.spec[key][-3:]
+            dim = sample[key].shape[-3:]
             assert num_sec < dim[-3]
             dims.add(dim)
         assert len(dims) == 1

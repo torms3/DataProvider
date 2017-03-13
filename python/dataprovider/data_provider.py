@@ -113,8 +113,3 @@ class VolumeDataProvider(DataProvider):
 
     def __call__(self, mode, **kwargs):
         return self.transform(self._sample(mode, **kwargs), **kwargs)
-
-
-class ObjectInstanceDataProvider(VolumeDataProvider):
-
-    def _sample(self, mode, **kwargs):

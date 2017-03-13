@@ -28,7 +28,7 @@ if __name__ == "__main__":
     img  = emio.imread(args.img);   print "Load image..."
     lbl  = emio.imread(args.lbl);   print "Load label..."
     prob = emio.imread(args.prob);  print "Load probability map..."
-    prob = prob**4
+    prob = prob**16
 
     # Preprocess.
     img = transform.divideby(img, val=255.0, dtype='float32')
@@ -55,29 +55,42 @@ if __name__ == "__main__":
     augment.append('blur', max_sec=5, mode='mix', skip_ratio=0.3)
     augment.append('greyscale', mode='mix', skip_ratio=0.3)
     augment.append('flip')
-    # augment.append('box', min_dim=50, max_dim=100, aspect_ratio=10, density=0.2)
 
     # Data transformation.
-    # dst = list()
-    # for i in xrange(1):
-    #     dst.append((i+1,3**i,3**i))
-    # transform = Affinity(dst, 'label', 'label', crop=(1,1,1), rebalance=True)
-    transform = ObjectInstance(source='label', target='label')
+    transform = Transformer()
+    transform.append(ObjectInstance(source='label', target='label'))
 
-    # Data provider.
-    sampler = VolumeDataProvider()
-    sampler.add_dataset(vdset)
-    sampler.set_augmentor(augment)
-    sampler.add_transform(transform)
+    # Sampler.
+    while True:
+        try:
+            print 'try sample...'
+            spec = vdset.get_spec()
+            spec['mask'] = spec['input']
+            params = vdset.get_params()
+            spec = augment.prepare(spec, **params)
+            sample = vdset.next_sample(spec=spec)
+            break
+        except:
+            pass
+    # Object instance mask.
+    z, y, x = sample['label'].shape[-3:]
+    object_id = sample['label'][...,z//2,y//2,x//2]
+    mask = np.zeros((z,y,x), dtype='float32')
+    mask[z//2,y//2,x//2] = 1
+    sample['mask'] = mask
+    # Apply data augmentation.
+    sample = augment(sample, imgs=['input'])
+    # Apply transformation.
+    sample = transform(sample, object_id=object_id)
 
     # Failure test.
-    elapsed = 0.0
-    for i in range(args.iter):
-        t0 = time.time()
-        # Sample & augment.
-        sample = sampler('next', imgs=['input'])
-        elapsed += time.time() - t0
-        print "Iteration %7d, elapsed: %.3f" % (i+1, elapsed/(i+1))
+    # elapsed = 0.0
+    # for i in range(args.iter):
+    #     t0 = time.time()
+    #     # Sample & augment.
+    #     sample = sampler('next', imgs=['input'])
+    #     elapsed += time.time() - t0
+    #     print "Iteration %7d, elapsed: %.3f" % (i+1, elapsed/(i+1))
 
     # Dump a single random sample.
     if args.save:

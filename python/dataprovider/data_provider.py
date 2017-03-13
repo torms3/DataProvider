@@ -82,18 +82,21 @@ class VolumeDataProvider(DataProvider):
         """Fetch sample randomly."""
         return self._sample('random', **kwargs)
 
-    def _sample(self, mode, **kwargs):
+    def random_dataset(self, **kwargs):
+        """Pick one dataset randomly."""
         assert len(self.datasets) > 0
-        assert mode is 'random' or mode is 'next'
-        # Pick one dataset randomly.
         drange = range(len(self.datasets))
         if 'drange' in kwargs:
             drange = kwargs['drange']
         idx = np.random.choice(len(drange), 1)
-        dataset = self.datasets[idx]
-        params  = dataset.get_params()
+        return self.datasets[idx]
+
+    def _sample(self, mode, **kwargs):
+        assert mode is 'random' or mode is 'next'
+        dataset = self.random_dataset(**kwargs)
+        params = dataset.get_params()
         params.update(kwargs)
-        # Pick sample randomly.
+        # Pick a sample randomly.
         while True:
             try:
                 spec = dataset.get_spec()
@@ -110,3 +113,8 @@ class VolumeDataProvider(DataProvider):
 
     def __call__(self, mode, **kwargs):
         return self.transform(self._sample(mode, **kwargs), **kwargs)
+
+
+class ObjectInstanceDataProvider(VolumeDataProvider):
+
+    def _sample(self, mode, **kwargs):

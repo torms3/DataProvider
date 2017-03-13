@@ -275,8 +275,8 @@ def binarize(img, dtype='float32'):
     return ret
 
 
-def binarize_center_object(img, dtype='float32'):
-    """Binarize center object.
+def binarize_object(img, object_id=None, dtype='float32'):
+    """Binarize a target object.
 
     Args:
         img: 3D indexed image, with each index corresponding to each segment.
@@ -288,9 +288,12 @@ def binarize_center_object(img, dtype='float32'):
     ret = np.zeros(img.shape, dtype=dtype)
 
     # Center object.
-    z, y, x = img.shape[-3:]
-    center_id = img[...,z/2,y/2,x/2]
-    ret[:] = (img==center_id).astype(dtype)
+    if object_id is None:
+        z, y, x = img.shape[-3:]
+        object_id = img[...,z/2,y/2,x/2]
+    if object_id == 0:
+        assert False
+    ret[:] = (img==object_id).astype(dtype)
     return ret
 
 

@@ -28,7 +28,7 @@ if __name__ == "__main__":
     img  = emio.imread(args.img);   print "Load image..."
     lbl  = emio.imread(args.lbl);   print "Load label..."
     prob = emio.imread(args.prob);  print "Load probability map..."
-    prob = prob**16
+    prob = prob**4
 
     # Preprocess.
     img = transform.divideby(img, val=255.0, dtype='float32')

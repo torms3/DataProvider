@@ -159,7 +159,8 @@ class ObjectInstance(Transform):
     def __call__(self, sample, **kwargs):
         seg = sample[self.source]
         # Binarize.
-        lbl = tf.binarize_center_object(seg)
+        object_id = kwargs['object_id'] if 'object_id' in kwargs else None
+        lbl = tf.binarize_object(seg, object_id=object_id)
         # Rebalancing.
         if self.rebalance:
             msk = tf.rebalance_binary_class(lbl, msk=np.ones_like(lbl))

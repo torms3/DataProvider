@@ -73,4 +73,4 @@ class InstanceSequence(SampleSequence):
 
     def next_round(self):
         super(InstanceSequence, self).next_round()
-        self.probmap **= self.round
+        self.probmap **= 1 + 2*(self.round-1)

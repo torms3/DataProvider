@@ -68,9 +68,5 @@ class SampleSequence(object):
 
 class InstanceSequence(SampleSequence):
     """
-    prob**1, prob**2, prob**3, ...
+    Object instance segmentation.
     """
-
-    def next_round(self):
-        super(InstanceSequence, self).next_round()
-        self.probmap **= self.round

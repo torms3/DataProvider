@@ -19,12 +19,14 @@ class MissingAugment(data_augmentation.DataAugment):
     a user-specified value.
     """
 
-    def __init__(self, max_sec=1, skip_ratio=0.3, mode='full', consecutive=False):
+    def __init__(self, max_sec=1, skip_ratio=0.3, mode='full',
+                 consecutive=False, random_color=True):
         """Initialize MissingSectionAugment."""
         self.set_max_sections(max_sec)
         self.set_skip_ratio(skip_ratio)
         self.set_mode(mode)
         self.consecutive = consecutive
+        self.random_color = random_color
 
         # DEBUG(kisuk)
         # self.hist = [0] * (max_sec + 1)
@@ -99,10 +101,13 @@ class MissingAugment(data_augmentation.DataAugment):
         else:
             zlocs = np.random.choice(zdim, num_sec, replace=False)
 
+        # Fill-out value.
+        val = np.random.rand() if self.random_color else 0
+
         # Apply full or partial missing sections according to the mode.
         if self.mode == 'full':
             for key in imgs:
-                sample[key][...,zlocs,:,:] = 0
+                sample[key][...,zlocs,:,:] = val
         else:
             # Draw a random xy-coordinate.
             x = np.random.randint(0, xdim)
@@ -110,9 +115,10 @@ class MissingAugment(data_augmentation.DataAugment):
             rule = np.random.rand(4) > 0.5
 
             for z in zlocs:
+                val = np.random.rand() if self.random_color else 0
                 if self.mode == 'mix' and np.random.rand() > 0.5:
                     for key in imgs:
-                        sample[key][...,z,:,:] = 0
+                        sample[key][...,z,:,:] = val
                 else:
                     # Independent coordinates across sections.
                     if not self.consecutive:
@@ -122,18 +128,18 @@ class MissingAugment(data_augmentation.DataAugment):
                     # 1st quadrant.
                     if rule[0]:
                         for key in imgs:
-                            sample[key][...,z,:y,:x] = 0
+                            sample[key][...,z,:y,:x] = val
                     # 2nd quadrant.
                     if rule[1]:
                         for key in imgs:
-                            sample[key][...,z,y:,:x] = 0
+                            sample[key][...,z,y:,:x] = val
                     # 3nd quadrant.
                     if rule[2]:
                         for key in imgs:
-                            sample[key][...,z,:y,x:] = 0
+                            sample[key][...,z,:y,x:] = val
                     # 4nd quadrant.
                     if rule[3]:
                         for key in imgs:
-                            sample[key][...,z,y:,x:] = 0
+                            sample[key][...,z,y:,x:] = val
 
         return sample

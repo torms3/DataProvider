@@ -19,7 +19,8 @@ class MissingSection(augmentor.DataAugment):
     be overwritten by user-specified value.
     """
 
-    def __init__(self, max_sec=1, mode='mix', consecutive=False, skip_ratio=0.3):
+    def __init__(self, max_sec=1, mode='mix', consecutive=False,
+                 skip_ratio=0.3, random_color=True):
         """Initialize parameters.
 
         Args:
@@ -27,11 +28,14 @@ class MissingSection(augmentor.DataAugment):
             mode: 'full', 'partial', 'mix'
             consecutive: If True, introduce consecutive missing sections.
             skip_ratio: Probability of skipping augmentation.
+            random_color: If True, fill out missing sections uniformly with
+                            a random value.
         """
         self.set_max_sections(max_sec)
         self.set_mode(mode)
         self.set_skip_ratio(skip_ratio)
         self.consecutive = consecutive
+        self.random_color = random_color
 
     def prepare(self, spec, **kwargs):
         # No change in sample spec.
@@ -75,10 +79,13 @@ class MissingSection(augmentor.DataAugment):
         # DEBUG(kisuk)
         # print sorted([x+1 for x in zlocs])
 
+        # Fill-out value.
+        val = np.random.rand() if self.random_color else 0
+
         # Apply full or partial missing sections according to the mode.
         if self.mode == 'full':
             for key in imgs:
-                sample[key][...,zlocs,:,:] = 0
+                sample[key][...,zlocs,:,:] = val
         else:
             # Draw a random xy-coordinate.
             x = np.random.randint(0, xdim)
@@ -86,9 +93,10 @@ class MissingSection(augmentor.DataAugment):
             rule = np.random.rand(4) > 0.5
 
             for z in zlocs:
+                val = np.random.rand() if self.random_color else 0
                 if self.mode == 'mix' and np.random.rand() > 0.5:
                     for key in imgs:
-                        sample[key][...,z,:,:] = 0
+                        sample[key][...,z,:,:] = val
                 else:
                     # Independent coordinates across sections.
                     if not self.consecutive:
@@ -98,19 +106,19 @@ class MissingSection(augmentor.DataAugment):
                     # 1st quadrant.
                     if rule[0]:
                         for key in imgs:
-                            sample[key][...,z,:y,:x] = 0
+                            sample[key][...,z,:y,:x] = val
                     # 2nd quadrant.
                     if rule[1]:
                         for key in imgs:
-                            sample[key][...,z,y:,:x] = 0
+                            sample[key][...,z,y:,:x] = val
                     # 3nd quadrant.
                     if rule[2]:
                         for key in imgs:
-                            sample[key][...,z,:y,x:] = 0
+                            sample[key][...,z,:y,x:] = val
                     # 4nd quadrant.
                     if rule[3]:
                         for key in imgs:
-                            sample[key][...,z,y:,x:] = 0
+                            sample[key][...,z,y:,x:] = val
 
         return sample
 

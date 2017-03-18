@@ -59,7 +59,7 @@ class Augmentor(object):
             aug: (1) DataAugment object.
                  (2) Dictionary of augmentation type and parameters.
                      e.g. dict(type='flip')
-                 (3) str indicating augmentation type
+                 (3) string of augmentation type.
                      e.g. 'flip'
             kwargs: Only used in case (3).
         """

@@ -51,7 +51,7 @@ class Boundary(Transform):
     def __call__(self, sample, **kwargs):
         lbl = sample[self.source]
         # Boundary.
-        bdr, _ = tf.multiclass_expansion(sem, ids=[0])
+        bdr, _ = tf.multiclass_expansion(lbl, ids=[0])
         # Mask.
         msk = get_mask(sample, self.source)
         # Rebalancing.

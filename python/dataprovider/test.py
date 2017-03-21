@@ -48,16 +48,17 @@ if __name__ == "__main__":
 
     # Data augmentation.
     augment = Augmentor()
-    augment.append('misalign', max_trans=17, slip_ratio=0.5)
-    augment.append('warp')
-    augment.append('missing', max_sec=3, mode='mix', consecutive=True, skip_ratio=0.3)
-    augment.append('blur', max_sec=5, mode='mix', skip_ratio=0.3)
-    augment.append('greyscale', mode='mix', skip_ratio=0.3)
-    augment.append('flip')
+    # augment.append('misalign', max_trans=17, slip_ratio=0.5)
+    # augment.append('warp')
+    # augment.append('missing', max_sec=3, mode='mix', consecutive=True, skip_ratio=0.3)
+    # augment.append('blur', max_sec=5, mode='mix', skip_ratio=0.3)
+    # augment.append('greyscale', mode='mix', skip_ratio=0.3)
+    # augment.append('flip')
 
     # Data transformation.
     transform = Transformer()
-    transform.append(ObjectInstance(source='label', target='label'))
+    transform.append(ObjectInstance(source='label', target='object'))
+    transform.append(Boundary(source='label', target='boundary'))
 
     # Sampler.
     while True:

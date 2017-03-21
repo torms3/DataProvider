@@ -372,13 +372,13 @@ def affinitize(img, dst=(1,1,1), dtype='float32'):
 
 def affinitize1(img, dst=(1,1,1), dtype='float32'):
     """
-    Transform segmentation to 3D affinity graph.
+    Transform segmentation to an affinity map.
 
     Args:
         img: 3D indexed image, with each index corresponding to each segment.
 
     Returns:
-        ret: 3D affinity graph (4D tensor).
+        ret: an affinity map (4D tensor).
     """
     img = check_volume(img)
     ret = np.zeros(img.shape, dtype=dtype)

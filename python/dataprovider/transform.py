@@ -321,9 +321,7 @@ def multiclass_expansion(img, ids, dtype='float32'):
 
 
 def binary_class(img, dtype='float32'):
-    """
-    TODO(kisuk): Documentation.
-    """
+    """Binary softmax prediction."""
     img = check_volume(img)
     img = binarize(img, dtype=dtype)
     ret, _ = multiclass_expansion(img, ids=[0,1], dtype=dtype)

@@ -28,7 +28,6 @@ if __name__ == "__main__":
     img  = emio.imread(args.img);   print "Load image..."
     lbl  = emio.imread(args.lbl);   print "Load label..."
     prob = emio.imread(args.prob);  print "Load probability map..."
-    prob = prob**16
 
     # Preprocess.
     img = transform.divideby(img, val=255.0, dtype='float32')
@@ -43,7 +42,7 @@ if __name__ == "__main__":
     vdset.set_sequence(seq)
 
     # Set sample spec.
-    size = (1+args.z, 1+args.y, 1+args.x)
+    size = (args.z, args.y, args.x)
     spec = dict(input=size, label=size)
     vdset.set_spec(spec)
 

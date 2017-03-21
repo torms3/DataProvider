@@ -38,6 +38,31 @@ class Transform(object):
         return sample
 
 
+class Boundary(Transform):
+    """
+    Binary boundary prediction.
+    """
+
+    def __init__(self, source, target, rebalance=True):
+        self.source = source
+        self.target = target
+        self.rebalance = rebalance
+
+    def __call__(self, sample, **kwargs):
+        lbl = sample[self.source]
+        # Boundary.
+        bdr, _ = tf.multiclass_expansion(sem, ids=[0])
+        # Mask.
+        msk = get_mask(sample, self.source)
+        # Rebalancing.
+        if self.rebalance:
+            msk = tf.rebalance_binary_class(bdr, msk)
+        # Replace sample.
+        sample[self.target] = bdr
+        sample[self.target+'_mask'] = msk
+        return sample
+
+
 class Affinity(Transform):
     """
     Expand segmentation into affinity represntation.
@@ -180,5 +205,5 @@ def get_mask(sample, key):
         if key+'_mask' in sample:
             msk = sample[key+'_mask'].astype('float32')
         else:
-            msk = np.ones_like(sample[key])
+            msk = np.ones(sample[key].shape, 'float32')
     return msk

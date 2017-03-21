@@ -346,6 +346,47 @@ def affinitize(img, dst=(1,1,1), dtype='float32'):
 
     return ret
 
+
+def affinitize1(img, dst=(1,1,1), dtype='float32'):
+    """
+    Transform segmentation to an affinity map.
+
+    Args:
+        img: 3D indexed image, with each index corresponding to each segment.
+
+    Returns:
+        ret: an affinity map (4D tensor).
+    """
+    img = check_volume(img)
+    ret = np.zeros(img.shape, dtype=dtype)
+
+    # Sanity check.
+    (dz,dy,dx) = dst
+    assert abs(dx) < img.shape[-1]
+    assert abs(dy) < img.shape[-2]
+    assert abs(dz) < img.shape[-3]
+
+    # Slices.
+    s0 = list()
+    s1 = list()
+    s2 = list()
+    for i in range(3):
+        if dst[i] == 0:
+            s0.append(slice(None))
+            s1.append(slice(None))
+            s2.append(slice(None))
+        elif dst[i] > 0:
+            s0.append(slice(dst[i],  None))
+            s1.append(slice(dst[i],  None))
+            s2.append(slice(None, -dst[i]))
+        else:
+            s0.append(slice(None,  dst[i]))
+            s1.append(slice(-dst[i], None))
+            s2.append(slice(None,  dst[i]))
+
+    ret[s0] = (img[s1]==img[s2]) & (img[s1]>0)
+    return ret[np.newaxis,...]
+
 ####################################################################
 ## Mask Transformations
 ####################################################################
@@ -390,6 +431,47 @@ def affinitize_mask(msk, dst=(1,1,1), dtype='float32'):
         ret[0,:,:,:-dx] = (msk[:,:,dx:]>0) | (msk[:,:,:-dx]>0)
 
     return ret
+
+
+def affinitize1_mask(msk, dst=(1,1,1), dtype='float32'):
+    """
+    Transform binary mask to affinity mask.
+
+    Args:
+        msk: 3D binary mask.
+
+    Returns:
+        ret: 3D affinity mask (4D tensor).
+    """
+    msk = check_volume(msk)
+    ret = np.zeros(msk.shape, dtype=dtype)
+
+    # Sanity check.
+    (dz,dy,dx) = dst
+    assert dx and abs(dx) < msk.shape[-1]
+    assert dy and abs(dy) < msk.shape[-2]
+    assert dz and abs(dz) < msk.shape[-3]
+
+    # Slices.
+    s0 = list()
+    s1 = list()
+    s2 = list()
+    for i in range(3):
+        if dst[i] == 0:
+            s0.append(slice(None))
+            s1.append(slice(None))
+            s2.append(slice(None))
+        elif dst[i] > 0:
+            s0.append(slice(dst[i],  None))
+            s1.append(slice(dst[i],  None))
+            s2.append(slice(None, -dst[i]))
+        else:
+            s0.append(slice(None,  dst[i]))
+            s1.append(slice(-dst[i], None))
+            s2.append(slice(None,  dst[i]))
+
+    ret[s0] = (msk[s1]>0) | (msk[s2]>0)
+    return ret[np.newaxis,...]
 
 ####################################################################
 ## Rebalancing

@@ -110,6 +110,53 @@ class Affinity(Transform):
         return sample
 
 
+class Affinity1(Transform):
+    """
+    Expand segmentation into affinity represntation.
+    """
+
+    def __init__(self, dst, source, target, crop=None, rebalance=True):
+        """Initialize parameters.
+
+        Args:
+            dst: List of 3-tuples, each indicating affinity distance in (z,y,x).
+            source: Key to source data from which to construct affinity.
+            target: Key to target data.
+            crop: 3-tuple indicating crop offset.
+            rebalance: Class-rebalanced gradient weight mask.
+        """
+        self.dst = dst
+        self.source = source
+        self.target = target
+        self.crop = crop
+        self.rebalance = rebalance
+
+    def __call__(self, sample, **kwargs):
+        """Affinity label processing."""
+        seg  = sample[self.source]
+        msk  = get_mask(sample, self.source)
+        affs = list()
+        msks = list()
+        # Affinitize.
+        for dst in self.dst:
+            affs.append(tf.affinitize1(seg, dst=dst))
+            msks.append(tf.affinitize1_mask(msk, dst=dst))
+        aff = np.concatenate(affs, axis=0)
+        msk = np.concatenate(msks, axis=0)
+        # Rebalancing.
+        if self.rebalance:
+            for c in xrange(aff.shape[0]):
+                msk[c,...] *= tf.rebalance_binary_class(aff[c,...], msk=msk[c,...])
+        # Update sample.
+        sample[self.target] = aff
+        sample[self.target+'_mask'] = msk
+        # Crop.
+        if self.crop is not None:
+            for k, v in sample.iteritems():
+                sample[k] = tf.crop(v, offset=self.crop)
+        return sample
+
+
 class Semantic(Transform):
     """
     Expand semantic segmentation into multiclass represntation.

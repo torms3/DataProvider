@@ -16,18 +16,24 @@ if __name__ == "__main__":
     parser.add_argument('z', type=int, help='sample z dim.')
     parser.add_argument('y', type=int, help='sample y dim.')
     parser.add_argument('x', type=int, help='sample x dim.')
-    parser.add_argument('img', help='image file (h5 or tif) path.')
-    parser.add_argument('lbl', help='label file (h5 or tif) path.')
-    parser.add_argument('prob', help='prob file (h5 or tif) path.')
-    parser.add_argument('-iter', type=int, default=1)
+    # parser.add_argument('img', help='image file (h5 or tif) path.')
+    # parser.add_argument('lbl', help='label file (h5 or tif) path.')
+    # parser.add_argument('prob', help='prob file (h5 or tif) path.')
+    # parser.add_argument('-iter', type=int, default=1)
     parser.add_argument('-s', '--save', action='store_true')
 
     args = parser.parse_args()
 
+    # Temp.
+    img = '~/Data_local/datasets/SNEMI3D/original/train.img.h5'
+    lbl = '~/Data_local/datasets/SNEMI3D/original/train.seg.h5'
+    args.img = os.path.expanduser(img)
+    args.lbl = os.path.expanduser(lbl)
+
     # Load data.
-    img  = emio.imread(args.img);   print "Load image..."
-    lbl  = emio.imread(args.lbl);   print "Load label..."
-    prob = emio.imread(args.prob);  print "Load probability map..."
+    img = emio.imread(args.img);   print "Load image..."
+    lbl = emio.imread(args.lbl);   print "Load label..."
+    # prob = emio.imread(args.prob);  print "Load probability map..."
 
     # Preprocess.
     img = transform.divideby(img, val=255.0, dtype='float32')
@@ -38,11 +44,11 @@ if __name__ == "__main__":
     vdset.add_raw_data(key='label', data=lbl)
 
     # Create sample sequence.
-    seq = InstanceSequence(prob, length=100000)
-    vdset.set_sequence(seq)
+    # seq = InstanceSequence(prob, length=100000)
+    # vdset.set_sequence(seq)
 
     # Set sample spec.
-    size = (args.z, args.y, args.x)
+    size = (1+args.z, 1+args.y, 1+args.x)
     spec = dict(input=size, label=size)
     vdset.set_spec(spec)
 
@@ -57,15 +63,35 @@ if __name__ == "__main__":
 
     # Data transformation.
     transform = Transformer()
-    transform.append(ObjectInstance(source='label', target='object'))
-    transform.append(Boundary(source='label', target='boundary'))
+    # transform.append(ObjectInstance(source='label', target='object'))
+    # transform.append(Boundary(source='label', target='boundary'))
+    dst = list()
+    dst.append((0,0,1))
+    dst.append((0,1,0))
+    dst.append((1,0,0))
+    dst.append((0,0,3))
+    dst.append((0,3,0))
+    dst.append((1,3,3))
+    dst.append((0,0,5))
+    dst.append((0,5,0))
+    dst.append((1,5,5))
+    dst.append((0,0,10))
+    dst.append((0,10,0))
+    dst.append((2,0,0))
+    dst.append((0,0,15))
+    dst.append((0,15,0))
+    dst.append((3,0,0))
+    dst.append((0,0,20))
+    dst.append((0,20,0))
+    dst.append((4,0,0))
+    transform.append(Affinity1(dst, 'label', 'affinity', crop=(1,1,1)))
 
     # Sampler.
     while True:
         try:
             print 'try sample...'
             spec = vdset.get_spec()
-            spec['mask'] = spec['input']
+            # spec['mask'] = spec['input']
             params = vdset.get_params()
             spec = augment.prepare(spec, **params)
             sample = vdset.next_sample(spec=spec)
@@ -73,15 +99,16 @@ if __name__ == "__main__":
         except:
             pass
     # Object instance mask.
-    z, y, x = sample['label'].shape[-3:]
-    object_id = sample['label'][...,z//2,y//2,x//2]
-    mask = np.zeros((z,y,x), dtype='float32')
-    mask[z//2,y//2,x//2] = 1
-    sample['mask'] = mask
+    # z, y, x = sample['label'].shape[-3:]
+    # object_id = sample['label'][...,z//2,y//2,x//2]
+    # mask = np.zeros((z,y,x), dtype='float32')
+    # mask[z//2,y//2,x//2] = 1
+    # sample['mask'] = mask
     # Apply data augmentation.
     sample = augment(sample, imgs=['input'])
     # Apply transformation.
-    sample = transform(sample, object_id=object_id)
+    # sample = transform(sample, object_id=object_id)
+    sample = transform(sample)
 
     # Failure test.
     # elapsed = 0.0

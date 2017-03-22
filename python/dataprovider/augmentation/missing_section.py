@@ -20,7 +20,7 @@ class MissingSection(augmentor.DataAugment):
     """
 
     def __init__(self, max_sec=1, mode='mix', consecutive=False,
-                 skip_ratio=0.3, random_color=True):
+                 skip_ratio=0.3, random_color=False):
         """Initialize parameters.
 
         Args:

@@ -20,7 +20,7 @@ class MissingAugment(data_augmentation.DataAugment):
     """
 
     def __init__(self, max_sec=1, skip_ratio=0.3, mode='full',
-                 consecutive=False, random_color=True):
+                 consecutive=False, random_color=False):
         """Initialize MissingSectionAugment."""
         self.set_max_sections(max_sec)
         self.set_skip_ratio(skip_ratio)

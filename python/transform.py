@@ -448,9 +448,9 @@ def affinitize1_mask(msk, dst=(1,1,1), dtype='float32'):
 
     # Sanity check.
     (dz,dy,dx) = dst
-    assert dx and abs(dx) < msk.shape[-1]
-    assert dy and abs(dy) < msk.shape[-2]
-    assert dz and abs(dz) < msk.shape[-3]
+    assert abs(dx) < msk.shape[-1]
+    assert abs(dy) < msk.shape[-2]
+    assert abs(dz) < msk.shape[-3]
 
     # Slices.
     s0 = list()

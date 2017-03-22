@@ -502,7 +502,7 @@ def rebalance_class(img, msk=None, dtype='float32'):
     return ret
 
 
-def rebalance_binary_class(img, msk=None, dtype='float32'):
+def rebalance_binary_class(img, msk=None, base_w=0.0, dtype='float32'):
     """Binary-class rebalancing.
 
     Profile:
@@ -525,9 +525,11 @@ def rebalance_binary_class(img, msk=None, dtype='float32'):
     if count > 0 and (total - count) > 0:
         weight = [1.0/count, 1.0/(total - count)]
         weight = weight/np.sum(weight)
-        ret[idx] = weight[0]
-        ret[~idx & msk] = weight[1]
+    else:
+        weight = [base_w]*2
 
+    ret[idx] = weight[0]
+    ret[~idx & msk] = weight[1]
     return ret
 
 

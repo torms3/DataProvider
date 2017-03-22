@@ -145,10 +145,11 @@ class Synapse(Transformer):
     Transform synapse segmentation into binary representation.
     """
 
-    def __init__(self, source, target, rebalance=True):
+    def __init__(self, source, target, rebalance=True, base_w=0.0):
         self.source = source
         self.target = target
         self.rebalance = rebalance
+        self.base_w = base_w
 
     def __call__(self, sample):
         """Synapse label processing."""
@@ -158,7 +159,7 @@ class Synapse(Transformer):
         msk = get_mask(sample, self.source)
         # Rebalancing.
         if self.rebalance:
-            msk = tf.rebalance_binary_class(lbl,msk)
+            msk = tf.rebalance_binary_class(lbl, msk, base_w=self.base_w)
         # Update sample.
         sample[self.target] = lbl
         sample[self.target+'_mask'] = msk

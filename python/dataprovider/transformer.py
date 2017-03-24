@@ -234,9 +234,10 @@ class ObjectInstance(Transform):
         # Binarize.
         object_id = kwargs['object_id'] if 'object_id' in kwargs else None
         lbl = tf.binarize_object(seg, object_id=object_id)
+        msk = get_mask(sample, self.source)
         # Rebalancing.
         if self.rebalance:
-            msk = tf.rebalance_binary_class(lbl, msk=np.ones_like(lbl))
+            msk = tf.rebalance_binary_class(lbl, msk)
         # Replace sample.
         sample[self.target] = lbl
         sample[self.target+'_mask'] = msk

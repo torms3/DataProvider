@@ -51,8 +51,8 @@ class Parser(object):
         section = 'dataset'
         if self._config.has_section(section):
             config.add_section(section)
-            for name, data in self._config.items(section):
-            # for name in self.net_spec.keys():
+            #for name, data in self._config.items(section):
+            for name in self.net_spec.keys():
                 if self._config.has_option(section, name):
                     data = self._config.get(section, name)
                     config.set(section, name, data)

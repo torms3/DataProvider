@@ -51,8 +51,8 @@ class Parser(object):
         section = 'dataset'
         if self._config.has_section(section):
             config.add_section(section)
-            # for name, data in self._config.items(section):
-            for name in self.net_spec.keys():
+            for name, data in self._config.items(section):
+            # for name in self.net_spec.keys():
                 if self._config.has_option(section, name):
                     data = self._config.get(section, name)
                     config.set(section, name, data)
@@ -225,34 +225,3 @@ class Parser(object):
             else:
                 msg = 'unknown border mode [%s].' % border_func['type']
                 raise RuntimeError(msg)
-
-
-if __name__ == "__main__":
-
-    # Data spec path.
-    dspec_path = 'test_spec/zfish.spec'
-
-    # FoV of the net.
-    fov = (9,109,109)
-
-    # For training.
-    net_spec = dict(input=(18,208,208), label=(10,100,100))
-    params = dict()
-    params['border']  = dict(type='mirror_border', fov=fov)
-    params['augment'] = [dict(type='flip')]
-    params['drange']  = [0]
-
-    # For inference.
-    # net_spec = dict(input=(18,208,208))
-    # params = dict()
-    # params['border']  = dict(type='mirror_border', fov=fov)
-    # params['drange']  = [0]
-
-    # Parser
-    p = Parser(dspec_path, net_spec, params)
-    config, dparams = p.parse_dataset(0)
-    assert dparams['dataset_id']==0
-    print dparams
-    f = open('zfish_dataset0.spec', 'w')
-    config.write(f)
-    f.close()

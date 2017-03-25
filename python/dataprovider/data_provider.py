@@ -35,8 +35,9 @@ class VolumeDataProvider(DataProvider):
 
     Attributes:
         datasets: List of datasets.
-        augmentor: Sampler augmentor.
-        transformer: Sample transformer.
+        preprocessor: Sample transformer, before augmentation.
+        augmentor: Sample augmentor.
+        postprocessor: Sample transformer, after augmentation.
     """
 
     def __init__(self, datasets=None, aug=None, tf=None):
@@ -50,36 +51,12 @@ class VolumeDataProvider(DataProvider):
         # Sample transformation.
         self.set_transformer(tf)
 
-    def add_dataset(self, dataset):
-        assert isinstance(dataset, Dataset)
-        self.datasets.append(dataset)
-
-    def add_augment(self, aug):
-        assert isinstance(aug, DataAugment)
-        self.augment.append(aug)
-
-    def add_transform(self, tf):
-        assert isinstance(tf, Transform)
-        self.transform.append(tf)
-
-    def set_augmentor(self, aug):
-        if isinstance(aug, Augmentor):
-            self.augment = aug
-        else:
-            self.augment = Augmentor()
-
-    def set_transformer(self, tf):
-        if isinstance(tf, Transformer):
-            self.transform = tf
-        else:
-            self.transform = Transformer()
-
     def next_sample(self, **kwargs):
         """Fetch the next sample in a predefined sequence, if any."""
         return self._sample('next', **kwargs)
 
     def random_sample(self, **kwargs):
-        """Fetch sample randomly."""
+        """Fetch a sample randomly."""
         return self._sample('random', **kwargs)
 
     def random_dataset(self, **kwargs):
@@ -92,11 +69,11 @@ class VolumeDataProvider(DataProvider):
         return self.datasets[idx]
 
     def _sample(self, mode, **kwargs):
-        assert mode is 'random' or mode is 'next'
+        assert mode in ['random', 'next']
         dataset = self.random_dataset(**kwargs)
-        params = dataset.get_params()
+        params = dataset.get_params()  ## Dataset-specific parameters.
         params.update(kwargs)
-        # Pick a sample randomly.
+        # Pick sample randomly.
         while True:
             try:
                 spec = dataset.get_spec()
@@ -105,11 +82,52 @@ class VolumeDataProvider(DataProvider):
                 break
             except:
                 pass
+        # Preprocessing.
+        sample = self.preprocess(sample, **params)
         # Apply data augmentation.
         sample = self.augment(sample, **params)
+        # Postprocessing.
+        sample = self.postprocess(sample, **params)
         # Ensure that sample is ordered by key.
-        sample = OrderedDict(sorted(sample.items(), key=lambda x: x[0]))
-        return sample
+        return OrderedDict(sorted(sample.items(), key=lambda x: x[0]))
 
     def __call__(self, mode, **kwargs):
-        return self.transform(self._sample(mode, **kwargs), **kwargs)
+        return self._sample(mode, **kwargs)
+
+    ####################################################################
+    ## Setters.
+    ####################################################################
+
+    def add_dataset(self, dataset):
+        assert isinstance(dataset, Dataset)
+        self.datasets.append(dataset)
+
+    def add_preprocess(self, tf):
+        assert isinstance(tf, Transform)
+        self.preprocess.append(tf)
+
+    def add_augment(self, aug):
+        assert isinstance(aug, DataAugment)
+        self.augment.append(aug)
+
+    def add_postprocess(self, tf):
+        assert isinstance(tf, Transform)
+        self.postprocess.append(tf)
+
+    def set_preprocessor(self, tf):
+        if isinstance(tf, Transformer):
+            self.preprocess = tf
+        else:
+            self.preprocess = Transformer()
+
+    def set_augmentor(self, aug):
+        if isinstance(aug, Augmentor):
+            self.augment = aug
+        else:
+            self.augment = Augmentor()
+
+    def set_postprocessor(self, tf):
+        if isinstance(tf, Transformer):
+            self.postprocess = tf
+        else:
+            self.postprocess = Transformer()

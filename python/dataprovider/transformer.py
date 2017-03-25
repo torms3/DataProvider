@@ -35,7 +35,16 @@ class Transform(object):
     """
 
     def __call__(self, sample, **kwargs):
-        return sample
+        raise NotImplementedError
+
+    def extract(sample, key):
+        """Return mask if any, or else default one (all ones)."""
+        assert key in sample
+        if key+'_mask' in sample:
+            msk = sample[key+'_mask'].astype('float32')
+        else:
+            msk = np.ones(sample[key].shape, 'float32')
+        return sample[key], msk
 
 
 class Boundary(Transform):
@@ -49,16 +58,14 @@ class Boundary(Transform):
         self.rebalance = rebalance
 
     def __call__(self, sample, **kwargs):
-        lbl = sample[self.source]
+        bdr, msk = self.extract(sample, self.source)
         # Boundary.
-        bdr, _ = tf.multiclass_expansion(lbl, ids=[0])
-        # Mask.
-        msk = get_mask(sample, self.source)
+        lbl, _ = tf.multiclass_expansion(bdr, ids=[0])
         # Rebalancing.
         if self.rebalance:
-            msk = tf.rebalance_binary_class(bdr, msk)
-        # Replace sample.
-        sample[self.target] = bdr
+            msk = tf.rebalance_binary_class(lbl, msk)
+        # Update sample.
+        sample[self.target] = lbl
         sample[self.target+'_mask'] = msk
         return sample
 
@@ -86,69 +93,21 @@ class Affinity(Transform):
 
     def __call__(self, sample, **kwargs):
         """Affinity label processing."""
-        seg  = sample[self.source]
-        msk  = get_mask(sample, self.source)
+        seg, msk = self.extract(sample, self.source)
         affs = list()
         msks = list()
         # Affinitize.
         for dst in self.dst:
             affs.append(tf.affinitize(seg, dst=dst))
             msks.append(tf.affinitize_mask(msk, dst=dst))
-        aff = np.concatenate(affs, axis=0)
+        lbl = np.concatenate(affs, axis=0)
         msk = np.concatenate(msks, axis=0)
         # Rebalancing.
         if self.rebalance:
             for c in xrange(aff.shape[0]):
-                msk[c,...] *= tf.rebalance_binary_class(aff[c,...], msk=msk[c,...])
+                msk[c,...] = tf.rebalance_binary_class(lbl[c,...], msk=msk[c,...])
         # Update sample.
-        sample[self.target] = aff
-        sample[self.target+'_mask'] = msk
-        # Crop.
-        if self.crop is not None:
-            for k, v in sample.iteritems():
-                sample[k] = tf.crop(v, offset=self.crop)
-        return sample
-
-
-class Affinity1(Transform):
-    """
-    Expand segmentation into affinity represntation.
-    """
-
-    def __init__(self, dst, source, target, crop=None, rebalance=True):
-        """Initialize parameters.
-
-        Args:
-            dst: List of 3-tuples, each indicating affinity distance in (z,y,x).
-            source: Key to source data from which to construct affinity.
-            target: Key to target data.
-            crop: 3-tuple indicating crop offset.
-            rebalance: Class-rebalanced gradient weight mask.
-        """
-        self.dst = dst
-        self.source = source
-        self.target = target
-        self.crop = crop
-        self.rebalance = rebalance
-
-    def __call__(self, sample, **kwargs):
-        """Affinity label processing."""
-        seg  = sample[self.source]
-        msk  = get_mask(sample, self.source)
-        affs = list()
-        msks = list()
-        # Affinitize.
-        for dst in self.dst:
-            affs.append(tf.affinitize1(seg, dst=dst))
-            msks.append(tf.affinitize1_mask(msk, dst=dst))
-        aff = np.concatenate(affs, axis=0)
-        msk = np.concatenate(msks, axis=0)
-        # Rebalancing.
-        if self.rebalance:
-            for c in xrange(aff.shape[0]):
-                msk[c,...] *= tf.rebalance_binary_class(aff[c,...], msk=msk[c,...])
-        # Update sample.
-        sample[self.target] = aff
+        sample[self.target] = lbl
         sample[self.target+'_mask'] = msk
         # Crop.
         if self.crop is not None:
@@ -178,16 +137,16 @@ class Semantic(Transform):
 
     def __call__(self, sample, **kwargs):
         """Semantic label processing."""
-        sem = sample[self.source]
+        sem, msk = self.extract(sample, self.source)
         # Semantic class expansion.
-        lbl, msk = tf.multiclass_expansion(sem, ids=self.ids)
+        lbl, msk2 = tf.multiclass_expansion(sem, ids=self.ids)
         # Combine with a given mask.
-        msk *= get_mask(sample, self.source)
+        msk *= msk2
         # Rebalancing.
         if self.rebalance:
             for i, _ in enumerate(self.ids):
                 msk[i,...] = tf.rebalance_binary_class(lbl[i,...], msk[i,...])
-        # Replace sample.
+        # Update sample.
         sample[self.target] = lbl
         sample[self.target+'_mask'] = msk
         return sample
@@ -206,10 +165,9 @@ class Synapse(Transformer):
 
     def __call__(self, sample, **kwargs):
         """Synapse label processing."""
-        syn = sample[self.source]
+        syn, msk = self.extract(sample, self.source)
         # Binarize.
         lbl = tf.binarize(syn)
-        msk = get_mask(sample, self.source)
         # Rebalancing.
         if self.rebalance:
             msk = tf.rebalance_binary_class(lbl, msk, base_w=self.base_w)
@@ -230,11 +188,10 @@ class ObjectInstance(Transform):
         self.rebalance = rebalance
 
     def __call__(self, sample, **kwargs):
-        seg = sample[self.source]
+        seg, msk = self.extract(sample, self.source)
         # Binarize.
         object_id = kwargs['object_id'] if 'object_id' in kwargs else None
         lbl = tf.binarize_object(seg, object_id=object_id)
-        msk = get_mask(sample, self.source)
         # Rebalancing.
         if self.rebalance:
             msk = tf.rebalance_binary_class(lbl, msk)
@@ -243,16 +200,24 @@ class ObjectInstance(Transform):
         sample[self.target+'_mask'] = msk
         return sample
 
-####################################################################
-## Helper.
-####################################################################
 
-def get_mask(sample, key):
-    """Return mask if any, or else default one (all ones)."""
-    msk = None
-    if key in sample:
-        if key+'_mask' in sample:
-            msk = sample[key+'_mask'].astype('float32')
-        else:
-            msk = np.ones(sample[key].shape, 'float32')
-    return msk
+class CenterInstance(ObjectInstance):
+    """
+    Center object instance with mask.
+    """
+
+    def __init__(self, source, target, mask=None, rebalance=True):
+        self.source = source
+        self.target = target
+        self.mask = mask
+        self.rebalance = rebalance
+
+    def __call__(self, sample, **kwargs):
+        # Object instance mask.
+        if self.mask is not None:
+            seg = sample[self.source]
+            z, y, x = seg.shape[-3:]
+            mask = np.zeros(seg.shape, dtype='float32')
+            mask[...,z//2,y//2,x//2] = 1
+            sample[self.mask] = mask
+        return super(CenterInstance, self).__call__(sample, **kwargs)

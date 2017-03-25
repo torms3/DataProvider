@@ -311,7 +311,6 @@ def multiclass_expansion(img, ids, dtype='float32'):
     """
     img = check_volume(img)
     ret = np.zeros((len(ids),) + img.shape, dtype=dtype)
-    msk = np.zeros(img.shape, dtype=dtype)
     for i, l in enumerate(ids):
         idx = (img == l)
         msk[idx] = 1
@@ -329,48 +328,6 @@ def binary_class(img, dtype='float32'):
 
 
 def affinitize(img, dst=(1,1,1), dtype='float32'):
-    """
-    Transform segmentation to 3D affinity graph.
-
-    Args:
-        img: 3D indexed image, with each index corresponding to each segment.
-
-    Returns:
-        ret: 3D affinity graph (4D tensor), 3 channels for z, y, x direction.
-    """
-    img = check_volume(img)
-    ret = np.zeros((3,) + img.shape, dtype=dtype)
-
-    (dz,dy,dx) = dst
-
-    # z-affinity.
-    assert dz and abs(dz) < img.shape[-3]
-    if dz > 0:
-        ret[2,dz:,:,:] = (img[dz:,:,:]==img[:-dz,:,:]) & (img[dz:,:,:]>0)
-    else:
-        dz = abs(dz)
-        ret[2,:-dz,:,:] = (img[dz:,:,:]==img[:-dz,:,:]) & (img[dz:,:,:]>0)
-
-    # y-affinity.
-    assert dy and abs(dy) < img.shape[-2]
-    if dy > 0:
-        ret[1,:,dy:,:] = (img[:,dy:,:]==img[:,:-dy,:]) & (img[:,dy:,:]>0)
-    else:
-        dy = abs(dy)
-        ret[1,:,:-dy,:] = (img[:,dy:,:]==img[:,:-dy,:]) & (img[:,dy:,:]>0)
-
-    # x-affinity.
-    assert dx and abs(dx) < img.shape[-1]
-    if dx > 0:
-        ret[0,:,:,dx:] = (img[:,:,dx:]==img[:,:,:-dx]) & (img[:,:,dx:]>0)
-    else:
-        dx = abs(dx)
-        ret[0,:,:,:-dx] = (img[:,:,dx:]==img[:,:,:-dx]) & (img[:,:,dx:]>0)
-
-    return ret
-
-
-def affinitize1(img, dst=(1,1,1), dtype='float32'):
     """
     Transform segmentation to an affinity map.
 
@@ -415,48 +372,6 @@ def affinitize1(img, dst=(1,1,1), dtype='float32'):
 ####################################################################
 
 def affinitize_mask(msk, dst=(1,1,1), dtype='float32'):
-    """
-    Transform binary mask to affinity mask.
-
-    Args:
-        msk: 3D binary mask.
-
-    Returns:
-        ret: 3D affinity mask (4D tensor), 3 channels for z, y, x direction.
-    """
-    msk = check_volume(msk)
-    ret = np.zeros((3,) + msk.shape, dtype=dtype)
-
-    (dz,dy,dx) = dst
-
-    # z-affinity.
-    assert dz and abs(dz) < msk.shape[-3]
-    if dz > 0:
-        ret[2,dz:,:,:] = (msk[dz:,:,:]>0) | (msk[:-dz,:,:]>0)
-    else:
-        dz = abs(dz)
-        ret[2,:-dz,:,:] = (msk[dz:,:,:]>0) | (msk[:-dz,:,:]>0)
-
-    # y-affinity.
-    assert dy and abs(dy) < msk.shape[-2]
-    if dy > 0:
-        ret[1,:,dy:,:] = (msk[:,dy:,:]>0) | (msk[:,:-dy,:]>0)
-    else:
-        dy = abs(dy)
-        ret[1,:,:-dy,:] = (msk[:,dy:,:]>0) | (msk[:,:-dy,:]>0)
-
-    # x-affinity.
-    assert dx and abs(dx) < msk.shape[-1]
-    if dx > 0:
-        ret[0,:,:,dx:] = (msk[:,:,dx:]>0) | (msk[:,:,:-dx]>0)
-    else:
-        dx = abs(dx)
-        ret[0,:,:,:-dx] = (msk[:,:,dx:]>0) | (msk[:,:,:-dx]>0)
-
-    return ret
-
-
-def affinitize1_mask(msk, dst=(1,1,1), dtype='float32'):
     """
     Transform binary mask to affinity mask.
 

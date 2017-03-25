@@ -105,7 +105,7 @@ class VolumeDataset(Dataset):
         return ret
 
     def random_sample(self, spec=None):
-        """Fetch sample randomly"""
+        """Fetch a sample randomly."""
         assert self.has_spec()
         original_spec = self.get_spec()
         try:

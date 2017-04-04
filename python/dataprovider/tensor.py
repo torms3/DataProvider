@@ -135,7 +135,7 @@ class WritableTensorData(TensorData):
         if isinstance(data_or_shape, np.ndarray):
             TensorData.__init__(self, data_or_shape, fov, offset)
         else:
-            data = np.zeros(data_or_shape, dtype='float32')
+            data = np.full(data_or_shape, 0, dtype='float32')
             TensorData.__init__(self, data, fov, offset)
 
     def set_patch(self, pos, patch, op=None):

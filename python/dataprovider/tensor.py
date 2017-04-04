@@ -34,7 +34,7 @@ class TensorData(object):
         """Initialize a TensorData object."""
         # Set immutable attributes.
         self._data   = self._check_data(data)
-        self._dim    = Vec3d(self._data.shape[1:])
+        self._dim    = Vec3d(self._data.shape[-3:])
         self._offset = Vec3d(offset)
         # Set bounding box.
         self._bb = Box((0,0,0), self._dim)
@@ -142,7 +142,7 @@ class WritableTensorData(TensorData):
         """Write a patch of size _fov centered on pos."""
         assert self._rg.contains(pos)
         patch = self._check_data(patch)
-        dim = patch.shape[1:]
+        dim = patch.shape[-3:]
         assert dim==self._fov
         box = centered_box(pos, dim)
 
@@ -170,16 +170,18 @@ class WritableTensorDataWithMask(WritableTensorData):
         WritableTensorData.__init__(self, data_or_shape, fov, offset)
 
         # Set norm.
-        self._norm = WritableTensorData(self.shape(), fov, offset)
+        self._norm = WritableTensorData(self.dim(), fov, offset)
 
     def set_patch(self, pos, patch, op='np.add', mask=None):
         """Write a patch of size _fov centered on pos."""
         # Default mask.
         if mask is None:
-            mask = np.ones(patch.shape, dtype='float32')
+            mask = np.ones(patch.shape[-3:], dtype='float32')
+        else:
+            mask = self._check_volume(mask)
         # Set patch.
         t0 = time.time()
-        WritableTensorData.set_patch(self, pos, mask*patch, op)
+        WritableTensorData.set_patch(self, pos, patch*mask, op)
         t1 = time.time() - t0
         # Set normalization.
         self._norm.set_patch(pos, mask, op='np.add')
@@ -197,6 +199,16 @@ class WritableTensorDataWithMask(WritableTensorData):
 
     def get_unnormalized_data(self):
         return WritableTensorData.get_data(self)
+
+    ####################################################################
+    ## Private helper methods.
+    ####################################################################
+
+    def _check_volume(self, data):
+        # Data should be either numpy 3D array.
+        assert isinstance(data, np.ndarray)
+        assert data.ndim==3
+        return data
 
 
 ########################################################################

@@ -94,7 +94,7 @@ class BumpBlend(Blend):
             # Compute max_logit for numerical stability.
             for k, v in self.data.iteritems():
                 fov = tuple(v.fov())
-                data.full(v.dim(), -np.inf, dtype='float32')
+                data = np.full(v.dim(), -np.inf, dtype='float32')
                 max_logit = WTD(data, fov, v.offset())
                 max_logit_window = self._bump_logit_map(fov)
                 for loc in self.locs:

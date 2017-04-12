@@ -37,7 +37,7 @@ class Transform(object):
     def __call__(self, sample, **kwargs):
         raise NotImplementedError
 
-    def extract(sample, key):
+    def extract(self, sample, key):
         """Return mask if any, or else default one (all ones)."""
         assert key in sample
         if key+'_mask' in sample:

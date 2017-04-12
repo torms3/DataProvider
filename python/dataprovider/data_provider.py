@@ -76,7 +76,7 @@ class VolumeDataProvider(DataProvider):
             drange = kwargs['drange']
         p = [self.p[d] for d in drange]
         idx = np.random.choice(len(drange), size=1, p=p)
-        return self.datasets[idx]
+        return self.datasets[idx[0]]
 
     def next_sample(self, **kwargs):
         """Fetch the next sample in a predefined sequence, if any."""

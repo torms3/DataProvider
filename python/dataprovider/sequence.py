@@ -38,6 +38,9 @@ class SampleSequence(object):
         assert length > 0
         self.length = length
 
+    def get_length(self):
+        return self.length
+
     def __call__(self):
         # Resample if sequence is empty.
         if len(self.pointer) == 0:

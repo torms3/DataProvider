@@ -150,8 +150,13 @@ class VolumeDataset(Dataset):
 
     def num_sample(self):
         """Return the number of samples."""
-        s = self._range.size()
-        return s[0]*s[1]*s[2]
+        n = 0
+        if self._sequence is None:
+            s = self._range.size()
+            n = s[0]*s[1]*s[2]
+        else:
+            n = self._sequence.get_length()
+        return n
 
     def get_range(self):
         """Return the valid range box."""

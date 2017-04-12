@@ -40,16 +40,42 @@ class VolumeDataProvider(DataProvider):
         postprocessor: Sample transformer, after augmentation.
     """
 
-    def __init__(self, datasets=None, aug=None, tf=None):
+    def __init__(self, datasets=None, pre=None, aug=None, post=None):
         # Datasets.
         self.datasets = list()
         if datasets is not None:
             for d in datasets:
                 self.add_dataset(d)
+        # Preprocessing.
+        self.set_preprocessor(pre)
         # Data augmentation.
         self.set_augmentor(aug)
-        # Sample transformation.
-        self.set_transformer(tf)
+        # Postprocessing.
+        self.set_postprocessor(post)
+        # Sampling weights.
+        self.set_sampling_weights()
+
+    def set_sampling_weights(self, p=None):
+        """Set probability of each dataset being chosen at each sampling."""
+        if p is None:
+            assert np.all([d.has_spec() for x in self.datasets])
+            p = [d.num_sample() for x in self.datasets]
+        # Normalize.
+        p = np.asarray(p, dtype='float32')
+        p = p/np.sum(p)
+        # Set sampling weights.
+        # print 'Sampling weights: {}'.format(['%0.3f' % x for x in p])
+        assert len(p)==len(self.datasets)
+        self.p = p
+
+    def random_dataset(self, **kwargs):
+        """Pick one dataset randomly."""
+        assert len(self.datasets) > 0
+        drange = range(len(self.datasets))
+        if 'drange' in kwargs:
+            drange = kwargs['drange']
+        idx = np.random.choice(len(drange), size=1, p=self.p)        
+        return self.datasets[idx]
 
     def next_sample(self, **kwargs):
         """Fetch the next sample in a predefined sequence, if any."""
@@ -58,15 +84,6 @@ class VolumeDataProvider(DataProvider):
     def random_sample(self, **kwargs):
         """Fetch a sample randomly."""
         return self._sample('random', **kwargs)
-
-    def random_dataset(self, **kwargs):
-        """Pick one dataset randomly."""
-        assert len(self.datasets) > 0
-        drange = range(len(self.datasets))
-        if 'drange' in kwargs:
-            drange = kwargs['drange']
-        idx = np.random.choice(len(drange), 1)
-        return self.datasets[idx]
 
     def _sample(self, mode, **kwargs):
         assert mode in ['random', 'next']

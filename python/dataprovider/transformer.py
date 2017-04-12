@@ -104,7 +104,7 @@ class Affinity(Transform):
         msk = np.concatenate(msks, axis=0)
         # Rebalancing.
         if self.base_w is not None:
-            for c in xrange(aff.shape[0]):
+            for c in xrange(lbl.shape[0]):
                 msk[c,...] = tf.rebalance_binary_class(lbl[c,...], msk=msk[c,...], base_w=self.base_w)
         # Update sample.
         sample[self.target] = lbl

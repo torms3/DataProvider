@@ -75,7 +75,7 @@ class Affinity(Transform):
     Expand segmentation into affinity represntation.
     """
 
-    def __init__(self, dst, source, target, crop=None, rebalance=True):
+    def __init__(self, dst, source, target, crop=None, base_w=None):
         """Initialize parameters.
 
         Args:
@@ -83,13 +83,13 @@ class Affinity(Transform):
             source: Key to source data from which to construct affinity.
             target: Key to target data.
             crop: 3-tuple indicating crop offset.
-            rebalance: Class-rebalanced gradient weight mask.
+            base_w: base weight for class-rebalanced gradient weight mask.
         """
         self.dst = dst
         self.source = source
         self.target = target
         self.crop = crop
-        self.rebalance = rebalance
+        self.base_w = base_w
 
     def __call__(self, sample, **kwargs):
         """Affinity label processing."""
@@ -103,9 +103,9 @@ class Affinity(Transform):
         lbl = np.concatenate(affs, axis=0)
         msk = np.concatenate(msks, axis=0)
         # Rebalancing.
-        if self.rebalance:
+        if self.base_w is not None:
             for c in xrange(aff.shape[0]):
-                msk[c,...] = tf.rebalance_binary_class(lbl[c,...], msk=msk[c,...])
+                msk[c,...] = tf.rebalance_binary_class(lbl[c,...], msk=msk[c,...], base_w=self.base_w)
         # Update sample.
         sample[self.target] = lbl
         sample[self.target+'_mask'] = msk

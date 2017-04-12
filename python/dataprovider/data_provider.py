@@ -74,7 +74,8 @@ class VolumeDataProvider(DataProvider):
         drange = range(len(self.datasets))
         if 'drange' in kwargs:
             drange = kwargs['drange']
-        idx = np.random.choice(len(drange), size=1, p=self.p)
+        p = [self.p[d] for d in drange]
+        idx = np.random.choice(len(drange), size=1, p=p)
         return self.datasets[idx]
 
     def next_sample(self, **kwargs):

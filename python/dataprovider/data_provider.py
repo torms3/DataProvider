@@ -58,8 +58,8 @@ class VolumeDataProvider(DataProvider):
     def set_sampling_weights(self, p=None):
         """Set probability of each dataset being chosen at each sampling."""
         if p is None:
-            assert np.all([d.has_spec() for x in self.datasets])
-            p = [d.num_sample() for x in self.datasets]
+            assert np.all([d.has_spec() for d in self.datasets])
+            p = [d.num_sample() for d in self.datasets]
         # Normalize.
         p = np.asarray(p, dtype='float32')
         p = p/np.sum(p)
@@ -74,7 +74,7 @@ class VolumeDataProvider(DataProvider):
         drange = range(len(self.datasets))
         if 'drange' in kwargs:
             drange = kwargs['drange']
-        idx = np.random.choice(len(drange), size=1, p=self.p)        
+        idx = np.random.choice(len(drange), size=1, p=self.p)
         return self.datasets[idx]
 
     def next_sample(self, **kwargs):

@@ -28,19 +28,27 @@ class BoxAugment(data_augmentation.DataAugment):
         # self.max_dim = 60
         # self.aspect_ratio = 6
         # self.density = 0.2
-        # self.alpha = 0.5
 
     def prepare(self, spec, **kwargs):
         """Prepare mask."""
         # No change in spec.
         self.spec = spec
+        return dict(spec)
+
+    def augment(self, sample, **kwargs):
+        """Apply box data augmentation."""
+        if np.random.rand() > self.skip_ratio:
+            sample = self._do_augment(sample, **kwargs)
+        return sample
+
+    def _do_augment(self, sample, **kwargs):
+        imgs = kwargs['imgs']
 
         # Find union of bounding boxes.
         self.bbox = dict()
         bbox = None
-        imgs = kwargs['imgs']
         for key in imgs:
-            dim = spec[key][-3:]
+            dim = self.spec[key][-3:]
             b = centered_box((0,0,0), dim)
             bbox = b if bbox is None else bbox.merge(b)
             self.bbox[key] = b
@@ -48,50 +56,34 @@ class BoxAugment(data_augmentation.DataAugment):
         # Create a mask.
         self.offset = bbox.min()
         self.dim    = bbox.size()
-        self.mask   = np.ones(self.dim, dtype='float32')
 
-        # Random box augmentation.
-        count = 0
-        goal  = bbox.volume()*self.density*np.random.rand()
-        while True:
-            # Random location.
-            m = self.min_dim  # Margin.
-            z = np.random.randint(0, self.dim[0])
-            y = np.random.randint(0, self.dim[1])
-            x = np.random.randint(0, self.dim[2])
-            loc = Vec3d(z,y,x) + self.offset
-            # Random box size.
-            dim = np.random.randint(self.min_dim, self.max_dim + 1, 3)
-            # Anisotropy.
-            dim[0] /= self.aspect_ratio
-            # Alpha.
-            # alpha = np.random.rand() * self.alpha
-            # Box.
-            box = bbox.intersect(centered_box(loc, dim))
-            # Local coordiate.
-            box.translate(-self.offset)
-            vmin = box.min()
-            vmax = box.max()
-            val = np.random.rand() if self.random_color else 0  # Fill-out value.
-            self.mask[vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] = val
-            # Stop condition.
-            count += box.volume()
-            if count > goal:
-                break;
-
-        return dict(spec)
-
-    def augment(self, sample, **kwargs):
-        """Apply box data augmentation."""
-        imgs = kwargs['imgs']
         for key in imgs:
-            b = self.bbox[key]
-            b.translate(-self.offset)
-            vmin = b.min()
-            vmax = b.max()
-            sample[key][...,:,:,:] *= self.mask[
-                vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]]
-
+            # Random box augmentation.
+            count = 0
+            goal  = bbox.volume()*self.density*np.random.rand()
+            while True:
+                # Random location.
+                m = self.min_dim  # Margin.
+                z = np.random.randint(0, self.dim[0])
+                y = np.random.randint(0, self.dim[1])
+                x = np.random.randint(0, self.dim[2])
+                loc = Vec3d(z,y,x) + self.offset
+                # Random box size.
+                dim = np.random.randint(self.min_dim, self.max_dim + 1, 3)
+                # Anisotropy.
+                dim[0] /= self.aspect_ratio
+                # Box.
+                box = bbox.intersect(centered_box(loc, dim))
+                # Local coordiate.
+                box.translate(-self.offset)
+                vmin = box.min()
+                vmax = box.max()
+                val = np.random.rand() if self.random_color else 0  # Fill-out value.
+                sample[key][...,vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] = val
+                # Stop condition.
+                count += box.volume()
+                if count > goal:
+                    break;
         return sample
 
     def set_skip_ratio(self, ratio):

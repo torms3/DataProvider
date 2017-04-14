@@ -16,12 +16,14 @@ class BoxAugment(data_augmentation.DataAugment):
     Add random box masks.
     """
 
-    def __init__(self, min_dim, max_dim, aspect_ratio, density):
+    def __init__(self, min_dim, max_dim, aspect_ratio, density, skip_ratio=0.3, random_color=False):
         """Initialize BoxAugment."""
         self.min_dim = min_dim
         self.max_dim = max_dim
         self.aspect_ratio = aspect_ratio
         self.density = density
+        self.set_skip_ratio(skip_ratio)
+        self.random_color = random_color
         # self.min_dim = 20
         # self.max_dim = 60
         # self.aspect_ratio = 6
@@ -50,7 +52,7 @@ class BoxAugment(data_augmentation.DataAugment):
 
         # Random box augmentation.
         count = 0
-        goal  = bbox.volume()*self.density
+        goal  = bbox.volume()*self.density*np.random.rand()
         while True:
             # Random location.
             m = self.min_dim  # Margin.
@@ -70,9 +72,8 @@ class BoxAugment(data_augmentation.DataAugment):
             box.translate(-self.offset)
             vmin = box.min()
             vmax = box.max()
-            # Apply box.
-            # self.mask[vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] *= alpha
-            self.mask[vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] = 0
+            val = np.random.rand() if self.random_color else 0  # Fill-out value.
+            self.mask[vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] = val
             # Stop condition.
             count += box.volume()
             if count > goal:
@@ -92,3 +93,8 @@ class BoxAugment(data_augmentation.DataAugment):
                 vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]]
 
         return sample
+
+    def set_skip_ratio(self, ratio):
+        """Set the probability of skipping augmentation."""
+        assert ratio >= 0.0 and ratio <= 1.0
+        self.skip_ratio = ratio

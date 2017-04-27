@@ -5,7 +5,6 @@ ForwardScanner.
 
 Kisuk Lee <kisuklee@mit.edu>, 2016
 """
-
 import numpy as np
 import math
 
@@ -14,6 +13,7 @@ from box import Box, centered_box
 from tensor import WritableTensorData as WTD, WritableTensorDataWithMask as WTDM
 import time
 from vector import *
+import threading
 
 class ForwardScanner(object):
     """
@@ -29,12 +29,12 @@ class ForwardScanner(object):
         """
         Initialize ForwardScanner.
         """
+    
         self._init()
 
         self.dataset   = dataset
         self.scan_spec = scan_spec
         self.params    = params if params is not None else dict()
-
         self._setup()
 
     def pull(self):
@@ -52,6 +52,37 @@ class ForwardScanner(object):
             self.counter += 1
         return ret
 
+
+    def pull_n(self, n):
+        """pull AND pull_n CAN'T BE INTERMIXED. USE EITHER ONE OR THE OTHER""" 
+        if self.counter >= len(self.locs):
+           if self.blnd_thr != None:
+              self.blnd_thr.join() 
+           return None 
+
+        ret = [None for i in xrange(n)]
+        for i in xrange(n):
+           if self.counter + i < len(self.locs):
+               idx = self.counter + i
+               loc = self.locs[idx]
+               print '({}/{}) loc: {}'.format(idx+1, len(self.locs), tuple(loc))
+               ret[i], _ = self.dataset.get_sample(loc)
+        
+        self.last_batch_size = n
+        self.current_idx = self.counter
+        self.counter += n 
+        return ret
+
+    def push_n(self, outs):
+        assert self.current_idx != None
+
+        if self.blnd_thr != None and self.blnd_thr.is_alive():
+           self.blnd_thr.join() 
+        self.blnd_thr = threading.Thread(target=self._push_n, args=(outs, 
+                                                                    self.current_idx))
+        self.blnd_thr.start()  
+   
+   
     def push(self, sample):
         """
         TODO(kisuk): Documentation
@@ -68,6 +99,18 @@ class ForwardScanner(object):
     ## Private Methods.
     ####################################################################
 
+    def _push_n(self, outs, start_idx):
+        idx = start_idx 
+        for out in outs:
+           if idx >= len(self.locs): 
+               break 
+
+           loc = self.locs[idx]
+           self.outputs.push(loc, out)
+           
+           idx += 1
+
+
     def _init(self):
         """Initialize all attributes."""
         self.dataset        = None
@@ -83,7 +126,9 @@ class ForwardScanner(object):
         self.locs           = None
         self.counter        = 0
         self.current        = None
+        self.current_idx    = None
         self.outputs        = None
+        self.blnd_thr       = None
 
     def _setup(self):
         """
@@ -142,7 +187,6 @@ class ForwardScanner(object):
                  2: x-dimension.
         """
         assert dim < 3
-
         # min & max coordinates.
         cmin = int(self.vmin[dim])
         cmax = int(self.vmax[dim])

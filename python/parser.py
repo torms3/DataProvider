@@ -95,6 +95,7 @@ class Parser(object):
             value = config.get(data, 'file')
             assert self._config.has_option('files', value)
             flist = self._config.get('files', value).split('\n')
+            print flist, idx 
             config.set(data, 'file', flist[idx])
 
         # FoV

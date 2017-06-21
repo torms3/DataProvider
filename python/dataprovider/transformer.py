@@ -157,7 +157,7 @@ class Synapse(Transformer):
     Transform synapse segmentation into binary representation.
     """
 
-    def __init__(self, source, target, rebalance=True, base_w=0.0):
+    def __init__(self, source, target, rebalance=False, base_w=0.0):
         self.source = source
         self.target = target
         self.rebalance = rebalance

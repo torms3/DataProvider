@@ -29,6 +29,10 @@ class Warp(augmentor.DataAugment):
     def __init__(self, skip_ratio=0.3):
         self.set_skip_ratio(skip_ratio)
 
+        # DEBUG
+        # self.count = dict(skip=0, warp=0)
+        # self.counter = 0
+
     def prepare(self, spec, **kwargs):
         """Randomly draw warp parameters and compute required (mostly larger
         than original) image sizes."""

@@ -152,7 +152,7 @@ class Semantic(Transform):
         return sample
 
 
-class Synapse(Transformer):
+class Synapse(Transform):
     """
     Transform synapse segmentation into binary representation.
     """

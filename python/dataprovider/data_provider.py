@@ -75,6 +75,9 @@ class VolumeDataProvider(DataProvider):
         if 'drange' in kwargs:
             drange = kwargs['drange']
         p = [self.p[d] for d in drange]
+        # Normalize again.
+        p = np.array(p)
+        p /= p.sum()
         idx = np.random.choice(len(drange), size=1, p=p)
         return self.datasets[idx[0]]
 

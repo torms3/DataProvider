@@ -57,6 +57,12 @@ class BoxOcclusion(augmentor.DataAugment):
         self.dim    = bbox.size()
 
         for key in imgs:
+            # Extract augmentation mask.
+            if key+'_augmask' in sample:
+                msk = sample[key+'_mask'].astype('float32')
+            else:
+                msk = np.zeros(sample[key].shape, 'float32')
+
             # Random box augmentation.
             count   = 0
             density = self.max_density*np.random.rand()
@@ -106,6 +112,9 @@ class BoxOcclusion(augmentor.DataAugment):
                     val = np.random.rand(sz[0],sz[1],sz[2])
                     sample[key][...,vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] = val[...]
 
+                # Update augmentation mask.
+                msk[...,vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] = 1
+
                 # Stop condition.
                 count += box.volume()
                 if count > goal:
@@ -113,6 +122,9 @@ class BoxOcclusion(augmentor.DataAugment):
 
             # Clip.
             sample[key] = np.clip(sample[key], 0, 1)
+
+            # Augmentation mask.
+            sample[key+'_augmask'] = msk
 
         return sample
 

@@ -20,6 +20,7 @@ setup(
     url='https://github.com/torms3/DataProvider',
     # packages=find_packages()
     packages=['dataprovider',
+              'dataprovider.inference',
               'dataprovider.augmentation',
               'dataprovider.augmentation.warping'],
     ext_modules = cythonize(extensions)

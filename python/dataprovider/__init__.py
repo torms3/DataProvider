@@ -6,3 +6,4 @@ from .dataset import VolumeDataset
 from .augmentation.augmentor import Augmentor
 from .transformer import *
 from .sequence import *
+from .inference.forward import *

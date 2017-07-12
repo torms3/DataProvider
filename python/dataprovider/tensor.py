@@ -186,7 +186,7 @@ class WritableTensorDataWithMask(WritableTensorData):
         # Set normalization.
         self._norm.set_patch(pos, mask, op='np.add')
         t2 = time.time() - t0
-        print 'set_patch: %.3f, set_mask: %.3f' % (t1, t2-t1)
+        # print 'set_patch: %.3f, set_mask: %.3f' % (t1, t2-t1)
 
     def get_norm(self):
         return self._norm._data

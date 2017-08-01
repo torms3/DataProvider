@@ -408,7 +408,7 @@ def affinitize_mask(msk, dst=(1,1,1), dtype='float32'):
             s1.append(slice(-dst[i], None))
             s2.append(slice(None,  dst[i]))
 
-    ret[s0] = (msk[s1]>0) | (msk[s2]>0)
+    ret[s0] = (msk[s1]>0) & (msk[s2]>0)
     return ret[np.newaxis,...]
 
 ####################################################################

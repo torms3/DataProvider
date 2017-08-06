@@ -117,7 +117,7 @@ class BoxOcclusion(augmentor.DataAugment):
                 # (4) Gaussian white noise (multiplicative).
                 if rule[3]:
                     assert enabled[3]
-                    val = np.random.normal(loc=0.0, scale=self.mode[3], size=sz)
+                    val = np.random.normal(loc=1.0, scale=self.mode[3], size=sz)
                     sample[key][...,vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] *= val[...]
 
                 # (5) Uniform white noise.

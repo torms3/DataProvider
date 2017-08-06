@@ -17,14 +17,14 @@ class BoxOcclusion(augmentor.DataAugment):
     Add random box occlusion masks.
     """
 
-    def __init__(self, min_dim, max_dim, aspect_ratio, max_density, skip_ratio=0.0, random_color=True):
+    def __init__(self, min_dim, max_dim, aspect_ratio, max_density, mode=[2,2,0.3,0.3,1], skip_ratio=0.0):
         """Initialize BoxAugment."""
         self.min_dim = min_dim
         self.max_dim = max_dim
         self.aspect_ratio = aspect_ratio
         self.max_density = max_density
+        self.mode = np.asarray(mode, dtype='float32')
         self.set_skip_ratio(skip_ratio)
-        self.random_color = random_color
 
         # TODO(kisuk): Allow nonzero alpha?
         self.alpha = 0.0
@@ -57,11 +57,12 @@ class BoxOcclusion(augmentor.DataAugment):
         self.dim    = bbox.size()
 
         for key in imgs:
-            # Extract augmentation mask.
-            if key+'_augmask' in sample:
-                msk = sample[key+'_mask'].astype('float32')
-            else:
-                msk = np.zeros(sample[key].shape, 'float32')
+            # TODO(kisuk): Augmentation mask.
+            # # Extract augmentation mask.
+            # if key+'_augmask' in sample:
+            #     msk = sample[key+'_mask'].astype('float32')
+            # else:
+            #     msk = np.zeros(sample[key].shape, 'float32')
 
             # Random box augmentation.
             count   = 0
@@ -88,32 +89,45 @@ class BoxOcclusion(augmentor.DataAugment):
                 sz   = box.size()
 
                 # Random choice.
-                rule = np.random.rand(4)
+                enabled = self.mode > 0
+                rule = np.random.rand(5)
+                rule[np.logical_not(enabled)] = 0
                 rule = rule >= rule.max()
 
-                # (1) Alpha.
+                # (1) Random fill-out.
                 if rule[0]:
-                    alpha = np.random.rand() * 2.0
-                    sample[key][...,vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] *= alpha
-
-                # (2) Random fill-out.
-                if rule[1]:
-                    val = np.random.rand() if self.random_color else 0  # Fill-out value.
+                    assert enabled[0]
+                    val = self.mode[0]  # Fill-out value.
+                    if val > 1:
+                        val = np.random.rand()
                     sample[key][...,vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] = val
+
+                # (2) Alpha.
+                if rule[1]:
+                    assert enabled[1]
+                    alpha = np.random.rand() * self.mode[1]
+                    sample[key][...,vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] *= alpha
 
                 # (3) Gaussian white noise (additive).
                 if rule[2]:
-                    # TODO(kisuk): Parametrize scale.
-                    val = np.random.normal(loc=0.0, scale=0.3, size=sz)
+                    assert enabled[2]
+                    val = np.random.normal(loc=0.0, scale=self.mode[2], size=sz)
                     sample[key][...,vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] += val[...]
 
-                # (4) Uniform white noise.
+                # (4) Gaussian white noise (multiplicative).
                 if rule[3]:
+                    assert enabled[3]
+                    val = np.random.normal(loc=0.0, scale=self.mode[3], size=sz)
+                    sample[key][...,vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] *= val[...]
+
+                # (5) Uniform white noise.
+                if rule[4]:
+                    assert enabled[4]
                     val = np.random.rand(sz[0],sz[1],sz[2])
                     sample[key][...,vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] = val[...]
 
-                # Update augmentation mask.
-                msk[...,vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] = 1
+                # # Update augmentation mask.
+                # msk[...,vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] = 1
 
                 # Stop condition.
                 count += box.volume()
@@ -123,8 +137,8 @@ class BoxOcclusion(augmentor.DataAugment):
             # Clip.
             sample[key] = np.clip(sample[key], 0, 1)
 
-            # Augmentation mask.
-            sample[key+'_augmask'] = msk
+            # # Augmentation mask.
+            # sample[key+'_augmask'] = msk
 
         return sample
 

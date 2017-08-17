@@ -68,7 +68,8 @@ class BoxOcclusion(augmentor.DataAugment):
             count   = 0
             density = self.max_density*np.random.rand()
             goal    = bbox.volume()*density
-            print 'density: %.2f' % density
+            # DEBUG(kisuk):
+            # print 'density: %.2f' % density
             while True:
                 # Random location.
                 m = self.min_dim  # Margin.

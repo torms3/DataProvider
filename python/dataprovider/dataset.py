@@ -59,11 +59,10 @@ class VolumeDataset(Dataset):
         assert isinstance(data, TensorData)
         self._data[key] = data
 
-    def add_raw_mask(self, key, data, **kwargs):
+    def add_raw_mask(self, key, data, loc=False, **kwargs):
         self.add_raw_data(key, data, **kwargs)
-        if 'loc' in kwargs:
-            if kwargs['loc']:
-                self._add_location(self._data[key])
+        if loc:
+            self._add_location(self._data[key])
 
     def add_mask(self, key, data, loc=False):
         self.add_data(key, data)
@@ -194,7 +193,7 @@ class VolumeDataset(Dataset):
 
     def _add_location(self, data):
         assert isinstance(data, TensorData)
-        self._locs   = data.get_data().nonzero()
+        self._locs   = data.get_data().nonzero()[-3:]
         self._offset = data.offset()
 
     def _random_location(self):

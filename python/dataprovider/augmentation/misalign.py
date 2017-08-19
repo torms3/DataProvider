@@ -45,9 +45,7 @@ class Misalign(augmentor.DataAugment):
             for k, v in spec.iteritems():
                 z, y, x = v[-3:]
                 assert z > 0
-                x_dim  = self.x_t + v[-1]
-                y_dim  = self.y_t + v[-2]
-                ret[k] = v[:-2] + (y_dim, x_dim)
+                ret[k] = v[:-2] + (y+self.y_t, x+self.x_t)
                 pvt[k] = z
                 zs.append(z)
 
@@ -86,8 +84,8 @@ class Misalign(augmentor.DataAugment):
         # DEBUG(kisuk)
         # print "\n[Misalign]"
         # for k, v in sample.iteritems():
-        #     print "Slip = {}".format(self.slip)
-        #     print "{} at {}".format(k, self.pivot[k])
+        #     slip = 'slip' if self.slip else 'trans'
+        #     print "{} @ z={} {}({},{})".format(k, self.pivot[k], slip, self.x_t, self.y_t)
 
         ret = dict()
 

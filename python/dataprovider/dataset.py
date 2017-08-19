@@ -40,6 +40,7 @@ class VolumeDataset(Dataset):
         _range: Range of valid coordinates for accessing data given the sample
                 spec. It depends both on the data and sample spec.
         _sequence:
+        _locs: Valid locations.
     """
 
     def __init__(self, **kwargs):
@@ -57,6 +58,17 @@ class VolumeDataset(Dataset):
         """Add data to the dataset."""
         assert isinstance(data, TensorData)
         self._data[key] = data
+
+    def add_raw_mask(self, key, data, **kwargs):
+        self.add_raw_data(key, data, **kwargs)
+        if 'loc' in kwargs:
+            if kwargs['loc']:
+                self._add_location(self._data[key])
+
+    def add_mask(self, key, data, loc=False):
+        self.add_data(key, data)
+        if loc:
+            self._add_location(self._data[key])
 
     def set_sequence(self, seq):
         """Add sample sequence generator."""
@@ -155,7 +167,10 @@ class VolumeDataset(Dataset):
             s = self._range.size()
             n = s[0]*s[1]*s[2]
         else:
-            n = self._sequence.get_length()
+            if self._locs is None:
+                n = self._sequence.get_length()
+            else:
+                n = len(self._locs[0])
         return n
 
     def get_range(self):
@@ -173,15 +188,33 @@ class VolumeDataset(Dataset):
         self._spec     = None
         self._range    = None
         self._sequence = None
+        # Valid locations (optional).
+        self._locs     = None
+        self._offset   = None
+
+    def _add_location(self, data):
+        assert isinstance(data, TensorData)
+        self._locs   = data.get_data().nonzero()
+        self._offset = data.offset()
 
     def _random_location(self):
         """Return one of the valid locations randomly."""
-        s = self._range.size()
-        z = np.random.randint(0, s[0])
-        y = np.random.randint(0, s[1])
-        x = np.random.randint(0, s[2])
-        # Global coordinate system.
-        return Vec3d(z,y,x) + self._range.min()
+        if self._locs is None:
+            s = self._range.size()
+            z = np.random.randint(0, s[0])
+            y = np.random.randint(0, s[1])
+            x = np.random.randint(0, s[2])
+            # Global coordinate system.
+            loc =  Vec3d(z,y,x) + self._range.min()
+        else:
+            while True:
+                idx = np.random.randint(0, self._locs[0].size)
+                loc = tuple([x[idx] for x in self._locs])
+                # Global coordinate system.
+                loc = Vec3d(loc) + self._offset
+                if self._range.contains(loc):
+                    break
+        return loc
 
     def _update_range(self):
         """Update the valid range.

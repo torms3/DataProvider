@@ -8,6 +8,7 @@ Kisuk Lee <kisuklee@mit.edu>, 2017
 
 import math
 import numpy as np
+from scipy.ndimage.filters import gaussian_filter
 
 import augmentor
 from ..box import *
@@ -17,7 +18,7 @@ class BoxOcclusion(augmentor.DataAugment):
     Add random box occlusion masks.
     """
 
-    def __init__(self, min_dim, max_dim, aspect_ratio, max_density, mode=[2,2,0.3,0.3,1], skip_ratio=0.0):
+    def __init__(self, min_dim, max_dim, aspect_ratio, max_density, mode=[2,2,0.3,0.3,1], skip_ratio=0.0, sigma_max=5.0):
         """Initialize BoxAugment."""
         self.min_dim = min_dim
         self.max_dim = max_dim
@@ -25,6 +26,7 @@ class BoxOcclusion(augmentor.DataAugment):
         self.max_density = max_density
         self.mode = np.asarray(mode, dtype='float32')
         self.set_skip_ratio(skip_ratio)
+        self.sigma_max = sigma_max
 
         # TODO(kisuk): Allow nonzero alpha?
         self.alpha = 0.0
@@ -123,8 +125,16 @@ class BoxOcclusion(augmentor.DataAugment):
 
                 # (5) Uniform white noise.
                 if rule[4]:
-                    assert enabled[4]
+                    # assert enabled[4]
                     val = np.random.rand(sz[0],sz[1],sz[2])
+                    # Random Gaussian blur.
+                    sigma = [0,0,0]
+                    sigma[0] = np.random.rand() * self.sigma_max
+                    sigma[1] = np.random.rand() * self.sigma_max
+                    sigma[2] = np.random.rand() * self.sigma_max
+                    # Anisotropy.
+                    sigma[0] /= self.aspect_ratio
+                    val = gaussian_filter(val, sigma=sigma)
                     sample[key][...,vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] = val[...]
 
                 # # Update augmentation mask.

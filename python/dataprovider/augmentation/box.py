@@ -97,35 +97,40 @@ class BoxOcclusion(augmentor.DataAugment):
                 rule[np.logical_not(enabled)] = 0
                 rule = rule >= rule.max()
 
+                # Slices.
+                s0 = vmin[0]:vmax[0]
+                s1 = vmin[1]:vmax[1]
+                s2 = vmin[2]:vmax[2]
+
                 # (1) Random fill-out.
                 if rule[0]:
                     assert enabled[0]
                     val = self.mode[0]  # Fill-out value.
                     if val > 1:
                         val = np.random.rand()
-                    sample[key][...,vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] = val
+                    sample[key][...,s0,s1,s2] = val
 
                 # (2) Alpha.
                 if rule[1]:
                     assert enabled[1]
                     alpha = np.random.rand() * self.mode[1]
-                    sample[key][...,vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] *= alpha
+                    sample[key][...,s0,s1,s2] *= alpha
 
                 # (3) Gaussian white noise (additive).
                 if rule[2]:
                     assert enabled[2]
                     val = np.random.normal(loc=0.0, scale=self.mode[2], size=sz)
-                    sample[key][...,vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] += val[...]
+                    sample[key][...,s0,s1,s2] += val[...]
 
                 # (4) Gaussian white noise (multiplicative).
                 if rule[3]:
                     assert enabled[3]
                     val = np.random.normal(loc=1.0, scale=self.mode[3], size=sz)
-                    sample[key][...,vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] *= val[...]
+                    sample[key][...,s0,s1,s2] *= val[...]
 
                 # (5) Uniform white noise.
                 if rule[4]:
-                    # assert enabled[4]
+                    assert enabled[4]
                     val = np.random.rand(sz[0],sz[1],sz[2])
                     # Random Gaussian blur.
                     sigma = [0,0,0]
@@ -135,10 +140,24 @@ class BoxOcclusion(augmentor.DataAugment):
                     # Anisotropy.
                     sigma[0] /= self.aspect_ratio
                     val = gaussian_filter(val, sigma=sigma)
-                    sample[key][...,vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] = val[...]
+                    sample[key][...,s0,s1,s2] = val[...]
+
+                # # (6) 3D blur.
+                # if rule[5]:
+                #     assert enabled[5]
+                #     img = sample[key][...,s0,s1,s2]
+                #     # Random Gaussian blur.
+                #     sigma = [0,0,0]
+                #     sigma[0] = np.random.rand() * self.sigma_max
+                #     sigma[1] = np.random.rand() * self.sigma_max
+                #     sigma[2] = np.random.rand() * self.sigma_max
+                #     # Anisotropy.
+                #     sigma[0] /= self.aspect_ratio
+                #     img = gaussian_filter(img, sigma=sigma)
+                #     sample[key][...,s0,s1,s2] = img
 
                 # # Update augmentation mask.
-                # msk[...,vmin[0]:vmax[0],vmin[1]:vmax[1],vmin[2]:vmax[2]] = 1
+                # msk[...,s0,s1,s2] = 1
 
                 # Stop condition.
                 count += box.volume()

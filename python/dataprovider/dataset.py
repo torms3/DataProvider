@@ -205,6 +205,8 @@ class VolumeDataset(Dataset):
             x = np.random.randint(0, s[2])
             # Global coordinate system.
             loc =  Vec3d(z,y,x) + self._range.min()
+            # DEBUG(kisuk)
+            # print 'loc = {}'.format(loc)
         else:
             while True:
                 idx = np.random.randint(0, self._locs[0].size)

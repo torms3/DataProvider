@@ -6,6 +6,7 @@ Transform classes.
 Kisuk Lee <kisuklee@mit.edu>, 2017
 """
 
+import datatools
 import numpy as np
 import time
 
@@ -94,25 +95,38 @@ class Affinity(Transform):
     def __call__(self, sample, **kwargs):
         """Affinity label processing."""
         seg, msk = self.extract(sample, self.source)
+
+        # Recompute connected components.
+        affs = list()
+        affs.append(tf.affinitize(seg, dst=(0,0,1)))
+        affs.append(tf.affinitize(seg, dst=(0,1,0)))
+        affs.append(tf.affinitize(seg, dst=(1,0,0)))
+        aff = np.concatenate(affs, axis=0)
+        seg = datatools.get_segmentation(aff)
+
+        # Affinitize.
         affs = list()
         msks = list()
-        # Affinitize.
         for dst in self.dst:
             affs.append(tf.affinitize(seg, dst=dst))
             msks.append(tf.affinitize_mask(msk, dst=dst))
         lbl = np.concatenate(affs, axis=0)
         msk = np.concatenate(msks, axis=0)
+
         # Rebalancing.
         if self.base_w is not None:
             for c in xrange(lbl.shape[0]):
                 msk[c,...] = tf.rebalance_binary_class(lbl[c,...], msk=msk[c,...], base_w=self.base_w)
+
         # Update sample.
         sample[self.target] = lbl
         sample[self.target+'_mask'] = msk
+
         # Crop.
         if self.crop is not None:
             for k, v in sample.iteritems():
                 sample[k] = tf.crop(v, offset=self.crop)
+
         return sample
 
 

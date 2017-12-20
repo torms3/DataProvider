@@ -76,7 +76,7 @@ class Affinity(Transform):
     Expand segmentation into affinity represntation.
     """
 
-    def __init__(self, dst, source, target, crop=None, base_w=None):
+    def __init__(self, dst, source, target, crop=None, base_w=None, recompute=True):
         """Initialize parameters.
 
         Args:
@@ -91,18 +91,20 @@ class Affinity(Transform):
         self.target = target
         self.crop = crop
         self.base_w = base_w
+        self.recompute = recompute
 
     def __call__(self, sample, **kwargs):
         """Affinity label processing."""
         seg, msk = self.extract(sample, self.source)
 
         # Recompute connected components.
-        affs = list()
-        affs.append(tf.affinitize(seg, dst=(0,0,1)))
-        affs.append(tf.affinitize(seg, dst=(0,1,0)))
-        affs.append(tf.affinitize(seg, dst=(1,0,0)))
-        aff = np.concatenate(affs, axis=0)
-        seg = datatools.get_segmentation(aff)
+        if self.recompute:
+            affs = list()
+            affs.append(tf.affinitize(seg, dst=(0,0,1)))
+            affs.append(tf.affinitize(seg, dst=(0,1,0)))
+            affs.append(tf.affinitize(seg, dst=(1,0,0)))
+            aff = np.concatenate(affs, axis=0)
+            seg = datatools.get_segmentation(aff)
 
         # Affinitize.
         affs = list()

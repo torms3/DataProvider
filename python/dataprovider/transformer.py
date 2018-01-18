@@ -107,13 +107,21 @@ class Affinity(Transform):
             seg = datatools.get_segmentation(aff)
 
         # Affinitize.
-        affs = list()
-        msks = list()
-        for dst in self.dst:
-            affs.append(tf.affinitize(seg, dst=dst))
-            msks.append(tf.affinitize_mask(msk, dst=dst))
-        lbl = np.concatenate(affs, axis=0)
-        msk = np.concatenate(msks, axis=0)
+        # affs = list()
+        # msks = list()
+        # for dst in self.dst:
+        #     affs.append(tf.affinitize(seg, dst=dst))
+        #     msks.append(tf.affinitize_mask(msk, dst=dst))
+        # lbl = np.concatenate(affs, axis=0)
+        # msk = np.concatenate(msks, axis=0)
+        shape = (len(self.dst),) + seg.shape[-3:]
+        affs = np.full(shape, 0, dtype='float32')
+        msks = np.full(shape, 0, dtype='float32')
+        for i, dst in enumerate(self.dst):
+            tf.affinitize(seg, ret=affs[i,...], dst=dst)
+            tf.affinitize_mask(msk, ret=msks[i,...], dst=dst)
+        lbl = affs
+        msk = msks
 
         # Rebalancing.
         if self.base_w is not None:

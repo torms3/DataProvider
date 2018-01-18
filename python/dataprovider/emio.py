@@ -14,10 +14,10 @@ def imread(fname):
     """Read volumetirc data.
 
     Args:
-        fname: Name of the file to read (hdf5 or tiff).
+        fname (string): Name of the file to read (hdf5 or tiff).
 
     Returns:
-        data: Numpy 3D or 4D array.
+        data (ndarray): Numpy 3D or 4D array.
     """
     if '.hdf5' in fname or '.h5' in fname:
         f = h5py.File(fname)
@@ -26,7 +26,7 @@ def imread(fname):
     elif '.tif' in fname:
         data = tifffile.imread(fname)
     else:
-        raise RuntimeError('only hdf5 and tiff formats are supported')
+        raise RuntimeError("only hdf5 and tiff formats are supported")
 
     return data
 
@@ -45,4 +45,4 @@ def imsave(data, fname):
     elif '.tif' in fname:
         tifffile.imsave(fname, data)
     else:
-        raise RuntimeError('only hdf5 and tiff formats are supported')
+        raise RuntimeError("only hdf5 and tiff formats are supported")

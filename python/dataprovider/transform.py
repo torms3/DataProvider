@@ -327,7 +327,7 @@ def binary_class(img, dtype='float32'):
     return ret
 
 
-def affinitize(img, dst=(1,1,1), dtype='float32'):
+def affinitize(img, ret=None, dst=(1,1,1), dtype='float32'):
     """
     Transform segmentation to an affinity map.
 
@@ -338,7 +338,8 @@ def affinitize(img, dst=(1,1,1), dtype='float32'):
         ret: an affinity map (4D tensor).
     """
     img = check_volume(img)
-    ret = np.zeros(img.shape, dtype=dtype)
+    if ret is None:
+        ret = np.full(img.shape, 0, dtype=dtype)
 
     # Sanity check.
     (dz,dy,dx) = dst
@@ -371,7 +372,7 @@ def affinitize(img, dst=(1,1,1), dtype='float32'):
 ## Mask Transformations
 ####################################################################
 
-def affinitize_mask(msk, dst=(1,1,1), dtype='float32'):
+def affinitize_mask(msk, ret=None, dst=(1,1,1), dtype='float32'):
     """
     Transform binary mask to affinity mask.
 
@@ -382,7 +383,8 @@ def affinitize_mask(msk, dst=(1,1,1), dtype='float32'):
         ret: 3D affinity mask (4D tensor).
     """
     msk = check_volume(msk)
-    ret = np.zeros(msk.shape, dtype=dtype)
+    if ret is None:
+        ret = np.full(msk.shape, 0, dtype=dtype)
 
     # Sanity check.
     (dz,dy,dx) = dst

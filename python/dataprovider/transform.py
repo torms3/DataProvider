@@ -339,7 +339,7 @@ def affinitize(img, ret=None, dst=(1,1,1), dtype='float32'):
     """
     img = check_volume(img)
     if ret is None:
-        ret = np.full(img.shape, 0, dtype=dtype)
+        ret = np.zeros(img.shape, dtype=dtype)
 
     # Sanity check.
     (dz,dy,dx) = dst
@@ -384,7 +384,7 @@ def affinitize_mask(msk, ret=None, dst=(1,1,1), dtype='float32'):
     """
     msk = check_volume(msk)
     if ret is None:
-        ret = np.full(msk.shape, 0, dtype=dtype)
+        ret = np.zeros(msk.shape, dtype=dtype)
 
     # Sanity check.
     (dz,dy,dx) = dst

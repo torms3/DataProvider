@@ -100,7 +100,7 @@ class Affinity(Transform):
         # Recompute connected components.
         if self.recompute:
             shape = (3,) + seg.shape[-3:]
-            aff = np.full(shape, 0, dtype='float32')
+            aff = np.zeros(shape, dtype='float32')
             tf.affinitize(seg, ret=aff[0,...], dst=(0,0,1))
             tf.affinitize(seg, ret=aff[1,...], dst=(0,1,0))
             tf.affinitize(seg, ret=aff[2,...], dst=(1,0,0))
@@ -120,8 +120,8 @@ class Affinity(Transform):
         # lbl = np.concatenate(affs, axis=0)
         # msk = np.concatenate(msks, axis=0)
         shape = (len(self.dst),) + seg.shape[-3:]
-        affs = np.full(shape, 0, dtype='float32')
-        msks = np.full(shape, 0, dtype='float32')
+        affs = np.zeros(shape, dtype='float32')
+        msks = np.zeros(shape, dtype='float32')
         for i, dst in enumerate(self.dst):
             tf.affinitize(seg, ret=affs[i,...], dst=dst)
             tf.affinitize_mask(msk, ret=msks[i,...], dst=dst)

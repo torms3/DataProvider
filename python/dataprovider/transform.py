@@ -443,11 +443,7 @@ def rebalance_class(img, msk=None, dtype='float32'):
 
 
 def rebalance_binary_class(img, msk=None, base_w=0.0, dtype='float32'):
-    """Binary-class rebalancing.
-
-    Profile:
-        (18,158,158): 5.6 ms
-    """
+    """Binary-class rebalancing."""
     img = check_volume(img)
     ret = np.zeros(img.shape, dtype=dtype)
 

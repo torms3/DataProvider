@@ -64,6 +64,9 @@ class ForwardScanner(object):
         self.outputs.push(self.current, sample)
         self.current = None
 
+    def voxels(self):
+        return self.outputs.voxels()
+
     ####################################################################
     ## Private Methods.
     ####################################################################

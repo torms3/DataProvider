@@ -48,6 +48,12 @@ class Blend(object):
         assert key in self.data
         return self.data[key].get_data()
 
+    def voxels(self):
+        voxels = list()
+        for k, v in self.data.items():
+            voxels.append(np.prod(v.dim()))
+        return min(voxels)
+
     ####################################################################
     ## Private Methods.
     ####################################################################

@@ -78,7 +78,10 @@ class TensorData(object):
     ####################################################################
 
     def get_data(self):
-        return self._data
+        if isinstance(self._data, torch.Tensor)
+            return self._data.numpy()
+        else
+            return self._data
 
     def shape(self):
         """Return data shape (c,z,y,x)."""

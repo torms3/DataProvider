@@ -10,6 +10,8 @@ import math
 import numpy as np
 import time
 
+import torch
+
 from box import *
 from vector import *
 
@@ -64,10 +66,12 @@ class TensorData(object):
             box  = centered_box(loc, self._fov)
             vmin = box.min()
             vmax = box.max()
-            ret  = np.copy(self._data[:,vmin[0]:vmax[0],
-                                        vmin[1]:vmax[1],
-                                        vmin[2]:vmax[2]])
-        return ret
+            patch = self._data[:,vmin[0]:vmax[0],
+                                 vmin[1]:vmax[1],
+                                 vmin[2]:vmax[2]]
+            if isinstance(patch, torch.Tensor):
+                patch = patch.numpy()
+        return np.copy(patch)
 
     ####################################################################
     ## Public methods for accessing attributes.
@@ -101,12 +105,16 @@ class TensorData(object):
     ####################################################################
 
     def _check_data(self, data):
-        # Data should be either numpy 3D or 4D array.
-        assert isinstance(data, np.ndarray)
-        assert data.ndim==3 or data.ndim==4
-        # Add channel dimension if data is 3D array.
-        if data.ndim == 3:
-            data = data[np.newaxis,...]
+        if isinstance(data, np.ndarray):
+            assert data.ndim==3 or data.ndim==4
+            if data.ndim == 3:
+                data = data[np.newaxis,...]
+        elif isinstance(data, torch.Tensor):
+            assert data.ndimension()==3 or data.ndimension()==4
+            if data.ndimension()==3:
+                data = data.unsqueeze(0)
+        else:
+            assert False, "data should be either numpy.ndarray or torch.Tensor"
         return data
 
     def _set_range(self):

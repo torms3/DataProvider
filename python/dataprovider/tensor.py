@@ -78,7 +78,7 @@ class TensorData(object):
     ####################################################################
 
     def get_data(self):
-        if isinstance(self._data, torch.Tensor)
+        if isinstance(self._data, torch.Tensor):
             return self._data.numpy()
         else
             return self._data

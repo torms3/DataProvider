@@ -132,6 +132,7 @@ class TensorData(object):
             assert data.ndimension()==3 or data.ndimension()==4
             if data.ndimension()==3:
                 data = data.unsqueeze(0)
+            data = data.share_memory_()
         else:
             assert False, "unsupported data type {}".format(type(data))
         return data

@@ -80,7 +80,7 @@ class TensorData(object):
     def get_data(self):
         if isinstance(self._data, torch.Tensor):
             return self._data.numpy()
-        else
+        else:
             return self._data
 
     def shape(self):

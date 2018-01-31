@@ -69,7 +69,7 @@ class TensorData(object):
             patch = self._data[:,vmin[0]:vmax[0],
                                  vmin[1]:vmax[1],
                                  vmin[2]:vmax[2]]
-            if isinstance(patch, torch.Tensor):
+            if self._is_torch_tensor(patch):
                 patch = patch.numpy()
         return np.copy(patch)
 
@@ -78,7 +78,7 @@ class TensorData(object):
     ####################################################################
 
     def get_data(self):
-        if isinstance(self._data, torch.Tensor):
+        if self._is_torch_tensor(self._data):
             return self._data.numpy()
         else:
             return self._data
@@ -107,17 +107,33 @@ class TensorData(object):
     ## Private helper methods.
     ####################################################################
 
+    def _is_torch_tensor(self, data):
+        ret = False
+        if isinstance(data, torch.FloatTensor):
+            ret = True
+        elif isinstance(data, torch.ByteTensor):
+            ret = True
+        elif isinstance(data, torch.CharTensor):
+            ret = True
+        elif isinstance(data, torch.ShortTensor):
+            ret = True
+        elif isinstance(data, torch.IntTensor):
+            ret = True
+        elif isinstance(data, torch.LongTensor):
+            ret = True
+        return ret
+
     def _check_data(self, data):
         if isinstance(data, np.ndarray):
             assert data.ndim==3 or data.ndim==4
             if data.ndim == 3:
                 data = data[np.newaxis,...]
-        elif isinstance(data, torch.Tensor):
+        elif self._is_torch_tensor(data):
             assert data.ndimension()==3 or data.ndimension()==4
             if data.ndimension()==3:
                 data = data.unsqueeze(0)
         else:
-            assert False, "data should be either numpy.ndarray or torch.Tensor"
+            assert False, "unsupported data type {}".format(type(data))
         return data
 
     def _set_range(self):

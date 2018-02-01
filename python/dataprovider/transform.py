@@ -184,7 +184,8 @@ class Flip(object):
         if rule[3]:
             data = data.transpose(0,1,3,2)
 
-        return data
+        # Prevent potential negative stride issues by copying.
+        return np.copy(data)
 
 flip = Flip()
 

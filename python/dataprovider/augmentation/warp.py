@@ -110,7 +110,8 @@ class Warp(augmentor.DataAugment):
             else:  # Labels and masks.
                 v = warping.warp3dLab(v, self.spec[k][-3:], self.size,
                     self.rot, self.shear, self.scale, self.stretch, self.twist)
-            sample[k] = np.transpose(v, (1,0,2,3))
+            # Prevent potential negative stride issues by copying.
+            sample[k] = np.copy(np.transpose(v, (1,0,2,3)))
         # DEBUG(kisuk)
         # print "Elapsed: %.3f" % (time.time()-t0)
         return sample

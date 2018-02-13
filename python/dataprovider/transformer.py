@@ -76,7 +76,8 @@ class Affinity(Transform):
     Expand segmentation into affinity represntation.
     """
 
-    def __init__(self, dst, source, target, crop=None, base_w=None, recompute=True):
+    def __init__(self, dst, source, target, crop=None, crop_size=None,
+                    base_w=None, recompute=True):
         """Initialize parameters.
 
         Args:
@@ -84,12 +85,15 @@ class Affinity(Transform):
             source: Key to source data from which to construct affinity.
             target: Key to target data.
             crop: 3-tuple indicating crop offset.
+            crop-size:
             base_w: base weight for class-rebalanced gradient weight mask.
+            recompute:
         """
         self.dst = dst
         self.source = source
         self.target = target
         self.crop = crop
+        self.crop_size = crop_size
         self.base_w = base_w
         self.recompute = recompute
 
@@ -128,7 +132,7 @@ class Affinity(Transform):
         # Crop.
         if self.crop is not None:
             for k, v in sample.iteritems():
-                sample[k] = tf.crop(v, offset=self.crop)
+                sample[k] = tf.crop(v, offset=self.crop, size=self.crop_size)
 
         return sample
 

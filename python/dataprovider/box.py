@@ -15,6 +15,7 @@ import math
 
 from .vector import Vec3d, minimum, maximum
 
+
 class Box(object):
     """
     A 3D box identified by two vectors.
@@ -130,9 +131,9 @@ class Box(object):
 def centered_box(c, s):
     """Return a box of size s centered on c."""
     center = Vec3d(c)
-    size   = Vec3d(s)
-    half   = size/2
+    size = Vec3d(s)
     assert size.x >= 0 and size.y >= 0 and size.z >= 0
+    half = size // 2
     v1 = center - half
     v2 = v1 + size
     return Box(v1,v2)

@@ -90,10 +90,10 @@ class Augmentor(object):
         sample = OrderedDict(sorted(sample.items(), key=lambda x: x[0]))
         return sample
 
-from box import BoxOcclusion
-from blur import Blur
-from flip import Flip
-from warp import Warp
-from misalign import Misalign
-from missing_section import MissingSection
-from greyscale import Greyscale
+from .box import BoxOcclusion
+from .blur import Blur
+from .flip import Flip
+from .warp import Warp
+from .misalign import Misalign
+from .missing_section import MissingSection
+from .greyscale import Greyscale

@@ -9,7 +9,7 @@ Kisuk Lee <kisuklee@mit.edu>, 2016
 from collections import OrderedDict
 import numpy as np
 from utils import *
-from vector import Vec3d, minimum, maximum
+from .vector import Vec3d, minimum, maximum
 
 def transform_tensor(func, data, *args, **kwargs):
     """Apply func to each channel of data (4D tensor)."""

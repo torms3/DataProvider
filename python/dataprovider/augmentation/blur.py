@@ -2,7 +2,7 @@ from __future__ import print_function
 import numpy as np
 from scipy.ndimage.filters import gaussian_filter
 
-import augmentor
+from . import augmentor
 
 class Blur(augmentor.DataAugment):
     """

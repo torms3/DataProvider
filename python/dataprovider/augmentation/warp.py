@@ -2,7 +2,7 @@ from __future__ import print_function
 import numpy as np
 import time
 
-import augmentor
+from . import augmentor
 from ..box import Box
 from ..utils import check_tensor, check_volume
 from ..vector import Vec3d

@@ -3,7 +3,7 @@ import numpy as np
 import math
 import time
 
-import blend
+from . import blend
 from ..box import Box, centered_box
 from ..tensor import WritableTensorData as WTD, WritableTensorDataWithMask as WTDM
 from ..vector import *

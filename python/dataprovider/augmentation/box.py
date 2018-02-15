@@ -3,7 +3,7 @@ import math
 import numpy as np
 from scipy.ndimage.filters import gaussian_filter
 
-import augmentor
+from . import augmentor
 from ..box import *
 
 class BoxOcclusion(augmentor.DataAugment):

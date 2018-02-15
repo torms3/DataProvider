@@ -3,8 +3,8 @@ import math
 import numpy as np
 import time
 
-from box import *
-from vector import *
+from .box import *
+from .vector import *
 
 class TensorData(object):
     """

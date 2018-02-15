@@ -3,10 +3,10 @@ from collections import OrderedDict
 import copy
 import numpy as np
 
-from box import Box
-from sequence import SampleSequence
-from tensor import TensorData
-from vector import Vec3d
+from .box import Box
+from .sequence import SampleSequence
+from .tensor import TensorData
+from .vector import Vec3d
 
 class Dataset(object):
     """

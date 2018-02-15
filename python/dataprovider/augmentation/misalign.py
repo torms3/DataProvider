@@ -1,7 +1,7 @@
 from __future__ import print_function
 import numpy as np
 
-import augmentor
+from . import augmentor
 from ..utils import check_tensor
 
 class Misalign(augmentor.DataAugment):

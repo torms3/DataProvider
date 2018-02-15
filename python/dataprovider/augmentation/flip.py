@@ -8,7 +8,7 @@ Kisuk Lee <kisuklee@mit.edu>, 2017
 
 import numpy as np
 
-import augmentor
+from . import augmentor
 from ..transform import flip
 
 class Flip(augmentor.DataAugment):

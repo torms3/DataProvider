@@ -8,7 +8,7 @@ Kisuk Lee <kisuklee@mit.edu>, 2017
 
 import numpy as np
 
-import emio
+import .emio
 
 class SampleSequence(object):
     """

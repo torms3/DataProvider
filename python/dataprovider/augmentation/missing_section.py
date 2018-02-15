@@ -1,7 +1,7 @@
 from __future__ import print_function
 import numpy as np
 
-import augmentor
+from . import augmentor
 
 class MissingSection(augmentor.DataAugment):
     """

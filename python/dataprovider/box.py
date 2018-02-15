@@ -13,7 +13,7 @@ Kisuk Lee <kisuklee@mit.edu>, 2015-2016
 
 import math
 
-from vector import Vec3d, minimum, maximum
+from .vector import Vec3d, minimum, maximum
 
 class Box(object):
     """

@@ -16,7 +16,7 @@ import numpy as np
 # except ImportError:
 #     raise RuntimeError('_warping.so Cython extension not found.\n'
 #                        'Please run setup.py or manually cythonize _warping.pyx.')
-from _warping import warp2dFast, warp3dFast, _warp2dFastLab, _warp3dFastLab
+from ._warping import warp2dFast, warp3dFast, _warp2dFastLab, _warp3dFastLab
 
 
 def warp2dJoint(img, lab, patch_size, rot, shear, scale, stretch):
@@ -289,8 +289,7 @@ def test():
         img_s = np.concatenate((img_s[None], np.exp(img_s[None])), axis=0)
         out = warp2dFast(img_s, (11, 11), 0, 0, (1, 1), (0.0, 0.0))
     except Exception as e:
-        print("""%s)
-        Warping is broken. Most likeley the distributed _warping.so is not binary compatible to your system.""" % (e, )
+        print("%s Warping is broken. Most likeley the distributed _warping.so is not binary compatible to your system." % (e, ))
 
 
 test()

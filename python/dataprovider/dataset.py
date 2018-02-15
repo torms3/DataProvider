@@ -235,11 +235,12 @@ class VolumeDataset(Dataset):
 if __name__ == "__main__":
 
     import argparse
-    import emio
     import h5py
     import os
     import time
-    import transform
+
+    from . import emio
+    from . import transform
 
     dsc = 'VolumeDataset demo.'
     parser = argparse.ArgumentParser(description=dsc)

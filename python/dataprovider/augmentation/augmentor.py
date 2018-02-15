@@ -9,6 +9,7 @@ Kisuk Lee <kisuklee@mit.edu>, 2016-2017
 from collections import OrderedDict
 import numpy as np
 
+
 class DataAugment(object):
     """
     DataAugment interface.

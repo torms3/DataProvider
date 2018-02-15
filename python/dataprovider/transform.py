@@ -8,8 +8,10 @@ Kisuk Lee <kisuklee@mit.edu>, 2016
 
 from collections import OrderedDict
 import numpy as np
-from utils import *
+
+from .utils import *
 from .vector import Vec3d, minimum, maximum
+
 
 def transform_tensor(func, data, *args, **kwargs):
     """Apply func to each channel of data (4D tensor)."""
@@ -94,7 +96,7 @@ def mirror_border(img, fov):
     fov = Vec3d(fov.astype('uint32'))
 
     # Pad size
-    top = fov / 2
+    top = fov // 2
     btm = fov - top - (1,1,1)
     pad_with = [(top[0],btm[0]),(top[1],btm[1]),(top[2],btm[2])]
     # TODO(kisuk): Should we force an odd-sized fov?
@@ -291,7 +293,7 @@ def binarize_object(img, object_id=None, dtype='float32'):
     # Center object.
     if object_id is None:
         z, y, x = img.shape[-3:]
-        object_id = img[...,z/2,y/2,x/2]
+        object_id = img[...,z//2,y//2,x//2]
     if object_id == 0:
         assert False
     ret[:] = (img==object_id).astype(dtype)

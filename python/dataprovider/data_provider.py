@@ -7,6 +7,7 @@ from .dataset import Dataset, VolumeDataset
 from .transformer import Transform, Transformer
 from .sequence import *
 
+
 class DataProvider(object):
     """
     DataProvider interface.

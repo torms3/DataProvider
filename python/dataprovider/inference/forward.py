@@ -8,6 +8,7 @@ from ..box import Box, centered_box
 from ..tensor import WritableTensorData as WTD, WritableTensorDataWithMask as WTDM
 from ..vector import *
 
+
 class ForwardScanner(object):
     """
     ForwardScanner.
@@ -160,7 +161,7 @@ class ForwardScanner(object):
 
         # Automatic full spanning.
         if grid == 0:
-            grid = (cmax - cmin - 1)/stride + 1
+            grid = (cmax - cmin - 1)//stride + 1
             coord.add(cmax-1)  # Offcut
 
         # Scan coordinates.

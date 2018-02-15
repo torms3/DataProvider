@@ -4,6 +4,7 @@ import numpy as np
 from . import augmentor
 from ..utils import check_tensor
 
+
 class Misalign(augmentor.DataAugment):
     """
     Misalignment data augmentation.
@@ -58,7 +59,7 @@ class Misalign(augmentor.DataAugment):
                 # Introduce misalignment at pivot.
                 pivot = np.random.randint(1, zmin - 1)
                 for k, v in pvt.items():
-                    offset = int(v - zmin)/2  # Compute offset.
+                    offset = int(v - zmin)//2  # Compute offset.
                     pvt[k] = offset + pivot
                 self.pivot = pvt
 

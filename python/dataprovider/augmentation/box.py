@@ -6,6 +6,7 @@ from scipy.ndimage.filters import gaussian_filter
 from . import augmentor
 from ..box import *
 
+
 class BoxOcclusion(augmentor.DataAugment):
     """
     Add random box occlusion masks.
@@ -75,7 +76,7 @@ class BoxOcclusion(augmentor.DataAugment):
                 # Random box size.
                 dim = np.random.randint(self.min_dim, self.max_dim + 1, 3)
                 # Anisotropy.
-                dim[0] /= int(self.aspect_ratio)
+                dim[0] //= int(self.aspect_ratio)
                 # Box.
                 box = bbox.intersect(centered_box(loc, dim))
                 # Local coordiate.

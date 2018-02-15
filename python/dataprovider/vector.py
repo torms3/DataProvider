@@ -12,6 +12,7 @@ Kisuk Lee <kisuklee@mit.edu>, 2015-2016
 import math
 import operator
 
+
 class Vec3d(object):
     """
     3d vector class, supports vector and scalar operators,
@@ -213,7 +214,7 @@ class Vec3d(object):
     def __rtruediv__(self, v):
         return self._r_o2(v, operator.truediv)
     def __itruediv__(self, v):
-        return self._io(v, operator.floordiv)
+        return self._io(v, operator.truediv)
 
     # Modulo
     def __mod__(self, v):
@@ -370,6 +371,7 @@ if __name__ == "__main__":
 
     import unittest
     import pickle
+    import sys
 
     ####################################################################
     class UnitTestVec3d(unittest.TestCase):
@@ -391,17 +393,21 @@ if __name__ == "__main__":
             self.assertTrue(v - 2 == [109,220,331])
             self.assertTrue(v * 3 == (333,666,999))
             self.assertTrue(v / 2.0 == Vec3d(55.5, 111, 166.5))
-            self.assertTrue(v / 2 == (55, 111, 166))
+            if sys.version_info[0] == 2:
+                self.assertTrue(v / 2 == Vec3d(55, 111, 166))
+            else:
+                self.assertTrue(v / 2 == Vec3d(55.5, 111, 166.5))
+            self.assertTrue(v // 2 == (55, 111, 166))
             self.assertTrue(v ** Vec3d(2,3,2) == [12321, 10941048, 110889])
             self.assertTrue(v + [-11, 78, 67] == Vec3d(100, 300, 400))
-            self.assertTrue(v / [11,2,9] == [10,111,37])
+            self.assertTrue(v // [11,2,9] == [10,111,37])
 
         def testReverseMath(self):
             v = Vec3d(111,222,333)
             self.assertTrue(1 + v == Vec3d(112,223,334))
             self.assertTrue(2 - v == [-109,-220,-331])
             self.assertTrue(3 * v == (333,666,999))
-            self.assertTrue([222,999,666] / v == [2,4,2])
+            self.assertTrue([222,999,666] // v == [2,4,2])
             self.assertTrue([111,222,333] ** Vec3d(2,3,2) ==
                             [12321, 10941048, 110889])
             self.assertTrue([-11, 78,67] + v == Vec3d(100, 300, 400))

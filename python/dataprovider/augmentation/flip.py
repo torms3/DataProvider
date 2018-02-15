@@ -30,6 +30,6 @@ class Flip(augmentor.DataAugment):
         else:
             rule = np.random.rand(4) > 0.5
         # Apply flip.
-        for k, v in sample.iteritems():
+        for k, v in sample.items():
             sample[k] = flip(v, rule)
         return sample

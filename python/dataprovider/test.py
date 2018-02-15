@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+from __future__ import print_function
 import argparse
 import h5py
 import os
@@ -31,9 +31,9 @@ if __name__ == "__main__":
     args.lbl = os.path.expanduser(lbl)
 
     # Load data.
-    img = emio.imread(args.img);   print "Load image..."
-    lbl = emio.imread(args.lbl);   print "Load label..."
-    # prob = emio.imread(args.prob);  print "Load probability map..."
+    img = emio.imread(args.img);   print("Load image...")
+    lbl = emio.imread(args.lbl);   print("Load label...")
+    # prob = emio.imread(args.prob);  print("Load probability map...")
 
     # Preprocess.
     img = transform.divideby(img, val=255.0, dtype='float32')
@@ -89,7 +89,7 @@ if __name__ == "__main__":
     # Sampler.
     while True:
         try:
-            print 'try sample...'
+            print('try sample...')
             spec = vdset.get_spec()
             # spec['mask'] = spec['input']
             params = vdset.get_params()
@@ -117,15 +117,15 @@ if __name__ == "__main__":
     #     # Sample & augment.
     #     sample = sampler('next', imgs=['input'])
     #     elapsed += time.time() - t0
-    #     print "Iteration %7d, elapsed: %.3f" % (i+1, elapsed/(i+1))
+    #     print("Iteration %7d, elapsed: %.3f" % (i+1, elapsed/(i+1)))
 
     # Dump a single random sample.
     if args.save:
-        print "\nSave as file..."
+        print("\nSave as file...")
         fname = 'sample.h5'
         if os.path.exists(fname):
             os.remove(fname)
         f = h5py.File(fname)
-        for key, data in sample.iteritems():
+        for key, data in sample.items():
             f.create_dataset('/' + key, data=data)
         f.close()

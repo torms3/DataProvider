@@ -122,7 +122,7 @@ class Affinity(Transform):
 
         # Rebalancing.
         if self.base_w is not None:
-            for c in xrange(lbl.shape[0]):
+            for c in range(lbl.shape[0]):
                 msk[c,...] = tf.rebalance_binary_class(lbl[c,...], msk=msk[c,...], base_w=self.base_w)
 
         # Update sample.
@@ -131,7 +131,7 @@ class Affinity(Transform):
 
         # Crop.
         if self.crop is not None:
-            for k, v in sample.iteritems():
+            for k, v in sample.items():
                 sample[k] = tf.crop(v, offset=self.crop, size=self.crop_size)
 
         return sample

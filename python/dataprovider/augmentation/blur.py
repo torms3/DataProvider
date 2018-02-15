@@ -1,11 +1,4 @@
-#!/usr/bin/env python
-__doc__ = """
-
-Out-of-focus (Gaussian blur) section augmentation.
-
-Kisuk Lee <kisuklee@mit.edu>, 2017
-"""
-
+from __future__ import print_function
 import numpy as np
 from scipy.ndimage.filters import gaussian_filter
 
@@ -51,8 +44,8 @@ class Blur(augmentor.DataAugment):
         num_sec = np.random.randint(1, self.MAX_SEC + 1)
 
         # DEBUG(kisuk)
-        # print "\n[Blur]"
-        # print "num_sec = %d" % num_sec
+        # print("\n[Blur]")
+        # print("num_sec = %d" % num_sec)
 
         # Assume that the sample contains only one input volume, or multiple
         # input volumes of same size.
@@ -79,13 +72,13 @@ class Blur(augmentor.DataAugment):
                     img = sample[key][...,z,:,:]
                     sample[key][...,z,:,:] = gaussian_filter(img, sigma=sigma)
                     # DEBUG(kisuk)
-                    # print 'z = {}, sigma = {}'.format(z+1,sigma)
+                    # print('z = {}, sigma = {}'.format(z+1,sigma))
         else:
             for z in zlocs:
                 # Random sigma.
                 sigma = np.random.rand() * self.sigma_max
                 # DEBUG(kisuk)
-                # print 'z = {}, sigma = {}'.format(z+1,sigma)
+                # print('z = {}, sigma = {}'.format(z+1,sigma))
                 # Blurring.
                 for key in imgs:
                     img = sample[key][...,z,:,:]

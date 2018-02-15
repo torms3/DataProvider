@@ -1,11 +1,4 @@
-#!/usr/bin/env python
-__doc__ = """
-
-DaraProvider classes.
-
-Kisuk Lee <kisuklee@mit.edu>, 2017
-"""
-
+from __future__ import print_function
 from collections import OrderedDict
 import numpy as np
 
@@ -64,7 +57,7 @@ class VolumeDataProvider(DataProvider):
         p = np.asarray(p, dtype='float32')
         p = p/np.sum(p)
         # Set sampling weights.
-        # print 'Sampling weights: {}'.format(['%0.3f' % x for x in p])
+        # print('Sampling weights: {}'.format(['%0.3f' % x for x in p]))
         assert len(p)==len(self.datasets)
         self.p = p
 

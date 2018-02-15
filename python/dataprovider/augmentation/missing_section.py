@@ -1,11 +1,4 @@
-#!/usr/bin/env python
-__doc__ = """
-
-Missing section data augmentation.
-
-Kisuk Lee <kisuklee@mit.edu>, 2017
-"""
-
+from __future__ import print_function
 import numpy as np
 
 import augmentor
@@ -52,8 +45,8 @@ class MissingSection(augmentor.DataAugment):
         num_sec = np.random.randint(1, self.max_sec + 1)
 
         # DEBUG(kisuk)
-        # print "\n[MissingSection]"
-        # print "num_sec = %d" % num_sec
+        # print("\n[MissingSection]")
+        # print("num_sec = %d" % num_sec)
 
         # Assume that the sample contains only one input volume,
         # or multiple input volumes of same size.
@@ -77,7 +70,7 @@ class MissingSection(augmentor.DataAugment):
             zlocs = np.random.choice(zdim, num_sec, replace=False)
 
         # DEBUG(kisuk)
-        # print sorted([x+1 for x in zlocs])
+        # print(sorted([x+1 for x in zlocs]))
 
         # Fill-out value.
         val = np.random.rand() if self.random_color else 0

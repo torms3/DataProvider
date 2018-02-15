@@ -50,7 +50,7 @@ class Greyscale(augmentor.DataAugment):
         """
         imgs = kwargs['imgs']
         for key in imgs:
-            for z in xrange(sample[key].shape[-3]):
+            for z in range(sample[key].shape[-3]):
                 img = sample[key][...,z,:,:]
                 img *= 1 + (np.random.rand() - 0.5)*self.CONTRAST_FACTOR
                 img += (np.random.rand() - 0.5)*self.BRIGHTNESS_FACTOR

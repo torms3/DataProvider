@@ -1,12 +1,4 @@
-#!/usr/bin/env python
-__doc__ = """
-
-Misalignment data augmentation.
-
-Karan Kathpalia <karank@cs.princeton.edu>
-Kisuk Lee <kisuklee@mit.edu>, 2016-2017
-"""
-
+from __future__ import print_function
 import numpy as np
 
 import augmentor
@@ -42,7 +34,7 @@ class Misalign(augmentor.DataAugment):
 
             # Randomly draw x/y translation independently.
             ret, pvt, zs = dict(), dict(), list()
-            for k, v in spec.iteritems():
+            for k, v in spec.items():
                 z, y, x = v[-3:]
                 assert z > 0
                 ret[k] = v[:-2] + (y+self.y_t, x+self.x_t)
@@ -65,7 +57,7 @@ class Misalign(augmentor.DataAugment):
                 self.do_augment = True
                 # Introduce misalignment at pivot.
                 pivot = np.random.randint(1, zmin - 1)
-                for k, v in pvt.iteritems():
+                for k, v in pvt.items():
                     offset = int(v - zmin)/2  # Compute offset.
                     pvt[k] = offset + pivot
                 self.pivot = pvt
@@ -82,15 +74,15 @@ class Misalign(augmentor.DataAugment):
 
     def augment(self, sample, **kwargs):
         # DEBUG(kisuk)
-        # print "\n[Misalign]"
-        # for k, v in sample.iteritems():
+        # print("\n[Misalign]")
+        # for k, v in sample.items():
         #     slip = 'slip' if self.slip else 'trans'
-        #     print "{} @ z={} {}({},{})".format(k, self.pivot[k], slip, self.x_t, self.y_t)
+        #     print("{} @ z={} {}({},{})".format(k, self.pivot[k], slip, self.x_t, self.y_t))
 
         ret = dict()
 
         if self.do_augment:
-            for k, v in sample.iteritems():
+            for k, v in sample.items():
                 # Ensure data is a 4D tensor.
                 data = check_tensor(v)
                 new_data = np.zeros(self.spec[k], dtype=data.dtype)

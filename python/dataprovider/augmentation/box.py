@@ -1,11 +1,4 @@
-#!/usr/bin/env python
-__doc__ = """
-
-Box occlusion augmentation.
-
-Kisuk Lee <kisuklee@mit.edu>, 2017
-"""
-
+from __future__ import print_function
 import math
 import numpy as np
 from scipy.ndimage.filters import gaussian_filter
@@ -71,7 +64,7 @@ class BoxOcclusion(augmentor.DataAugment):
             density = self.max_density*np.random.rand()
             goal    = bbox.volume()*density
             # DEBUG(kisuk):
-            # print 'density: %.2f' % density
+            # print('density: %.2f' % density)
             while True:
                 # Random location.
                 m = self.min_dim  # Margin.

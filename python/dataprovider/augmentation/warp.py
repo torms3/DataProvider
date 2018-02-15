@@ -1,11 +1,4 @@
-#!/usr/bin/env python
-__doc__ = """
-
-Warping data augmentation.
-
-Kisuk Lee <kisuklee@mit.edu>, 2017
-"""
-
+from __future__ import print_function
 import numpy as np
 import time
 
@@ -46,7 +39,7 @@ class Warp(augmentor.DataAugment):
 
         # Compute the largest image size.
         b = Box((0,0,0), (0,0,0))  # Empty box.
-        for k, v in spec.iteritems():
+        for k, v in spec.items():
             b = b.merge(Box((0,0,0), v[-3:]))
         maxsz = tuple(b.size())
 
@@ -67,7 +60,7 @@ class Warp(augmentor.DataAugment):
         # Replace every shape to the largest required one.
         # TODO(kisuk): Is this correct?
         ret = dict()
-        for k, v in spec.iteritems():
+        for k, v in spec.items():
             if k in imgs:  # Images.
                 ret[k] = v[:-3] + self.size
             else:  # Labels and masks.
@@ -78,30 +71,30 @@ class Warp(augmentor.DataAugment):
         """Apply warp data augmentation."""
         # DEBUG(kisuk)
         # t0 = time.time()
-        # print '\n[Warp]'
+        # print('\n[Warp]')
         # self.counter += 1
         # if self.skip:
         #     self.count['skip'] += 1
         # else:
         #     self.count['warp'] += 1
-        # for k,v in self.count.iteritems():
-        #     print '{}={}'.format(k,'%0.3f'%(v/float(self.counter)))
+        # for k,v in self.count.items():
+        #     print('{}={}'.format(k,'%0.3f'%(v/float(self.counter))))
 
         if self.skip:
             return sample
 
         # DEBUG(kisuk)
-        # print 'rot      = {}'.format(self.rot)
-        # print 'shear    = {}'.format(self.shear)
-        # print 'scale    = {}'.format(self.scale)
-        # print 'stretch  = {}'.format(self.stretch)
-        # print 'twist    = {}'.format(self.twist)
-        # print 'req_size = {}'.format(self.size)
+        # print('rot      = {}'.format(self.rot))
+        # print('shear    = {}'.format(self.shear))
+        # print('scale    = {}'.format(self.scale))
+        # print('stretch  = {}'.format(self.stretch))
+        # print('twist    = {}'.format(self.twist))
+        # print('req_size = {}'.format(self.size))
 
         imgs = kwargs['imgs']
 
         # Apply warp to each tensor.
-        for k, v in sample.iteritems():
+        for k, v in sample.items():
             v = check_tensor(v)
             v = np.transpose(v, (1,0,2,3))
             if k in imgs:  # Images.
@@ -113,7 +106,7 @@ class Warp(augmentor.DataAugment):
             # Prevent potential negative stride issues by copying.
             sample[k] = np.copy(np.transpose(v, (1,0,2,3)))
         # DEBUG(kisuk)
-        # print "Elapsed: %.3f" % (time.time()-t0)
+        # print("Elapsed: %.3f" % (time.time()-t0))
         return sample
 
     ####################################################################

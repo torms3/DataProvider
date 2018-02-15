@@ -1,11 +1,4 @@
-#!/usr/bin/env python
-__doc__ = """
-
-Inference outputs.
-
-Kisuk Lee <kisuklee@mit.edu>, 2016-2017
-"""
-
+from __future__ import print_function
 import numpy as np
 import time
 
@@ -39,7 +32,7 @@ class Blend(object):
 
     def push(self, loc, sample):
         """Write to data."""
-        for k, v in sample.iteritems():
+        for k, v in sample.items():
             assert k in self.data
             self.data[k].set_patch(loc, v, op=self.op)
 
@@ -68,7 +61,7 @@ class Blend(object):
 
         self.data = dict()
         self.op   = None
-        for k, v in self.spec.iteritems():
+        for k, v in self.spec.items():
             fov = v[-3:]
             a = centered_box(rmin, fov)
             b = centered_box(rmax, fov)
@@ -98,7 +91,7 @@ class BumpBlend(Blend):
         if blend:
             max_logits = dict()
             # Compute max_logit for numerical stability.
-            for k, v in self.data.iteritems():
+            for k, v in self.data.items():
                 fov = tuple(v.fov())
                 data = np.full(v.dim(), -np.inf, dtype='float32')
                 max_logit = WTD(data, fov, v.offset())
@@ -110,14 +103,14 @@ class BumpBlend(Blend):
 
     def push(self, loc, sample):
         """Blend with data."""
-        for k, v in sample.iteritems():
+        for k, v in sample.items():
             assert k in self.data
             t0 = time.time()
             mask = self._get_mask(k, loc)
             t1 = time.time() - t0
             self.data[k].set_patch(loc, v, op=self.op, mask=mask)
             t2 = time.time() - t0
-            # print 'get_mask: %.3f, set_patch: %.3f' % (t1, t2-t1)
+            # print('get_mask: %.3f, set_patch: %.3f' % (t1, t2-t1))
 
     ####################################################################
     ## Private methods.

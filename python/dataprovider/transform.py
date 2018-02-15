@@ -16,7 +16,7 @@ def transform_tensor(func, data, *args, **kwargs):
     data = check_tensor(data)
     arrs = list()
     f = globals()[func]
-    for c in xrange(data.shape[0]):
+    for c in range(data.shape[0]):
         vol = f(data[c,...], *args, **kwargs)
         arrs.append(check_tensor(vol))
     return np.concatenate(arrs, axis=0)
@@ -35,7 +35,7 @@ class SampleFunction(object):
     def _transform_sample(self, func, sample, *args, **kwargs):
         """Apply func to a sample."""
         ret = OrderedDict()
-        for key, data in sample.iteritems():
+        for key, data in sample.items():
             ret[key] = transform_tensor(func, data, *args, **kwargs)
         return ret
 
@@ -112,7 +112,7 @@ def standardize(img, mode='2D', dtype='float32'):
     f = lambda x: (x - np.mean(x)) / np.std(x)
 
     if mode == '2D':
-        for z in xrange(img.shape[0]):
+        for z in range(img.shape[0]):
             ret[z,:,:] = f(img[z,:,:])
     elif mode == '3D':
         ret[:] = f(img)

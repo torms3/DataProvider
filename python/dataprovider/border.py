@@ -26,9 +26,9 @@ def create_border(seg, max_dist, axis=0):
     """
     seg = check_tensor(seg)
     ret = np.copy(seg)
-    sl  = [slice(None) for d in xrange(seg.ndim)]
+    sl  = [slice(None) for d in range(seg.ndim)]
 
-    for z in xrange(seg.shape[axis]):
+    for z in range(seg.shape[axis]):
         sl[axis] = z
         border = create_border_mask_2d(seg[tuple(sl)], max_dist)
         target = ret[tuple(sl)]

@@ -1,11 +1,4 @@
-#!/usr/bin/env python
-__doc__ = """
-
-Dataset classes.
-
-Kisuk Lee <kisuklee@mit.edu>, 2017
-"""
-
+from __future__ import print_function
 from collections import OrderedDict
 import copy
 import numpy as np
@@ -47,7 +40,7 @@ class VolumeDataset(Dataset):
         # Initialize attributes.
         self._reset()
         # Set dataset-specific params.
-        for k, v in kwargs.iteritems():
+        for k, v in kwargs.items():
             self._params[k] = v
 
     def add_raw_data(self, key, data, fov=(0,0,0), offset=(0,0,0)):
@@ -206,7 +199,7 @@ class VolumeDataset(Dataset):
             # Global coordinate system.
             loc =  Vec3d(z,y,x) + self._range.min()
             # DEBUG(kisuk)
-            # print 'loc = {}'.format(loc)
+            # print('loc = {}'.format(loc))
         else:
             while True:
                 idx = np.random.randint(0, self._locs[0].size)
@@ -225,7 +218,7 @@ class VolumeDataset(Dataset):
         assert self.has_spec()
         # Valid range.
         vr = None
-        for key, dim in self._spec.iteritems():
+        for key, dim in self._spec.items():
             if key in self._data:
                 # Update patch size.
                 self._data[key].set_fov(dim[-3:])
@@ -278,11 +271,11 @@ if __name__ == "__main__":
     sample = vdset.random_sample()
 
     # Dump a single random sample.
-    print 'Save as file...'
+    print('Save as file...')
     fname = 'sample.h5'
     if os.path.exists(fname):
         os.remove(fname)
     f = h5py.File(fname)
-    for key, data in sample.iteritems():
+    for key, data in sample.items():
         f.create_dataset('/' + key, data=data)
     f.close()

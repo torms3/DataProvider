@@ -3,6 +3,7 @@ import numpy as np
 
 from . import augmentor
 
+
 class MissingSection(augmentor.DataAugment):
     """
     Introduce missing section(s) to a training example.

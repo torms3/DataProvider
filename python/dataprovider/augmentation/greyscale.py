@@ -10,6 +10,7 @@ import numpy as np
 
 from . import augmentor
 
+
 class Greyscale(augmentor.DataAugment):
     """
     Greyscale value augmentation.

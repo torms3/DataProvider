@@ -10,7 +10,8 @@ import datatools
 import numpy as np
 import time
 
-import .transform as tf
+from . import transform as tf
+
 
 class Transformer(object):
     """

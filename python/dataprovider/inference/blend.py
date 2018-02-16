@@ -5,6 +5,7 @@ import time
 from ..box import centered_box
 from ..tensor import WritableTensorData as WTD, WritableTensorDataWithMask as WTDM
 
+
 def prepare_outputs(spec, locs, blend=False, blend_mode=''):
     blend_pool = ['','bump']
     b = blend_mode.lower()

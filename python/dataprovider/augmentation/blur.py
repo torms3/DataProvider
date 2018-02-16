@@ -4,6 +4,7 @@ from scipy.ndimage.filters import gaussian_filter
 
 from . import augmentor
 
+
 class Blur(augmentor.DataAugment):
     """
     Introduce out-of-focus section(s) to a training example.

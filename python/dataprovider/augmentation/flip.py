@@ -11,6 +11,7 @@ import numpy as np
 from . import augmentor
 from ..transform import flip
 
+
 class Flip(augmentor.DataAugment):
     """
     Random flip.

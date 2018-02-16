@@ -8,6 +8,7 @@ from .sequence import SampleSequence
 from .tensor import TensorData
 from .vector import Vec3d
 
+
 class Dataset(object):
     """
     Dataset interface.
@@ -18,6 +19,11 @@ class Dataset(object):
 
     def random_sample(self):
         raise NotImplementedError
+
+
+class OutOfRangeError(Exception):
+    def __init__(self):
+        super(OutOfRangeError, self).__init__()
 
 
 class VolumeDataset(Dataset):
@@ -83,7 +89,7 @@ class VolumeDataset(Dataset):
             if key in self._data:
                 patch = self._data[key].get_patch(pos)
                 if patch is None:
-                    raise
+                    raise OutOfRangeError()
                 else:
                     sample[key] = patch
         return sample
@@ -105,7 +111,7 @@ class VolumeDataset(Dataset):
                 if spec is not None: self.set_spec(original_spec)
             except:
                 self.set_spec(original_spec)
-                raise
+                raise OutOfRangeError()
         return ret
 
     def random_sample(self, spec=None):
@@ -122,7 +128,7 @@ class VolumeDataset(Dataset):
             if spec is not None: self.set_spec(original_spec)
         except:
             self.set_spec(original_spec)
-            raise
+            raise OutOfRangeError()
         return ret
 
     ####################################################################

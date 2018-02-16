@@ -3,7 +3,7 @@ from collections import OrderedDict
 import numpy as np
 
 from .augmentation.augmentor import DataAugment, Augmentor
-from .dataset import Dataset, VolumeDataset
+from .dataset import Dataset, VolumeDataset, OutOfRangeError
 from .transformer import Transform, Transformer
 from .sequence import *
 
@@ -95,8 +95,10 @@ class VolumeDataProvider(DataProvider):
                 spec = self.augment.prepare(spec, **params)
                 sample = getattr(dataset, mode+'_sample')(spec=spec)
                 break
-            except:
+            except OutOfRangeError:
                 pass
+            except:
+                raise
         # Preprocessing.
         sample = self.preprocess(sample, **params)
         # Apply data augmentation.

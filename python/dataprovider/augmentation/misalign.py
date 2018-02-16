@@ -30,8 +30,8 @@ class Misalign(augmentor.DataAugment):
 
             # Random translation.
             # Always lower box is translated.
-            self.x_t = int(round(max_trans * np.random.rand(1)))
-            self.y_t = int(round(max_trans * np.random.rand(1)))
+            self.x_t = int(round(max_trans * np.random.rand()))
+            self.y_t = int(round(max_trans * np.random.rand()))
 
             # Randomly draw x/y translation independently.
             ret, pvt, zs = dict(), dict(), list()

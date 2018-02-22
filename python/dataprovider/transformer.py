@@ -78,7 +78,7 @@ class Segmentation(Transform):
     Segmentation.
     """
 
-    def __init__(self, source, target, dtype=np.int32, recompute=True):
+    def __init__(self, source, target, recompute=True):
         """Initialize parameters.
 
         Args:
@@ -88,7 +88,6 @@ class Segmentation(Transform):
         """
         self.source = source
         self.target = target
-        self.dtype = dtype
         self.recompute = recompute
 
     def __call__(self, sample, **kwargs):
@@ -105,8 +104,8 @@ class Segmentation(Transform):
             seg = datatools.get_segmentation(aff)
 
         # Update sample.
-        sample[self.target] = utils.check_volume(seg.astype(self.dtype))
-        sample[self.target+'_mask'] = utils.check_volume(msk)
+        sample[self.target] = utils.check_volume(seg.astype('float32'))
+        sample[self.target+'_mask'] = utils.check_volume(msk.astype('float32'))
 
         return sample
 

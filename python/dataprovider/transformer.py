@@ -105,8 +105,8 @@ class Segmentation(Transform):
             seg = datatools.get_segmentation(aff)
 
         # Update sample.
-        sample[self.target] = utils.check_tensor(seg.astype(self.dtype))
-        sample[self.target+'_mask'] = utils.check_tensor(msk)
+        sample[self.target] = utils.check_volume(seg.astype(self.dtype))
+        sample[self.target+'_mask'] = utils.check_volume(msk)
 
         return sample
 

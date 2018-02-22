@@ -72,6 +72,44 @@ class Boundary(Transform):
         return sample
 
 
+class Segmentation(Transform):
+    """
+    Segmentation.
+    """
+
+    def __init__(self, source, target, dtype=np.int32, recompute=True):
+        """Initialize parameters.
+
+        Args:
+            source: Key to source data.
+            target: Key to target data.
+            recompute: Recompute connected components.
+        """
+        self.source = source
+        self.target = target
+        self.dtype = dtype
+        self.recompute = recompute
+
+    def __call__(self, sample, **kwargs):
+        """Affinity label processing."""
+        seg, msk = self.extract(sample, self.source)
+
+        # Recompute connected components.
+        if self.recompute:
+            shape = (3,) + seg.shape[-3:]
+            aff = np.zeros(shape, dtype='float32')
+            tf.affinitize(seg, ret=aff[0,...], dst=(0,0,1))
+            tf.affinitize(seg, ret=aff[1,...], dst=(0,1,0))
+            tf.affinitize(seg, ret=aff[2,...], dst=(1,0,0))
+            seg = datatools.get_segmentation(aff)
+
+        # Update sample.
+        sample[self.target] = seg.astype(self.dtype)
+        sample[self.target+'_mask'] = msk
+
+        return sample
+
+
 class Affinity(Transform):
     """
     Expand segmentation into affinity represntation.

@@ -11,6 +11,7 @@ import numpy as np
 import time
 
 from . import transform as tf
+from . import utils
 
 
 class Transformer(object):
@@ -104,8 +105,8 @@ class Segmentation(Transform):
             seg = datatools.get_segmentation(aff)
 
         # Update sample.
-        sample[self.target] = seg.astype(self.dtype)
-        sample[self.target+'_mask'] = msk
+        sample[self.target] = utils.check_tensor(seg.astype(self.dtype))
+        sample[self.target+'_mask'] = utils.check_tensor(msk)
 
         return sample
 

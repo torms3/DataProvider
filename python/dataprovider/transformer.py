@@ -77,7 +77,6 @@ class Segmentation(Transform):
     """
     Segmentation.
     """
-
     def __init__(self, source, target, recompute=True):
         """Initialize parameters.
 
@@ -104,8 +103,8 @@ class Segmentation(Transform):
             seg = datatools.get_segmentation(aff)
 
         # Update sample.
-        sample[self.target] = utils.check_volume(seg.astype('float32'))
-        sample[self.target+'_mask'] = utils.check_volume(msk.astype('float32'))
+        sample[self.target] = utils.check_tensor(seg.astype('float32'))
+        sample[self.target+'_mask'] = utils.check_tensor(msk.astype('float32'))
 
         return sample
 
@@ -114,7 +113,6 @@ class Affinity(Transform):
     """
     Expand segmentation into affinity represntation.
     """
-
     def __init__(self, dst, source, target, crop=None, crop_size=None,
                     base_w=None, recompute=True):
         """Initialize parameters.
